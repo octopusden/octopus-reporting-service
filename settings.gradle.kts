@@ -20,3 +20,4 @@ include("client")
 include("common")
 //include("ft")
 include("server")
+findProject(":server")?.name = "reporting-service"

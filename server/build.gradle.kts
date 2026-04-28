@@ -1,8 +1,11 @@
 plugins {
     kotlin("plugin.spring")
     id("org.springframework.boot")
+    id("com.bmuschko.docker-spring-boot-application")
     `maven-publish`
 }
+
+fun String.getExt() = project.ext[this] as String
 
 publishing {
     publications {
@@ -31,6 +34,14 @@ publishing {
                 }
             }
         }
+    }
+}
+
+docker {
+    springBootApplication {
+        baseImage.set("${"dockerRegistry".getExt()}/eclipse-temurin:21-jdk")
+        ports.set(listOf(8080, 8080))
+        images.set(setOf("${"octopusGithubDockerRegistry".getExt()}/octopusden/$name:$version"))
     }
 }
 
