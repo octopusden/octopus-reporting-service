@@ -11,7 +11,7 @@ publishing {
             from(components["java"])
             pom {
                 name.set(project.name)
-                description.set(project.description)
+                description.set("Octopus module: ${project.name}")
                 url.set("https://github.com/octopusden/octopus-reporting-service.git")
                 licenses {
                     license {
