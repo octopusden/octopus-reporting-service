@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("plugin.spring")
     id("org.springframework.boot")
@@ -40,8 +43,19 @@ publishing {
 docker {
     springBootApplication {
         baseImage.set("${"dockerRegistry".getExt()}/eclipse-temurin:21-jdk")
-        ports.set(listOf(8080, 8080))
+        ports.set(listOf(8080))
         images.set(setOf("${"octopusGithubDockerRegistry".getExt()}/octopusden/$name:$version"))
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
     }
 }
 

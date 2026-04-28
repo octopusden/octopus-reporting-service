@@ -12,6 +12,6 @@ spring:
       retry:
         multiplier: 2
         max-interval: 60000
-        max-attempts: 5000
+        max-attempts: 10
         initial-interval: 1000
       token: ${VAULT_TOKEN}

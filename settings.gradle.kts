@@ -1,12 +1,12 @@
 pluginManagement {
     plugins {
-        kotlin("jvm") version extra["kotlin.version"] as String
-        kotlin("plugin.spring") version extra["kotlin.version"] as String
-        id("io.spring.dependency-management") version extra["spring-dependency-management.version"] as String
-        id("org.springframework.boot") version extra["spring-boot.version"] as String
-        id("com.bmuschko.docker-spring-boot-application") version extra["bmuschko-docker-plugin.version"] as String
-        id("org.octopusden.octopus.oc-template") version extra["octopus-oc-template.version"] as String
-        id("io.github.gradle-nexus.publish-plugin") version extra["gradle-nexus-publish-plugin.version"] as String
+        kotlin("jvm") version providers.gradleProperty("kotlin.version").get()
+        kotlin("plugin.spring") version providers.gradleProperty("kotlin.version").get()
+        id("io.spring.dependency-management") version providers.gradleProperty("spring-dependency-management.version").get()
+        id("org.springframework.boot") version providers.gradleProperty("spring-boot.version").get()
+        id("com.bmuschko.docker-spring-boot-application") version providers.gradleProperty("bmuschko-docker-plugin.version").get()
+        id("org.octopusden.octopus.oc-template") version providers.gradleProperty("octopus-oc-template.version").get()
+        id("io.github.gradle-nexus.publish-plugin") version providers.gradleProperty("gradle-nexus-publish-plugin.version").get()
     }
     repositories {
         gradlePluginPortal()
