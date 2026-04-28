@@ -1,21 +1,16 @@
 <component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="ReportingServiceApplication(dev)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-        <module name="octopus-reporting-service.server.main" />
-        <option name="SPRING_BOOT_MAIN_CLASS" value="org.octopusden.octopus.reportingservice.ReportingServiceApplicationKt" />
-        <option name="ACTIVE_PROFILES" value="dev" />
-        <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-        <option name="ALTERNATIVE_JRE_PATH" />
-        <option name="SHORTEN_COMMAND_LINE" value="NONE" />
-        <option name="ENABLE_LAUNCH_OPTIMIZATION" value="true" />
-        <option name="ENABLE_JMX_AGENT" value="true" />
-        <option name="ENABLE_SWAGGER_SUPPORT" value="false" />
-        <option name="HIDE_BANNER" value="false" />
-        <option name="DEBUG_MODE" value="false" />
-        <envs>
-            <env name="SPRING_PROFILES_ACTIVE" value="dev" />
-        </envs>
-        <method v="2">
-            <option name="Make" enabled="true" />
-        </method>
-    </configuration>
+  <configuration default="false" name="ReportingServiceApplication(dev)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <envs>
+      <env name="COMPONENTS_REGISTRY_SERVICE_URL" value="" />
+      <env name="TEAMCITY_PASSWORD" value="" />
+      <env name="TEAMCITY_URL" value="" />
+      <env name="TEAMCITY_USER" value="" />
+    </envs>
+    <module name="octopus-reporting-service.server.main" />
+    <option name="PROGRAM_PARAMETERS" value="--spring.config.additional-location=classpath:/application-dev.yaml" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="org.octopusden.octopus.reportingservice.ReportingServiceApplicationKt" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
 </component>

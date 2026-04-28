@@ -23,7 +23,7 @@ val defaultVersion = "${
 }-SNAPSHOT"
 
 allprojects {
-    group = "org.octopusden.octopus.reportingservice"
+    group = "org.octopusden.octopus.reporting-service"
     if (version == "unspecified") {
         version = defaultVersion
     }

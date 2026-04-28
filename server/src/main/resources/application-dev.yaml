@@ -2,3 +2,23 @@ spring:
   cloud:
     config:
       enabled: false
+
+reporting:
+  teamcity:
+    base-project-id: RDDepartment
+    templates:
+      build:
+        - CDCompileUTGradle
+        - CDCompileUTMaven
+      release-candidate:
+        - CdReleaseCandidateNew
+      release:
+        - CDRelease
+
+components-registry-service:
+  url: ${COMPONENTS_REGISTRY_SERVICE_URL}
+
+teamcity:
+  url: ${TEAMCITY_URL}
+  user: ${TEAMCITY_USER}
+  password: ${TEAMCITY_PASSWORD}
