@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: reporting-service
+
+  config:
+    import:
+      - optional:configserver:${SPRING_CLOUD_CONFIG_URI}
+
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        multiplier: 2
+        max-interval: 60000
+        max-attempts: 10
+        initial-interval: 1000
+      token: ${VAULT_TOKEN}
