@@ -6,7 +6,7 @@
       <env name="TEAMCITY_URL" value="" />
       <env name="TEAMCITY_USER" value="" />
     </envs>
-    <module name="octopus-reporting-service.server.main" />
+    <module name="octopus-reporting-service.reporting-service.main" />
     <option name="PROGRAM_PARAMETERS" value="--spring.config.additional-location=classpath:/application-dev.yaml" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="org.octopusden.octopus.reportingservice.ReportingServiceApplicationKt" />
     <method v="2">

@@ -22,3 +22,13 @@ teamcity:
   url: ${TEAMCITY_URL}
   user: ${TEAMCITY_USER}
   password: ${TEAMCITY_PASSWORD}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, env, metrics, threaddump, heapdump, info, configprops, prometheus, loggers
+
+logging:
+  level:
+    org.octopusden.octopus.releasemanagementservice.*: trace
