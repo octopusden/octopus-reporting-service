@@ -1,6 +1,7 @@
 package org.octopusden.octopus.reportingservice
 
-import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.util.stream.Stream
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -26,8 +27,14 @@ import org.octopusden.octopus.reportingservice.dto.BuildConfigurationStep
 import org.octopusden.octopus.reportingservice.service.ComponentsRegistryService
 import org.octopusden.octopus.reportingservice.service.TeamCityService
 import org.octopusden.octopus.reportingservice.service.impl.BuildConfigurationReportServiceImpl
-import org.octopusden.octopus.reportingservice.util.TestUtils
 
+/**
+ * Unit-тесты отчёта о состояниях сборок.
+ *
+ * Моки `TeamCityService` и `ComponentsRegistryService` настраиваются прямо в
+ * аргументах параметризованного теста. Ожидаемый ответ загружается из
+ * JSON-файла в `server/src/test/resources/build-configuration-report/`.
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class BuildConfigurationReportServiceTest {
 
@@ -63,9 +70,10 @@ class BuildConfigurationReportServiceTest {
     ) {
         setup(teamCityService, componentsRegistryService)
         val actual = service.generateReport(request)
-        val expected = TestUtils.loadObject(
-            "$RESOURCES_ROOT/$expectedResourceFile",
-            object : TypeReference<BuildConfigurationReportResponseDto>() {}
+        val expected = OBJECT_MAPPER.readValue(
+            javaClass.classLoader.getResourceAsStream("$RESOURCES_ROOT/$expectedResourceFile")
+                ?: error("Resource '$RESOURCES_ROOT/$expectedResourceFile' not found"),
+            BuildConfigurationReportResponseDto::class.java
         )
         assertEquals(expected, actual)
     }
@@ -74,13 +82,14 @@ class BuildConfigurationReportServiceTest {
         private const val ROOT_PROJECT_ID = "RootProject"
         private const val BASE_PROJECT_ID = "RDDepartment"
         private const val BUILD_TEMPLATE_ID = "CDCompileUTGradle"
-        private const val RESOURCES_ROOT = "build-configuration-report"
-
+        private const val SYSTEM = "TEST_SYSTEM"
         private const val COMPONENT_A = "componentA"
         private const val COMPONENT_A_PROJECT_ID = "RootProject_ComponentA"
         private const val COMPONENT_A_PROJECT_URL = "http://tc/RootProject_ComponentA"
         private const val COMPONENT_A_BUILD_ID = "RootProject_ComponentA_Build"
-        private const val SYSTEM = "TEST_SYSTEM"
+        private const val RESOURCES_ROOT = "build-configuration-report"
+
+        private val OBJECT_MAPPER: ObjectMapper = ObjectMapper().registerKotlinModule()
 
         private fun setupMocks(
             components: List<ComponentV2> = emptyList(),
@@ -94,6 +103,23 @@ class BuildConfigurationReportServiceTest {
                     whenever(tc.getTemplateByProjectIdAndTemplateId(any(), any())).thenReturn(template)
                 }
             }
+
+        private fun request(
+            parameters: List<String> = emptyList(),
+            steps: List<String> = emptyList(),
+            excludeComponents: Set<String> = emptySet()
+        ) = BuildConfigurationReportRequestDto(
+            rootProjectId = ROOT_PROJECT_ID,
+            componentsFilter = BuildConfigurationReportComponentsFilterDto(
+                includeSystems = setOf(SYSTEM),
+                excludeComponents = excludeComponents
+            ),
+            checks = BuildConfigurationReportChecksDto(
+                buildStage = BuildStage.BUILD,
+                parameters = parameters,
+                steps = steps
+            )
+        )
 
         @JvmStatic
         @Suppress("unused")
@@ -122,16 +148,7 @@ class BuildConfigurationReportServiceTest {
                         )
                     )
                 ),
-                BuildConfigurationReportRequestDto(
-                    rootProjectId = ROOT_PROJECT_ID,
-                    componentsFilter = BuildConfigurationReportComponentsFilterDto(
-                        includeSystems = setOf(SYSTEM)
-                    ),
-                    checks = BuildConfigurationReportChecksDto(
-                        buildStage = BuildStage.BUILD,
-                        parameters = listOf("XRAY")
-                    )
-                ),
+                request(parameters = listOf("XRAY")),
                 "parameterMatches.json"
             ),
             Arguments.of(
@@ -158,16 +175,7 @@ class BuildConfigurationReportServiceTest {
                         )
                     )
                 ),
-                BuildConfigurationReportRequestDto(
-                    rootProjectId = ROOT_PROJECT_ID,
-                    componentsFilter = BuildConfigurationReportComponentsFilterDto(
-                        includeSystems = setOf(SYSTEM)
-                    ),
-                    checks = BuildConfigurationReportChecksDto(
-                        buildStage = BuildStage.BUILD,
-                        parameters = listOf("XRAY")
-                    )
-                ),
+                request(parameters = listOf("XRAY")),
                 "parameterMismatch.json"
             ),
             Arguments.of(
@@ -190,16 +198,7 @@ class BuildConfigurationReportServiceTest {
                         )
                     )
                 ),
-                BuildConfigurationReportRequestDto(
-                    rootProjectId = ROOT_PROJECT_ID,
-                    componentsFilter = BuildConfigurationReportComponentsFilterDto(
-                        includeSystems = setOf(SYSTEM)
-                    ),
-                    checks = BuildConfigurationReportChecksDto(
-                        buildStage = BuildStage.BUILD,
-                        parameters = listOf("XRAY")
-                    )
-                ),
+                request(parameters = listOf("XRAY")),
                 "parameterNotDefined.json"
             ),
             Arguments.of(
@@ -226,16 +225,7 @@ class BuildConfigurationReportServiceTest {
                         )
                     )
                 ),
-                BuildConfigurationReportRequestDto(
-                    rootProjectId = ROOT_PROJECT_ID,
-                    componentsFilter = BuildConfigurationReportComponentsFilterDto(
-                        includeSystems = setOf(SYSTEM)
-                    ),
-                    checks = BuildConfigurationReportChecksDto(
-                        buildStage = BuildStage.BUILD,
-                        steps = listOf("Compile")
-                    )
-                ),
+                request(steps = listOf("Compile")),
                 "stepDisabledMismatch.json"
             ),
             Arguments.of(
@@ -247,16 +237,7 @@ class BuildConfigurationReportServiceTest {
                     template = BuildConfiguration(buildTypeId = BUILD_TEMPLATE_ID),
                     projects = emptyList()
                 ),
-                BuildConfigurationReportRequestDto(
-                    rootProjectId = ROOT_PROJECT_ID,
-                    componentsFilter = BuildConfigurationReportComponentsFilterDto(
-                        includeSystems = setOf(SYSTEM)
-                    ),
-                    checks = BuildConfigurationReportChecksDto(
-                        buildStage = BuildStage.BUILD,
-                        parameters = listOf("XRAY")
-                    )
-                ),
+                request(parameters = listOf("XRAY")),
                 "componentWithoutProject.json"
             ),
             Arguments.of(
@@ -279,28 +260,13 @@ class BuildConfigurationReportServiceTest {
                         )
                     )
                 ),
-                BuildConfigurationReportRequestDto(
-                    rootProjectId = ROOT_PROJECT_ID,
-                    componentsFilter = BuildConfigurationReportComponentsFilterDto(
-                        includeSystems = setOf(SYSTEM)
-                    ),
-                    checks = BuildConfigurationReportChecksDto(
-                        buildStage = BuildStage.BUILD,
-                        parameters = listOf("XRAY")
-                    )
-                ),
+                request(parameters = listOf("XRAY")),
                 "projectWithoutMatchingBuild.json"
             ),
             Arguments.of(
                 "emptyChecks",
-                setupMocks(/* ни один мок не должен быть вызван */),
-                BuildConfigurationReportRequestDto(
-                    rootProjectId = ROOT_PROJECT_ID,
-                    componentsFilter = BuildConfigurationReportComponentsFilterDto(
-                        includeSystems = setOf(SYSTEM)
-                    ),
-                    checks = BuildConfigurationReportChecksDto(buildStage = BuildStage.BUILD)
-                ),
+                setupMocks(),
+                request(),
                 "emptyChecks.json"
             ),
             Arguments.of(
@@ -313,17 +279,7 @@ class BuildConfigurationReportServiceTest {
                     template = BuildConfiguration(buildTypeId = BUILD_TEMPLATE_ID),
                     projects = emptyList()
                 ),
-                BuildConfigurationReportRequestDto(
-                    rootProjectId = ROOT_PROJECT_ID,
-                    componentsFilter = BuildConfigurationReportComponentsFilterDto(
-                        includeSystems = setOf(SYSTEM),
-                        excludeComponents = setOf("skipped")
-                    ),
-                    checks = BuildConfigurationReportChecksDto(
-                        buildStage = BuildStage.BUILD,
-                        parameters = listOf("XRAY")
-                    )
-                ),
+                request(parameters = listOf("XRAY"), excludeComponents = setOf("skipped")),
                 "excludeComponents.json"
             ),
             Arguments.of(
@@ -337,16 +293,7 @@ class BuildConfigurationReportServiceTest {
                     template = BuildConfiguration(buildTypeId = BUILD_TEMPLATE_ID),
                     projects = emptyList()
                 ),
-                BuildConfigurationReportRequestDto(
-                    rootProjectId = ROOT_PROJECT_ID,
-                    componentsFilter = BuildConfigurationReportComponentsFilterDto(
-                        includeSystems = setOf(SYSTEM)
-                    ),
-                    checks = BuildConfigurationReportChecksDto(
-                        buildStage = BuildStage.BUILD,
-                        parameters = listOf("XRAY")
-                    )
-                ),
+                request(parameters = listOf("XRAY")),
                 "multipleComponentsSorted.json"
             )
         )

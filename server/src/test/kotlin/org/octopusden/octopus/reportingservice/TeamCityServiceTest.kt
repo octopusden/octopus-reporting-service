@@ -92,8 +92,8 @@ class TeamCityServiceTest {
     }
 
     companion object {
-        private const val FIND_SUBPROJECTS_ROOT = "teamcity/findSubprojects"
-        private const val TEMPLATES_ROOT = "teamcity/getTemplates"
+        private const val FIND_SUBPROJECTS_ROOT = "teamcity-service/findSubprojects"
+        private const val TEMPLATES_ROOT = "teamcity-service/getTemplates"
 
         private fun locatorWithId(expectedId: String): ProjectLocator =
             argThat { this.id == expectedId && this.affectedProject == null }

@@ -48,7 +48,7 @@ class ComponentsRegistryServiceTest {
     }
 
     companion object {
-        private const val RESOURCES_ROOT = "components-registry"
+        private const val RESOURCES_ROOT = "components-registry-service"
 
         private fun setupMocks(
             components: List<ComponentV2> = emptyList()

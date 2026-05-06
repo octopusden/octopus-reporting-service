@@ -1,0 +1,45 @@
+{
+  "count": 1,
+  "project": [
+    {
+      "id": "RootProject_ComponentA",
+      "name": "RootProject_ComponentA",
+      "href": "/app/rest/projects/id:RootProject_ComponentA",
+      "webUrl": "http://tc/RootProject_ComponentA",
+      "archived": false,
+      "parameters": {
+        "property": [
+          { "name": "COMPONENT_NAME", "value": "componentA" }
+        ]
+      },
+      "buildTypes": {
+        "buildType": [
+          {
+            "id": "RootProject_ComponentA_Build",
+            "templates": {
+              "buildType": [
+                { "id": "CDCompileUTGradle" }
+              ]
+            },
+            "parameters": {
+              "property": [
+                { "name": "XRAY", "value": "true" }
+              ]
+            },
+            "steps": {
+              "step": [
+                {
+                  "id": "s1",
+                  "name": "Compile",
+                  "type": "gradle",
+                  "disabled": false,
+                  "properties": { "property": [] }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
