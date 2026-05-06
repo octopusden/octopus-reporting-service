@@ -1,0 +1,13 @@
+{
+  "rootProjectId": "RootProject",
+  "result": [
+    {
+      "componentId": "componentA",
+      "status": "NO_BUILD_CONFIGURATION",
+      "buildConfigurationUrl": "http://tc/RootProject_ComponentA",
+      "buildTypeId": null,
+      "isRndTemplate": false,
+      "checks": []
+    }
+  ]
+}

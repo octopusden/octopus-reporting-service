@@ -1,0 +1,10 @@
+{
+  "buildTypeId": "CDCompileUTGradle",
+  "templateIds": [],
+  "parameters": [
+    { "name": "XRAY", "value": "true" }
+  ],
+  "steps": [
+    { "id": "s1", "name": "Compile", "disabled": false }
+  ]
+}

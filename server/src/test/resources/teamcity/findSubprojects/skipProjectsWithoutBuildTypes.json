@@ -1,0 +1,16 @@
+[
+  {
+    "id": "RootProject_Ok",
+    "name": "RootProject_Ok",
+    "webUrl": "http://tc/Ok",
+    "componentId": "ok",
+    "buildConfigurations": [
+      {
+        "buildTypeId": "RootProject_Ok_Build",
+        "templateIds": [],
+        "parameters": [],
+        "steps": []
+      }
+    ]
+  }
+]

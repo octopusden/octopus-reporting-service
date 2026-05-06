@@ -1,0 +1,12 @@
+[
+  {
+    "id": "a",
+    "name": "A",
+    "componentOwner": "owner"
+  },
+  {
+    "id": "b",
+    "name": "B",
+    "componentOwner": "owner"
+  }
+]

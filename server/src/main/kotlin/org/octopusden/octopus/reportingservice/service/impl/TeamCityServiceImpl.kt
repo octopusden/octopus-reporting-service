@@ -1,13 +1,10 @@
 package org.octopusden.octopus.reportingservice.service.impl
 
-import org.octopusden.octopus.infrastructure.client.commons.ClientParametersProvider
-import org.octopusden.octopus.infrastructure.client.commons.StandardBasicCredCredentialProvider
-import org.octopusden.octopus.infrastructure.teamcity.client.TeamcityClassicClient
+import org.octopusden.octopus.infrastructure.teamcity.client.TeamcityClient
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityBuildType
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityProject
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.locator.ProjectLocator
 import org.octopusden.octopus.reportingservice.client.common.exception.NotFoundException
-import org.octopusden.octopus.reportingservice.config.TeamCityConfig
 import org.octopusden.octopus.reportingservice.dto.BuildConfiguration
 import org.octopusden.octopus.reportingservice.dto.BuildConfigurationParameter
 import org.octopusden.octopus.reportingservice.dto.BuildConfigurationProject
@@ -21,17 +18,8 @@ import kotlin.text.orEmpty
 
 @Service
 class TeamCityServiceImpl(
-    private val teamCityConfig: TeamCityConfig
+    private val client: TeamcityClient
 ) : TeamCityService {
-
-    private val client by lazy {
-        TeamcityClassicClient(
-            object : ClientParametersProvider {
-                override fun getApiUrl(): String = teamCityConfig.url
-                override fun getAuth() = StandardBasicCredCredentialProvider(teamCityConfig.user, teamCityConfig.password)
-            }
-        )
-    }
 
     override fun findSubprojects(rootProjectId: String): List<BuildConfigurationProject> {
         logger.info("findSubprojects: rootProjectId='{}'", rootProjectId)
@@ -59,7 +47,6 @@ class TeamCityServiceImpl(
         """.trimIndent().replace("\\s+".toRegex(), "")
         val result = mutableListOf<BuildConfigurationProject>()
 
-        // Сначала сам корневой проект
         val rootLocator = ProjectLocator(
             id = rootProjectId,
             archived = false
@@ -70,7 +57,6 @@ class TeamCityServiceImpl(
             .mapNotNull { it.toBuildConfigurationProjectOrNull() }
             .toList()
 
-        // Потом все его потомки (постранично)
         var start = 0
         while (true) {
             val locator = ProjectLocator(

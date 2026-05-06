@@ -1,0 +1,29 @@
+{
+  "rootProjectId": "RootProject",
+  "result": [
+    {
+      "componentId": "alpha",
+      "status": "NO_PROJECT",
+      "buildConfigurationUrl": null,
+      "buildTypeId": null,
+      "isRndTemplate": false,
+      "checks": []
+    },
+    {
+      "componentId": "Bravo",
+      "status": "NO_PROJECT",
+      "buildConfigurationUrl": null,
+      "buildTypeId": null,
+      "isRndTemplate": false,
+      "checks": []
+    },
+    {
+      "componentId": "charlie",
+      "status": "NO_PROJECT",
+      "buildConfigurationUrl": null,
+      "buildTypeId": null,
+      "isRndTemplate": false,
+      "checks": []
+    }
+  ]
+}

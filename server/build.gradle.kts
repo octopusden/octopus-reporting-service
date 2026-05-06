@@ -79,10 +79,10 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.octopusden.octopus.infrastructure:components-registry-service-client:${properties["octopus-components-registry.version"]}")
     implementation("org.octopusden.octopus.octopus-external-systems-clients:teamcity-client:${properties["octopus-teamcity-client.version"]}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${properties["kotlin-coroutines.version"]}")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:${properties["mockito-kotlin.version"]}")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

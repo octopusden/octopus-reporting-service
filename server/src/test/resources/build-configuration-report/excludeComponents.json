@@ -1,0 +1,13 @@
+{
+  "rootProjectId": "RootProject",
+  "result": [
+    {
+      "componentId": "componentA",
+      "status": "NO_PROJECT",
+      "buildConfigurationUrl": null,
+      "buildTypeId": null,
+      "isRndTemplate": false,
+      "checks": []
+    }
+  ]
+}
