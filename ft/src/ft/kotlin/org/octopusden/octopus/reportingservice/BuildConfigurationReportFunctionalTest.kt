@@ -16,7 +16,7 @@ import org.octopusden.octopus.reportingservice.client.ReportingServiceClient
 import org.octopusden.octopus.reportingservice.client.ReportingServiceClientConfig
 import org.octopusden.octopus.reportingservice.client.ReportingServiceClientFactory
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportResponseDto
-import org.octopusden.octopus.reportingservice.client.common.exception.InternalException
+import org.octopusden.octopus.reportingservice.client.common.exception.ExternalServiceException
 import org.octopusden.octopus.reportingservice.Fixtures.BASE_PROJECT_ID
 import org.octopusden.octopus.reportingservice.Fixtures.ROOT_PROJECT_ID
 import org.octopusden.octopus.reportingservice.Fixtures.SYSTEM
@@ -90,12 +90,12 @@ class BuildConfigurationReportFunctionalTest {
     inner class ErrorHandling {
 
         @Test
-        @DisplayName("TeamCity returns 5xx on root request -> client receives 502 / InternalException")
+        @DisplayName("TeamCity returns 5xx on root request -> client receives ExternalServiceException (502)")
         fun teamCityServerErrorBecomesBadGateway() {
             teamCity.stubRootProjectsStatus(ROOT_PROJECT_ID, statusCode = 500)
             teamCity.stubTemplate("teamcity-mock-data/templates.json")
 
-            val ex = assertThrows(InternalException::class.java) {
+            val ex = assertThrows(ExternalServiceException::class.java) {
                 client.generateBuildConfigurationReport(
                     requestBuildConfigurationReport(
                         rootProjectId = ROOT_PROJECT_ID,
@@ -108,7 +108,7 @@ class BuildConfigurationReportFunctionalTest {
         }
 
         @Test
-        @DisplayName("TeamCity returns 5xx on template request -> 502 / InternalException")
+        @DisplayName("TeamCity returns 5xx on template request -> ExternalServiceException (502)")
         fun teamCityTemplateFailureBecomesBadGateway() {
             teamCity.stubRootProjects(ROOT_PROJECT_ID, "teamcity-mock-data/projects.json")
             teamCity.stubChildrenPages(
@@ -118,7 +118,7 @@ class BuildConfigurationReportFunctionalTest {
             )
             teamCity.stubTemplateStatus(statusCode = 503)
 
-            val ex = assertThrows(InternalException::class.java) {
+            val ex = assertThrows(ExternalServiceException::class.java) {
                 client.generateBuildConfigurationReport(
                     requestBuildConfigurationReport(
                         rootProjectId = ROOT_PROJECT_ID,
