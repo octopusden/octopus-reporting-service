@@ -31,4 +31,4 @@ management:
 
 logging:
   level:
-    org.octopusden.octopus.releasemanagementservice.*: trace
+    org.octopusden.octopus.reportingservice.*: trace

@@ -1,17 +1,11 @@
 package org.octopusden.octopus.reportingservice
 
 import org.mockserver.client.MockServerClient
+import org.mockserver.matchers.Times
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.MediaType
 
-/**
- * Обёртка над MockServer, настраивающая TeamCity REST API-стабы для FT.
- *
- * Семантика TC-эндпоинтов (пути, query-параметры) живёт в этом классе.
- * Тела ответов читаются из classpath-ресурсов (`ft/src/ft/resources/team-city/...`)
- * — в них лежат «чистые» TeamCity JSON-объекты.
- */
 class TeamCityMockServer(
     private val client: MockServerClient,
     private val baseProjectId: String
@@ -26,37 +20,35 @@ class TeamCityMockServer(
             .`when`(
                 request()
                     .withMethod("GET")
-                    .withPath("/app/rest/projects")
-                    .withQueryStringParameter("locator", "id:$rootProjectId,archived:false")
+                    .withPath(PROJECTS_PATH)
+                    .withQueryStringParameter("locator", "archived:false,id:$rootProjectId")
             )
             .respond(jsonResponse(readResource(bodyResourcePath)))
     }
 
-    fun stubChildrenEmpty(rootProjectId: String) {
-        client
-            .`when`(
-                request()
+    fun stubChildrenPages(rootProjectId: String, vararg pageBodyResourcePaths: String) {
+        pageBodyResourcePaths.forEach { resourcePath ->
+            client
+                .`when`(request()
                     .withMethod("GET")
-                    .withPath("/app/rest/projects")
-                    .withQueryStringParameter("locator", ".*affectedProject.*id:$rootProjectId.*")
-            )
-            .respond(jsonResponse(EMPTY_PROJECTS_PAGE))
+                    .withPath(PROJECTS_PATH)
+                    .withQueryStringParameter("locator", "affectedProject:\\(id:$rootProjectId\\).*"),
+                    Times.once()
+                )
+                .respond(jsonResponse(readResource(resourcePath)))
+        }
     }
 
-    /**
-     * Стаб на запрос шаблона: `GET /app/rest/projects?locator=id:<baseProjectId>`.
-     */
     fun stubTemplate(bodyResourcePath: String) {
         client
             .`when`(
                 request()
                     .withMethod("GET")
-                    .withPath("/app/rest/projects")
+                    .withPath(PROJECTS_PATH)
                     .withQueryStringParameter("locator", "id:$baseProjectId")
             )
             .respond(jsonResponse(readResource(bodyResourcePath)))
     }
-
 
     private fun jsonResponse(body: String) = response()
         .withStatusCode(200)
@@ -70,6 +62,6 @@ class TeamCityMockServer(
     }
 
     companion object {
-        private const val EMPTY_PROJECTS_PAGE = """{"count":0,"project":[]}"""
+        private const val PROJECTS_PATH = "/app/rest/2018.1/projects"
     }
 }

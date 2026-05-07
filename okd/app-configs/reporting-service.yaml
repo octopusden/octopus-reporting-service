@@ -1,0 +1,34 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+
+reporting:
+  teamcity:
+    base-project-id: RDDepartment
+    templates:
+      build:
+        - CDCompileUTGradle
+        - CDCompileUTMaven
+      release-candidate:
+        - CdReleaseCandidateNew
+      release:
+        - CDRelease
+
+components-registry-service:
+  url: http://${TEST_COMPONENTS_REGISTRY_HOST}
+
+teamcity:
+  url: http://${TEST_MOCKSERVER_HOST}
+  user: admin
+  password: admin
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, env, metrics, threaddump, heapdump, info, configprops, prometheus, loggers
+
+logging:
+  level:
+    org.octopusden.octopus.reportingservice.*: trace

@@ -1,0 +1,87 @@
+{
+  "count": 2,
+  "href": "/app/rest/projects?locator=affectedProject:(id:RootProject),archived:false,count:200,start:0",
+  "nextHref": "/app/rest/projects?locator=affectedProject:(id:RootProject),archived:false,count:200,start:200",
+  "project": [
+    {
+      "id": "RootProject_ComponentA",
+      "name": "RootProject_ComponentA",
+      "href": "/app/rest/projects/id:RootProject_ComponentA",
+      "webUrl": "http://tc/RootProject_ComponentA",
+      "archived": false,
+      "parameters": {
+        "property": [
+          { "name": "COMPONENT_NAME", "value": "componentA" }
+        ]
+      },
+      "buildTypes": {
+        "buildType": [
+          {
+            "id": "RootProject_ComponentA_Build",
+            "templates": {
+              "buildType": [
+                { "id": "CDCompileUTGradle" }
+              ]
+            },
+            "parameters": {
+              "property": [
+                { "name": "XRAY", "value": "true" }
+              ]
+            },
+            "steps": {
+              "step": [
+                {
+                  "id": "s1",
+                  "name": "Compile",
+                  "type": "gradle",
+                  "disabled": false,
+                  "properties": { "property": [] }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "RootProject_ComponentB",
+      "name": "RootProject_ComponentB",
+      "href": "/app/rest/projects/id:RootProject_ComponentB",
+      "webUrl": "http://tc/RootProject_ComponentB",
+      "archived": false,
+      "parameters": {
+        "property": [
+          { "name": "COMPONENT_NAME", "value": "componentB" }
+        ]
+      },
+      "buildTypes": {
+        "buildType": [
+          {
+            "id": "RootProject_ComponentB_Build",
+            "templates": {
+              "buildType": [
+                { "id": "CDCompileUTMaven" }
+              ]
+            },
+            "parameters": {
+              "property": [
+                { "name": "XRAY", "value": "false" }
+              ]
+            },
+            "steps": {
+              "step": [
+                {
+                  "id": "s1",
+                  "name": "Compile",
+                  "type": "maven",
+                  "disabled": false,
+                  "properties": { "property": [] }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

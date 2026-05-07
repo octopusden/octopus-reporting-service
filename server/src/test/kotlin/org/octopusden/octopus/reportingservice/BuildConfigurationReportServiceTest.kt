@@ -1,5 +1,6 @@
 package org.octopusden.octopus.reportingservice
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.util.stream.Stream
@@ -27,14 +28,8 @@ import org.octopusden.octopus.reportingservice.dto.BuildConfigurationStep
 import org.octopusden.octopus.reportingservice.service.ComponentsRegistryService
 import org.octopusden.octopus.reportingservice.service.TeamCityService
 import org.octopusden.octopus.reportingservice.service.impl.BuildConfigurationReportServiceImpl
+import org.octopusden.octopus.reportingservice.util.TestUtils
 
-/**
- * Unit-тесты отчёта о состояниях сборок.
- *
- * Моки `TeamCityService` и `ComponentsRegistryService` настраиваются прямо в
- * аргументах параметризованного теста. Ожидаемый ответ загружается из
- * JSON-файла в `server/src/test/resources/build-configuration-report/`.
- */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class BuildConfigurationReportServiceTest {
 
@@ -70,11 +65,10 @@ class BuildConfigurationReportServiceTest {
     ) {
         setup(teamCityService, componentsRegistryService)
         val actual = service.generateReport(request)
-        val expected = OBJECT_MAPPER.readValue(
-            javaClass.classLoader.getResourceAsStream("$RESOURCES_ROOT/$expectedResourceFile")
-                ?: error("Resource '$RESOURCES_ROOT/$expectedResourceFile' not found"),
-            BuildConfigurationReportResponseDto::class.java
-        )
+        val expected = TestUtils.loadObject(
+                "$RESOURCES_ROOT/$expectedResourceFile",
+                object : TypeReference<BuildConfigurationReportResponseDto>() {}
+            )
         assertEquals(expected, actual)
     }
 
@@ -88,8 +82,6 @@ class BuildConfigurationReportServiceTest {
         private const val COMPONENT_A_PROJECT_URL = "http://tc/RootProject_ComponentA"
         private const val COMPONENT_A_BUILD_ID = "RootProject_ComponentA_Build"
         private const val RESOURCES_ROOT = "build-configuration-report"
-
-        private val OBJECT_MAPPER: ObjectMapper = ObjectMapper().registerKotlinModule()
 
         private fun setupMocks(
             components: List<ComponentV2> = emptyList(),
@@ -286,9 +278,9 @@ class BuildConfigurationReportServiceTest {
                 "multipleComponentsSorted",
                 setupMocks(
                     components = listOf(
-                        ComponentV2(id = "Bravo", name = "Bravo", componentOwner = "owner"),
+                        ComponentV2(id = "Betta", name = "Betta", componentOwner = "owner"),
                         ComponentV2(id = "alpha", name = "alpha", componentOwner = "owner"),
-                        ComponentV2(id = "charlie", name = "charlie", componentOwner = "owner")
+                        ComponentV2(id = "gamma", name = "gamma", componentOwner = "owner")
                     ),
                     template = BuildConfiguration(buildTypeId = BUILD_TEMPLATE_ID),
                     projects = emptyList()

@@ -11,6 +11,6 @@ class ComponentsRegistryServiceImpl(
 ) : ComponentsRegistryService {
 
     override fun getComponentsBySystems(systems: Set<String>): List<ComponentV2> {
-        return client.getAllComponents(systems = systems.toList()).components.toList()
+        return client.getAllComponents(systems = systems.toList()).components.filter { !it.archived }
     }
 }

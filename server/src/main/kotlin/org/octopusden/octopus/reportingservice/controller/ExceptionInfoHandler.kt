@@ -19,7 +19,7 @@ class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFound(exception: NotFoundException): ErrorResponse {
         val message = exception.message ?: "Not found"
-        logger.warn(message)
+        logger.warn(message, exception)
         return ErrorResponse(
             code = HttpStatus.NOT_FOUND.value().toString(),
             message = message
@@ -31,7 +31,7 @@ class ExceptionInfoHandler {
     @Order(100)
     fun handleException(exception: Exception): ErrorResponse {
         val message = exception.message ?: "Unexpected error"
-        logger.error(message)
+        logger.error(message, exception)
         return ErrorResponse(
             code = HttpStatus.INTERNAL_SERVER_ERROR.value().toString(),
             message = message

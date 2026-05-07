@@ -1,30 +1,45 @@
 package org.octopusden.octopus.reportingservice
 
-import org.junit.jupiter.api.AfterAll
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockserver.client.MockServerClient
-import org.mockserver.integration.ClientAndServer
 import org.octopusden.octopus.reportingservice.client.ReportingServiceClient
 import org.octopusden.octopus.reportingservice.client.ReportingServiceClientConfig
 import org.octopusden.octopus.reportingservice.client.ReportingServiceClientFactory
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportChecksDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportComponentsFilterDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportRequestDto
+import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportResponseDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildStage
-import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.ComponentReportStatus
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class BuildConfigurationReportFunctionalTest {
 
+    private val objectMapper: ObjectMapper = ObjectMapper().registerKotlinModule()
+
+    private val client: ReportingServiceClient = ReportingServiceClientFactory.create(
+        ReportingServiceClientConfig(baseUrl = "http://$reportingServiceHost")
+    )
+
+    private lateinit var teamCity: TeamCityMockServer
+
     @BeforeEach
     fun resetMocks() {
         teamCity.reset()
+    }
+
+    @BeforeAll
+    fun startMockServer() {
+        teamCity = TeamCityMockServer(
+            client = MockServerClient(mockServerHost, mockServerPort),
+            baseProjectId = BASE_PROJECT_ID
+        )
     }
 
     @Test
@@ -43,12 +58,16 @@ class BuildConfigurationReportFunctionalTest {
     }
 
     @Test
-    fun happyPathReportTest() {
+    fun generateReportFullTest() {
         teamCity.stubRootProjects(ROOT_PROJECT_ID, "teamcity-mock-data/projects.json")
-        teamCity.stubChildrenEmpty(ROOT_PROJECT_ID)
-        teamCity.stubTemplate("teamcity-mock-data/template.json")
+        teamCity.stubChildrenPages(
+            ROOT_PROJECT_ID,
+            "teamcity-mock-data/children-page-1.json",
+            "teamcity-mock-data/children-page-2.json"
+        )
+        teamCity.stubTemplate("teamcity-mock-data/templates.json")
 
-        val response = client.generateBuildConfigurationReport(
+        val actual = client.generateBuildConfigurationReport(
             BuildConfigurationReportRequestDto(
                 rootProjectId = ROOT_PROJECT_ID,
                 componentsFilter = BuildConfigurationReportComponentsFilterDto(
@@ -61,12 +80,14 @@ class BuildConfigurationReportFunctionalTest {
                 )
             )
         )
+        val expected = loadExpected("expected-reports/generateReportFullTest.json")
+        assertEquals(expected, actual)
+    }
 
-        val componentReport = response.result.firstOrNull { it.componentId == "componentA" }
-        assertNotNull(componentReport)
-        assertEquals(ComponentReportStatus.OK, componentReport!!.status)
-        assertEquals(2, componentReport.checks.size)
-        assertTrue(componentReport.checks.all { it.status })
+    private fun loadExpected(resourcePath: String): BuildConfigurationReportResponseDto {
+        val stream = javaClass.classLoader.getResourceAsStream(resourcePath)
+            ?: error("Resource '$resourcePath' not found in classpath")
+        return stream.use { objectMapper.readValue(it, BuildConfigurationReportResponseDto::class.java) }
     }
 
     companion object {
@@ -76,30 +97,8 @@ class BuildConfigurationReportFunctionalTest {
 
         private val reportingServiceHost: String = System.getProperty("test.reporting-service-host")
             ?: error("System property 'test.reporting-service-host' must be defined")
-
-        private val mockServerPort: Int = System.getProperty("test.mockserver-port", "1080").toInt()
-
-        private lateinit var mockServer: ClientAndServer
-        private lateinit var teamCity: TeamCityMockServer
-
-        private val client: ReportingServiceClient = ReportingServiceClientFactory.create(
-            ReportingServiceClientConfig(baseUrl = "http://$reportingServiceHost")
-        )
-
-        @BeforeAll
-        @JvmStatic
-        fun startMockServer() {
-            mockServer = ClientAndServer.startClientAndServer(mockServerPort)
-            teamCity = TeamCityMockServer(
-                client = MockServerClient("localhost", mockServerPort),
-                baseProjectId = BASE_PROJECT_ID
-            )
-        }
-
-        @AfterAll
-        @JvmStatic
-        fun stopMockServer() {
-            mockServer.stop()
-        }
+        private val mockServerPort: Int = System.getProperty("test.mockserver-port").toInt()
+        private val mockServerHost: String = System.getProperty("test.mockserver-host")
+            ?: error("System property 'test.mockserver-host' must be defined")
     }
 }

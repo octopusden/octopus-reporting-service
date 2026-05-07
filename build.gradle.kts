@@ -90,6 +90,10 @@ subprojects {
         System.getenv().let {
             set("dockerRegistry", it.getOrDefault("DOCKER_REGISTRY", properties["docker.registry"]))
             set("octopusGithubDockerRegistry", it.getOrDefault("OCTOPUS_GITHUB_DOCKER_REGISTRY", project.properties["octopus.github.docker.registry"]))
+            set("okdActiveDeadlineSeconds", it.getOrDefault("OKD_ACTIVE_DEADLINE_SECONDS", properties["okd.active-deadline-seconds"]))
+            set("okdProject", it.getOrDefault("OKD_PROJECT", properties["okd.project"]))
+            set("okdClusterDomain", it.getOrDefault("OKD_CLUSTER_DOMAIN", properties["okd.cluster-domain"]))
+            set("okdWebConsoleUrl", (it.getOrDefault("OKD_WEB_CONSOLE_URL", properties["okd.web-console-url"]) as String).trimEnd('/'))
         }
     }
 }

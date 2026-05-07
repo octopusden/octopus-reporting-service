@@ -39,6 +39,7 @@ class BuildConfigurationReportServiceImpl(
                 result = emptyList()
             )
         }
+        logger.info("generateReport: components found {}", components.size)
         val stageTemplates = getBuildStageTemplates(request)
         val projects = teamCityService.findSubprojects(request.rootProjectId)
         val result = components.map { component ->

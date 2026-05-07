@@ -1,4 +1,4 @@
-
+{
   "count": 1,
   "project": [
     {
@@ -22,6 +22,25 @@
                   "id": "s1",
                   "name": "Compile",
                   "type": "gradle",
+                  "disabled": false,
+                  "properties": { "property": [] }
+                }
+              ]
+            }
+          },
+          {
+            "id": "CDCompileUTMaven",
+            "parameters": {
+              "property": [
+                { "name": "XRAY", "value": "true" }
+              ]
+            },
+            "steps": {
+              "step": [
+                {
+                  "id": "s1",
+                  "name": "Compile",
+                  "type": "maven",
                   "disabled": false,
                   "properties": { "property": [] }
                 }

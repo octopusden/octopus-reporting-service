@@ -1,0 +1,99 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: reporting-service-template
+objects:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: ${DEPLOYMENT_PREFIX}-reporting-service-config-data
+    data:
+      application-dev.yaml: |-
+        ${APPLICATION_DEV_CONTENT}
+  - apiVersion: v1
+    kind: Pod
+    metadata:
+      name: ${DEPLOYMENT_PREFIX}-reporting
+      labels:
+        app.kubernetes.io/name: ${DEPLOYMENT_PREFIX}-reporting
+    spec:
+      restartPolicy: Never
+      activeDeadlineSeconds: ${{ACTIVE_DEADLINE_SECONDS}}
+      containers:
+        - name: reporting
+          image: ${DOCKER_REGISTRY}/octopusden/reporting-service:${REPORTING_SERVICE_VERSION}
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          env:
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "/"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+            - name: SPRING_CLOUD_CONFIG_ENABLED
+              value: "false"
+            - name: TEST_MOCKSERVER_HOST
+              value: ${TEST_MOCKSERVER_HOST}
+            - name: TEST_COMPONENTS_REGISTRY_HOST
+              value: ${TEST_COMPONENTS_REGISTRY_HOST}
+          volumeMounts:
+            - name: application-dev
+              mountPath: /application-dev.yaml
+              subPath: application-dev.yaml
+              readOnly: true
+      volumes:
+        - name: application-dev
+          configMap:
+            name: ${DEPLOYMENT_PREFIX}-reporting-service-config-data
+            items:
+              - key: application-dev.yaml
+                path: application-dev.yaml
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: ${DEPLOYMENT_PREFIX}-reporting-service
+    spec:
+      ports:
+        - port: 8080
+          protocol: TCP
+          targetPort: 8080
+      selector:
+        app.kubernetes.io/name: ${DEPLOYMENT_PREFIX}-reporting
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      name: ${DEPLOYMENT_PREFIX}-reporting-route
+    spec:
+      port:
+        targetPort: 8080
+      to:
+        kind: Service
+        name: ${DEPLOYMENT_PREFIX}-reporting-service
+parameters:
+  - description: Unique deployment prefix
+    name: DEPLOYMENT_PREFIX
+    required: true
+  - description: Active deadline seconds
+    name: ACTIVE_DEADLINE_SECONDS
+    required: true
+  - description: Docker registry
+    name: DOCKER_REGISTRY
+    required: true
+  - description: Reporting service version
+    name: REPORTING_SERVICE_VERSION
+    required: true
+  - description: application-dev.yaml content
+    name: APPLICATION_DEV_CONTENT
+    required: true
+  - description: Test mockserver host
+    name: TEST_MOCKSERVER_HOST
+    required: true
+  - description: Test components registry host
+    name: TEST_COMPONENTS_REGISTRY_HOST
+    required: true

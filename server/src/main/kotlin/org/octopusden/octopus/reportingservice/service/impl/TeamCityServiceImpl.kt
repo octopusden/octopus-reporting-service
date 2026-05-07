@@ -40,7 +40,7 @@ class TeamCityServiceImpl(
                         id,
                         templates(buildType(id,step)),
                         parameters(property(name,value)),
-                        steps(step(id,name,type,disabled))
+                        steps(step(id,name,type,disabled,properties(property(name,value))))
                     )
                 )
             )
@@ -93,7 +93,7 @@ class TeamCityServiceImpl(
                         id,
                         templates(buildType(id,step)),
                         parameters(property(name,value)),
-                        steps(step(id,name,type,disabled))
+                        steps(step(id,name,type,disabled,properties(property(name,value))))
                     )
                 )
             )
