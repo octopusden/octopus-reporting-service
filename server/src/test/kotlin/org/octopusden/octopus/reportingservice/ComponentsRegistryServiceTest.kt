@@ -1,13 +1,11 @@
 package org.octopusden.octopus.reportingservice
 
-import com.fasterxml.jackson.core.type.TypeReference
-import java.util.stream.Stream
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -15,10 +13,11 @@ import org.mockito.kotlin.whenever
 import org.octopusden.octopus.components.registry.client.impl.ClassicComponentsRegistryServiceClient
 import org.octopusden.octopus.components.registry.core.dto.ComponentV2
 import org.octopusden.octopus.components.registry.core.dto.ComponentsDTO
+import org.octopusden.octopus.reportingservice.client.common.exception.ExternalServiceException
+import org.octopusden.octopus.reportingservice.fixtures.Fixtures.component
 import org.octopusden.octopus.reportingservice.service.impl.ComponentsRegistryServiceImpl
-import org.octopusden.octopus.reportingservice.util.TestUtils
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisplayName("ComponentsRegistryService")
 class ComponentsRegistryServiceTest {
 
     private lateinit var client: ClassicComponentsRegistryServiceClient
@@ -30,60 +29,67 @@ class ComponentsRegistryServiceTest {
         service = ComponentsRegistryServiceImpl(client = client)
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("getComponentsBySystemsArguments")
-    fun getComponentsBySystemsTest(
-        @Suppress("UNUSED_PARAMETER") caseName: String,
-        setup: (ClassicComponentsRegistryServiceClient) -> Unit,
-        systems: Set<String>,
-        expectedResourceFile: String
-    ) {
-        setup(client)
-        val actual = service.getComponentsBySystems(systems)
-        val expected = TestUtils.loadObject(
-            "$RESOURCES_ROOT/$expectedResourceFile",
-            object : TypeReference<List<ComponentV2>>() {}
-        )
-        assertEquals(expected, actual)
+    private fun stubComponents(vararg components: ComponentV2) {
+        whenever(
+            client.getAllComponents(
+                vcsPath = ArgumentMatchers.isNull(),
+                buildSystem = ArgumentMatchers.isNull(),
+                solution = ArgumentMatchers.isNull(),
+                systems = any()
+            )
+        ).thenReturn(ComponentsDTO(components.toList()))
     }
 
-    companion object {
-        private const val RESOURCES_ROOT = "components-registry-service"
+    @Nested
+    @DisplayName("getComponentsBySystems")
+    inner class GetComponentsBySystems {
 
-        private fun setupMocks(
-            components: List<ComponentV2> = emptyList()
-        ): (ClassicComponentsRegistryServiceClient) -> Unit =
-            { c ->
-                whenever(
-                    c.getAllComponents(
-                        vcsPath = ArgumentMatchers.isNull(),
-                        buildSystem = ArgumentMatchers.isNull(),
-                        solution = ArgumentMatchers.isNull(),
-                        systems = any()
-                    )
-                ).thenReturn(ComponentsDTO(components))
+        @Test
+        @DisplayName("Returns non-archived components")
+        fun returnsNonArchivedComponents() {
+            stubComponents(component("a"), component("b"))
+
+            val actual = service.getComponentsBySystems(setOf("TEST_SYSTEM"))
+
+            assertEquals(listOf(component("a"), component("b")), actual)
+        }
+
+        @Test
+        @DisplayName("Filters out archived components")
+        fun filtersOutArchivedComponents() {
+            val archived = component("archived").also { it.archived = true }
+            stubComponents(component("active"), archived)
+
+            val actual = service.getComponentsBySystems(setOf("TEST_SYSTEM"))
+
+            assertEquals(listOf(component("active")), actual)
+        }
+
+        @Test
+        @DisplayName("Empty systems set -> empty result")
+        fun emptySystemsReturnsEmpty() {
+            stubComponents()
+
+            val actual = service.getComponentsBySystems(emptySet())
+
+            assertEquals(emptyList<ComponentV2>(), actual)
+        }
+
+        @Test
+        @DisplayName("Client error is wrapped into ExternalServiceException")
+        fun clientErrorWrappedAsExternal() {
+            whenever(
+                client.getAllComponents(
+                    vcsPath = ArgumentMatchers.isNull(),
+                    buildSystem = ArgumentMatchers.isNull(),
+                    solution = ArgumentMatchers.isNull(),
+                    systems = any()
+                )
+            ).thenThrow(RuntimeException("boom"))
+
+            assertThrows(ExternalServiceException::class.java) {
+                service.getComponentsBySystems(setOf("TEST_SYSTEM"))
             }
-
-        @JvmStatic
-        @Suppress("unused")
-        private fun getComponentsBySystemsArguments(): Stream<Arguments> = Stream.of(
-            Arguments.of(
-                "twoComponentsForNonEmptySystems",
-                setupMocks(
-                    components = listOf(
-                        ComponentV2(id = "a", name = "A", componentOwner = "owner"),
-                        ComponentV2(id = "b", name = "B", componentOwner = "owner")
-                    )
-                ),
-                setOf("TEST_SYSTEM"),
-                "twoComponents.json"
-            ),
-            Arguments.of(
-                "emptyComponentsForEmptySystems",
-                setupMocks(components = emptyList()),
-                emptySet<String>(),
-                "emptyComponents.json"
-            )
-        )
+        }
     }
 }

@@ -1,4 +1,4 @@
-package org.octopusden.octopus.reportingservice.dto
+package org.octopusden.octopus.reportingservice.domain
 
 data class BuildConfigurationProject(
     val id: String,

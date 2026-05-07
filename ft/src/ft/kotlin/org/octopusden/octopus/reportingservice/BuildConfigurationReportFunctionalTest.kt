@@ -3,22 +3,27 @@ package org.octopusden.octopus.reportingservice
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockserver.client.MockServerClient
 import org.octopusden.octopus.reportingservice.client.ReportingServiceClient
 import org.octopusden.octopus.reportingservice.client.ReportingServiceClientConfig
 import org.octopusden.octopus.reportingservice.client.ReportingServiceClientFactory
-import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportChecksDto
-import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportComponentsFilterDto
-import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportRequestDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportResponseDto
-import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildStage
+import org.octopusden.octopus.reportingservice.client.common.exception.InternalException
+import org.octopusden.octopus.reportingservice.Fixtures.BASE_PROJECT_ID
+import org.octopusden.octopus.reportingservice.Fixtures.ROOT_PROJECT_ID
+import org.octopusden.octopus.reportingservice.Fixtures.SYSTEM
+import org.octopusden.octopus.reportingservice.Fixtures.requestBuildConfigurationReport
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisplayName("Reporting Service / FT")
 class BuildConfigurationReportFunctionalTest {
 
     private val objectMapper: ObjectMapper = ObjectMapper().registerKotlinModule()
@@ -29,11 +34,6 @@ class BuildConfigurationReportFunctionalTest {
 
     private lateinit var teamCity: TeamCityMockServer
 
-    @BeforeEach
-    fun resetMocks() {
-        teamCity.reset()
-    }
-
     @BeforeAll
     fun startMockServer() {
         teamCity = TeamCityMockServer(
@@ -42,46 +42,93 @@ class BuildConfigurationReportFunctionalTest {
         )
     }
 
-    @Test
-    fun emptyReportTest() {
-        val response = client.generateBuildConfigurationReport(
-            BuildConfigurationReportRequestDto(
-                rootProjectId = ROOT_PROJECT_ID,
-                componentsFilter = BuildConfigurationReportComponentsFilterDto(
-                    includeSystems = setOf(SYSTEM)
-                ),
-                checks = BuildConfigurationReportChecksDto(buildStage = BuildStage.BUILD)
-            )
-        )
-        assertEquals(ROOT_PROJECT_ID, response.rootProjectId)
-        assertTrue(response.result.isEmpty())
+    @BeforeEach
+    fun resetMocks() {
+        teamCity.reset()
     }
 
-    @Test
-    fun generateReportFullTest() {
-        teamCity.stubRootProjects(ROOT_PROJECT_ID, "teamcity-mock-data/projects.json")
-        teamCity.stubChildrenPages(
-            ROOT_PROJECT_ID,
-            "teamcity-mock-data/children-page-1.json",
-            "teamcity-mock-data/children-page-2.json"
-        )
-        teamCity.stubTemplate("teamcity-mock-data/templates.json")
+    @Nested
+    @DisplayName("Happy path")
+    inner class HappyPath {
 
-        val actual = client.generateBuildConfigurationReport(
-            BuildConfigurationReportRequestDto(
-                rootProjectId = ROOT_PROJECT_ID,
-                componentsFilter = BuildConfigurationReportComponentsFilterDto(
-                    includeSystems = setOf(SYSTEM)
-                ),
-                checks = BuildConfigurationReportChecksDto(
-                    buildStage = BuildStage.BUILD,
+        @Test
+        @DisplayName("Empty checks -> empty response")
+        fun emptyReportTest() {
+            val response = client.generateBuildConfigurationReport(
+                requestBuildConfigurationReport(rootProjectId = ROOT_PROJECT_ID, systems = setOf(SYSTEM))
+            )
+            assertEquals(ROOT_PROJECT_ID, response.rootProjectId)
+            assertTrue(response.result.isEmpty())
+        }
+
+        @Test
+        @DisplayName("Full scenario: components with 4 different statuses, one parameter and one step")
+        fun generateReportFullTest() {
+            teamCity.stubRootProjects(ROOT_PROJECT_ID, "teamcity-mock-data/projects.json")
+            teamCity.stubChildrenPages(
+                ROOT_PROJECT_ID,
+                "teamcity-mock-data/children-page-1.json",
+                "teamcity-mock-data/children-page-2.json"
+            )
+            teamCity.stubTemplate("teamcity-mock-data/templates.json")
+
+            val actual = client.generateBuildConfigurationReport(
+                requestBuildConfigurationReport(
+                    rootProjectId = ROOT_PROJECT_ID,
+                    systems = setOf(SYSTEM),
                     parameters = listOf("XRAY"),
                     steps = listOf("Compile")
                 )
             )
-        )
-        val expected = loadExpected("expected-reports/generateReportFullTest.json")
-        assertEquals(expected, actual)
+            val expected = loadExpected("expected-reports/generateReportFullTest.json")
+            assertEquals(expected, actual)
+        }
+    }
+
+    @Nested
+    @DisplayName("Error handling")
+    inner class ErrorHandling {
+
+        @Test
+        @DisplayName("TeamCity returns 5xx on root request -> client receives 502 / InternalException")
+        fun teamCityServerErrorBecomesBadGateway() {
+            teamCity.stubRootProjectsStatus(ROOT_PROJECT_ID, statusCode = 500)
+            teamCity.stubTemplate("teamcity-mock-data/templates.json")
+
+            val ex = assertThrows(InternalException::class.java) {
+                client.generateBuildConfigurationReport(
+                    requestBuildConfigurationReport(
+                        rootProjectId = ROOT_PROJECT_ID,
+                        systems = setOf(SYSTEM),
+                        parameters = listOf("XRAY")
+                    )
+                )
+            }
+            assertTrue(ex.message?.contains("502") == true)
+        }
+
+        @Test
+        @DisplayName("TeamCity returns 5xx on template request -> 502 / InternalException")
+        fun teamCityTemplateFailureBecomesBadGateway() {
+            teamCity.stubRootProjects(ROOT_PROJECT_ID, "teamcity-mock-data/projects.json")
+            teamCity.stubChildrenPages(
+                ROOT_PROJECT_ID,
+                "teamcity-mock-data/children-page-1.json",
+                "teamcity-mock-data/children-page-2.json"
+            )
+            teamCity.stubTemplateStatus(statusCode = 503)
+
+            val ex = assertThrows(InternalException::class.java) {
+                client.generateBuildConfigurationReport(
+                    requestBuildConfigurationReport(
+                        rootProjectId = ROOT_PROJECT_ID,
+                        systems = setOf(SYSTEM),
+                        parameters = listOf("XRAY")
+                    )
+                )
+            }
+            assertTrue(ex.message?.contains("502") == true)
+        }
     }
 
     private fun loadExpected(resourcePath: String): BuildConfigurationReportResponseDto {
@@ -91,10 +138,6 @@ class BuildConfigurationReportFunctionalTest {
     }
 
     companion object {
-        private const val ROOT_PROJECT_ID = "RootProject"
-        private const val BASE_PROJECT_ID = "RDDepartment"
-        private const val SYSTEM = "TEST_SYSTEM"
-
         private val reportingServiceHost: String = System.getProperty("test.reporting-service-host")
             ?: error("System property 'test.reporting-service-host' must be defined")
         private val mockServerPort: Int = System.getProperty("test.mockserver-port").toInt()

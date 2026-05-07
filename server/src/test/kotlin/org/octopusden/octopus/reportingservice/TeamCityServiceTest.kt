@@ -1,35 +1,33 @@
 package org.octopusden.octopus.reportingservice
 
-import com.fasterxml.jackson.core.type.TypeReference
-import java.util.stream.Stream
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.octopusden.octopus.infrastructure.teamcity.client.TeamcityClient
-import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityBuildType
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityBuildTypes
-import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityProject
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityProjects
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityProperties
-import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityProperty
-import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityStep
-import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcitySteps
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.locator.ProjectLocator
+import org.octopusden.octopus.reportingservice.client.common.exception.ExternalServiceException
 import org.octopusden.octopus.reportingservice.client.common.exception.NotFoundException
-import org.octopusden.octopus.reportingservice.dto.BuildConfiguration
-import org.octopusden.octopus.reportingservice.dto.BuildConfigurationProject
+import org.octopusden.octopus.reportingservice.domain.BuildConfigurationParameter
+import org.octopusden.octopus.reportingservice.fixtures.Fixtures.build
+import org.octopusden.octopus.reportingservice.fixtures.Fixtures.project
+import org.octopusden.octopus.reportingservice.fixtures.Fixtures.step
+import org.octopusden.octopus.reportingservice.fixtures.Fixtures.tcBuildType
+import org.octopusden.octopus.reportingservice.fixtures.Fixtures.tcProject
+import org.octopusden.octopus.reportingservice.fixtures.Fixtures.tcProjectsPage
+import org.octopusden.octopus.reportingservice.fixtures.Fixtures.tcStep
 import org.octopusden.octopus.reportingservice.service.impl.TeamCityServiceImpl
-import org.octopusden.octopus.reportingservice.util.TestUtils
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisplayName("TeamCityService")
 class TeamCityServiceTest {
 
     private lateinit var client: TeamcityClient
@@ -41,317 +39,277 @@ class TeamCityServiceTest {
         service = TeamCityServiceImpl(client = client)
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("findSubprojectsArguments")
-    fun findSubprojectsTest(
-        @Suppress("UNUSED_PARAMETER") caseName: String,
-        setup: (TeamcityClient) -> Unit,
-        rootProjectId: String,
-        expectedResourceFile: String
-    ) {
-        setup(client)
-        val actual = service.findSubprojects(rootProjectId)
-        val expected = TestUtils.loadObject(
-            "$FIND_SUBPROJECTS_ROOT/$expectedResourceFile",
-            object : TypeReference<List<BuildConfigurationProject>>() {}
-        )
-        assertEquals(expected, actual)
+    private fun stubRoot(rootProjectId: String, vararg rootProjects: org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityProject) {
+        whenever(client.getProjectsWithLocatorAndFields(locatorWithId(rootProjectId), any()))
+            .thenReturn(TeamcityProjects(projects = rootProjects.toList()))
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("getTemplateArguments")
-    fun getTemplateByProjectIdAndTemplateIdTest(
-        @Suppress("UNUSED_PARAMETER") caseName: String,
-        setup: (TeamcityClient) -> Unit,
-        projectId: String,
-        templateId: String,
-        expectedResourceFile: String
-    ) {
-        setup(client)
-        val actual = service.getTemplateByProjectIdAndTemplateId(projectId, templateId)
-        val expected = TestUtils.loadObject(
-            "$TEMPLATES_ROOT/$expectedResourceFile",
-            object : TypeReference<BuildConfiguration>() {}
-        )
-        assertEquals(expected, actual)
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("getTemplateFailsArguments")
-    fun getTemplateByProjectIdAndTemplateIdFailsTest(
-        @Suppress("UNUSED_PARAMETER") caseName: String,
-        setup: (TeamcityClient) -> Unit,
-        projectId: String,
-        templateId: String,
-        exceptionClass: Class<out Throwable>
-    ) {
-        setup(client)
-        assertThrows(exceptionClass) {
-            service.getTemplateByProjectIdAndTemplateId(projectId, templateId)
+    private fun stubChildren(rootProjectId: String, vararg pages: TeamcityProjects) {
+        var stub = whenever(client.getProjectsWithLocatorAndFields(locatorWithAffectedProject(rootProjectId), any()))
+        if (pages.isEmpty()) {
+            stub.thenReturn(TeamcityProjects(nextHref = null, projects = emptyList()))
+        } else {
+            pages.forEach { page -> stub = stub.thenReturn(page) }
         }
     }
 
-    companion object {
-        private const val FIND_SUBPROJECTS_ROOT = "teamcity-service/findSubprojects"
-        private const val TEMPLATES_ROOT = "teamcity-service/getTemplates"
+    private fun stubProjectAbsent(projectId: String) {
+        whenever(client.getProjectsWithLocatorAndFields(locatorWithId(projectId), any()))
+            .thenReturn(TeamcityProjects(projects = emptyList()))
+    }
 
-        private fun locatorWithId(expectedId: String): ProjectLocator =
-            argThat { this.id == expectedId && this.affectedProject == null }
+    @Nested
+    @DisplayName("findSubprojects")
+    inner class FindSubprojects {
 
-        private fun locatorWithAffectedProject(expectedAffectedId: String): ProjectLocator =
-            argThat { this.affectedProject?.id == expectedAffectedId }
-
-        private fun setupFindSubprojectsMocks(
-            rootProjectId: String,
-            rootProjects: List<TeamcityProject>,
-            childrenPages: List<TeamcityProjects> =
-                listOf(TeamcityProjects(nextHref = null, projects = emptyList()))
-        ): (TeamcityClient) -> Unit = { c ->
-            whenever(c.getProjectsWithLocatorAndFields(locatorWithId(rootProjectId), any()))
-                .thenReturn(TeamcityProjects(projects = rootProjects))
-            var stub = whenever(c.getProjectsWithLocatorAndFields(locatorWithAffectedProject(rootProjectId), any()))
-            childrenPages.forEach { page -> stub = stub.thenReturn(page) }
-        }
-
-        private fun setupGetTemplateMocks(
-            projectId: String,
-            templates: List<TeamcityBuildType>
-        ): (TeamcityClient) -> Unit = { c ->
-            val project = TeamcityProject(
-                id = projectId,
-                name = projectId,
-                href = "/$projectId",
-                webUrl = "http://tc/$projectId",
-                archived = false,
-                templates = TeamcityBuildTypes(buildTypes = templates)
-            )
-            whenever(c.getProjectsWithLocatorAndFields(locatorWithId(projectId), any()))
-                .thenReturn(TeamcityProjects(projects = listOf(project)))
-        }
-
-        private fun setupEmptyProjectsMocks(projectId: String): (TeamcityClient) -> Unit = { c ->
-            whenever(c.getProjectsWithLocatorAndFields(locatorWithId(projectId), any()))
-                .thenReturn(TeamcityProjects(projects = emptyList()))
-        }
-
-        @JvmStatic
-        @Suppress("unused")
-        private fun findSubprojectsArguments(): Stream<Arguments> = Stream.of(
-            Arguments.of(
-                "singleRootProject",
-                setupFindSubprojectsMocks(
-                    rootProjectId = "RootProject_ComponentA",
-                    rootProjects = listOf(
-                        TeamcityProject(
-                            id = "RootProject_ComponentA",
-                            name = "RootProject_ComponentA",
-                            href = "/RootProject_ComponentA",
-                            webUrl = "http://tc/RootProject_ComponentA",
-                            archived = false,
-                            parameters = TeamcityProperties(
-                                properties = listOf(TeamcityProperty(name = "COMPONENT_NAME", value = "componentA"))
-                            ),
-                            buildTypes = TeamcityBuildTypes(
-                                buildTypes = listOf(
-                                    TeamcityBuildType(
-                                        id = "RootProject_ComponentA_Build",
-                                        parameters = TeamcityProperties(
-                                            properties = listOf(TeamcityProperty(name = "P1", value = "v1"))
-                                        ),
-                                        templates = TeamcityBuildTypes(
-                                            buildTypes = listOf(TeamcityBuildType(id = "CDCompileUTGradle"))
-                                        ),
-                                        steps = TeamcitySteps(
-                                            steps = listOf(
-                                                TeamcityStep(
-                                                    id = "s1",
-                                                    name = "Compile",
-                                                    type = "custom",
-                                                    disabled = false,
-                                                    properties = TeamcityProperties()
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                ),
+        @Test
+        @DisplayName("Maps TeamCity project to domain BuildConfigurationProject")
+        fun singleRootProject() {
+            stubRoot(
                 "RootProject_ComponentA",
-                "singleRootProject.json"
-            ),
-            Arguments.of(
-                "skipProjectsWithoutBuildTypes",
-                setupFindSubprojectsMocks(
-                    rootProjectId = "RootProject",
-                    rootProjects = listOf(
-                        TeamcityProject(
-                            id = "RootProject_NoBuilds",
-                            name = "No",
-                            href = "/RootProject_NoBuilds",
-                            webUrl = "http://tc/No",
-                            archived = false,
-                            parameters = TeamcityProperties(
-                                properties = listOf(TeamcityProperty(name = "COMPONENT_NAME", value = "no"))
-                            ),
-                            buildTypes = TeamcityBuildTypes(buildTypes = emptyList())
-                        ),
-                        TeamcityProject(
-                            id = "RootProject_Ok",
-                            name = "RootProject_Ok",
-                            href = "/RootProject_Ok",
-                            webUrl = "http://tc/Ok",
-                            archived = false,
-                            parameters = TeamcityProperties(
-                                properties = listOf(TeamcityProperty(name = "COMPONENT_NAME", value = "ok"))
-                            ),
-                            buildTypes = TeamcityBuildTypes(
-                                buildTypes = listOf(TeamcityBuildType(id = "RootProject_Ok_Build"))
-                            )
+                tcProject(
+                    id = "RootProject_ComponentA",
+                    componentName = "componentA",
+                    buildTypes = listOf(
+                        tcBuildType(
+                            id = "RootProject_ComponentA_Build",
+                            templateIds = setOf("CDCompileUTGradle"),
+                            parameters = mapOf("P1" to "v1"),
+                            steps = listOf(tcStep("Compile", disabled = false, id = "s1"))
                         )
                     )
-                ),
-                "RootProject",
-                "skipProjectsWithoutBuildTypes.json"
-            ),
-            Arguments.of(
-                "skipProjectWithoutComponentName",
-                setupFindSubprojectsMocks(
-                    rootProjectId = "RootProject",
-                    rootProjects = listOf(
-                        TeamcityProject(
-                            id = "RootProject_X",
-                            name = "X",
-                            href = "/x",
-                            webUrl = "http://tc/X",
-                            archived = false,
-                            buildTypes = TeamcityBuildTypes(listOf(TeamcityBuildType(id = "b"))),
-                            parameters = TeamcityProperties(
-                                properties = listOf(TeamcityProperty(name = "OTHER", value = "v"))
-                            )
-                        )
-                    )
-                ),
-                "RootProject",
-                "empty.json"
-            ),
-            Arguments.of(
-                "paginatedChildren",
-                setupFindSubprojectsMocks(
-                    rootProjectId = "RootProject",
-                    rootProjects = listOf(
-                        TeamcityProject(
-                            id = "RootProject",
-                            name = "RootProject",
-                            href = "/RootProject",
-                            webUrl = "http://tc/RootProject",
-                            archived = false,
-                            parameters = TeamcityProperties(
-                                properties = listOf(TeamcityProperty(name = "COMPONENT_NAME", value = "s-root"))
-                            ),
-                            buildTypes = TeamcityBuildTypes(
-                                buildTypes = listOf(TeamcityBuildType(id = "RootProject_Build"))
-                            )
-                        )
-                    ),
-                    childrenPages = listOf(
-                        TeamcityProjects(
-                            nextHref = "/next",
-                            projects = listOf(
-                                TeamcityProject(
-                                    id = "RootProject_A",
-                                    name = "RootProject_A",
-                                    href = "/RootProject_A",
-                                    webUrl = "http://tc/A",
-                                    archived = false,
-                                    parameters = TeamcityProperties(
-                                        properties = listOf(TeamcityProperty(name = "COMPONENT_NAME", value = "a"))
-                                    ),
-                                    buildTypes = TeamcityBuildTypes(
-                                        buildTypes = listOf(TeamcityBuildType(id = "RootProject_A_Build"))
-                                    )
-                                )
-                            )
-                        ),
-                        TeamcityProjects(
-                            nextHref = null,
-                            projects = listOf(
-                                TeamcityProject(
-                                    id = "RootProject_B",
-                                    name = "RootProject_B",
-                                    href = "/RootProject_B",
-                                    webUrl = "http://tc/B",
-                                    archived = false,
-                                    parameters = TeamcityProperties(
-                                        properties = listOf(TeamcityProperty(name = "COMPONENT_NAME", value = "b"))
-                                    ),
-                                    buildTypes = TeamcityBuildTypes(
-                                        buildTypes = listOf(TeamcityBuildType(id = "RootProject_B_Build"))
-                                    )
-                                )
-                            )
-                        )
-                    )
-                ),
-                "RootProject",
-                "paginatedChildren.json"
+                )
             )
-        )
+            stubChildren("RootProject_ComponentA")
 
-        @JvmStatic
-        @Suppress("unused")
-        private fun getTemplateArguments(): Stream<Arguments> = Stream.of(
-            Arguments.of(
-                "gradleTemplate",
-                setupGetTemplateMocks(
-                    projectId = "RDDepartment",
-                    templates = listOf(
-                        TeamcityBuildType(
-                            id = "CDCompileUTGradle",
-                            parameters = TeamcityProperties(
-                                properties = listOf(TeamcityProperty(name = "XRAY", value = "true"))
-                            ),
-                            steps = TeamcitySteps(
-                                steps = listOf(
-                                    TeamcityStep(
-                                        id = "s1",
-                                        name = "Compile",
-                                        type = "custom",
-                                        disabled = false,
-                                        properties = TeamcityProperties()
-                                    )
-                                )
+            val actual = service.findSubprojects("RootProject_ComponentA")
+
+            assertEquals(
+                listOf(
+                    project(
+                        id = "RootProject_ComponentA",
+                        componentId = "componentA",
+                        webUrl = "http://tc/RootProject_ComponentA",
+                        buildConfigurations = setOf(
+                            build(
+                                buildTypeId = "RootProject_ComponentA_Build",
+                                templateIds = setOf("CDCompileUTGradle"),
+                                parameters = listOf(
+                                    BuildConfigurationParameter("P1", "v1")
+                                ),
+                                steps = listOf(step("Compile", disabled = false, id = "s1"))
                             )
                         )
                     )
                 ),
-                "RDDepartment",
-                "CDCompileUTGradle",
-                "gradleTemplate.json"
+                actual
             )
-        )
+        }
 
-        @JvmStatic
-        @Suppress("unused")
-        private fun getTemplateFailsArguments(): Stream<Arguments> = Stream.of(
-            Arguments.of(
-                "templateIdAbsent",
-                setupGetTemplateMocks(
-                    projectId = "RDDepartment",
-                    templates = listOf(TeamcityBuildType(id = "SomeOtherTemplate"))
-                ),
-                "RDDepartment",
-                "Missing",
-                NotFoundException::class.java
-            ),
-            Arguments.of(
-                "projectAbsent",
-                setupEmptyProjectsMocks("RDDepartment"),
-                "RDDepartment",
-                "Any",
-                NotFoundException::class.java
+        @Test
+        @DisplayName("Skips projects without buildTypes")
+        fun skipProjectsWithoutBuildTypes() {
+            stubRoot(
+                "RootProject",
+                tcProject(id = "RootProject_NoBuilds", componentName = "no", buildTypes = emptyList()),
+                tcProject(
+                    id = "RootProject_Ok",
+                    componentName = "ok",
+                    buildTypes = listOf(tcBuildType(id = "RootProject_Ok_Build"))
+                )
             )
-        )
+            stubChildren("RootProject")
+
+            val actual = service.findSubprojects("RootProject")
+
+            assertEquals(
+                listOf(
+                    project(
+                        id = "RootProject_Ok",
+                        componentId = "ok",
+                        webUrl = "http://tc/RootProject_Ok",
+                        buildConfigurations = setOf(build(buildTypeId = "RootProject_Ok_Build"))
+                    )
+                ),
+                actual
+            )
+        }
+
+        @Test
+        @DisplayName("Skips projects without COMPONENT_NAME parameter")
+        fun skipProjectsWithoutComponentName() {
+            stubRoot(
+                "RootProject",
+                tcProject(
+                    id = "RootProject_X",
+                    componentName = null,
+                    buildTypes = listOf(tcBuildType(id = "b"))
+                )
+            )
+            stubChildren("RootProject")
+
+            val actual = service.findSubprojects("RootProject")
+
+            assertEquals(emptyList<Any>(), actual)
+        }
+
+        @Test
+        @DisplayName("Walks through children pages while nextHref is not null")
+        fun paginatedChildren() {
+            stubRoot(
+                "RootProject",
+                tcProject(
+                    id = "RootProject",
+                    componentName = "s-root",
+                    buildTypes = listOf(tcBuildType(id = "RootProject_Build"))
+                )
+            )
+            stubChildren(
+                "RootProject",
+                tcProjectsPage(
+                    nextHref = "/next",
+                    projects = listOf(
+                        tcProject(
+                            id = "RootProject_A",
+                            componentName = "a",
+                            buildTypes = listOf(tcBuildType(id = "RootProject_A_Build"))
+                        )
+                    )
+                ),
+                tcProjectsPage(
+                    nextHref = null,
+                    projects = listOf(
+                        tcProject(
+                            id = "RootProject_B",
+                            componentName = "b",
+                            buildTypes = listOf(tcBuildType(id = "RootProject_B_Build"))
+                        )
+                    )
+                )
+            )
+
+            val actual = service.findSubprojects("RootProject")
+
+            assertEquals(
+                listOf(
+                    project(id = "RootProject", componentId = "s-root",
+                        buildConfigurations = setOf(build("RootProject_Build"))),
+                    project(id = "RootProject_A", componentId = "a",
+                        buildConfigurations = setOf(build("RootProject_A_Build"))),
+                    project(id = "RootProject_B", componentId = "b",
+                        buildConfigurations = setOf(build("RootProject_B_Build")))
+                ),
+                actual
+            )
+        }
+
+        @Test
+        @DisplayName("Step without explicit 'disabled' flag is treated as disabled (current behaviour)")
+        fun stepWithoutDisabledIsTreatedAsDisabled() {
+            stubRoot(
+                "Root",
+                tcProject(
+                    id = "Root",
+                    componentName = "comp",
+                    buildTypes = listOf(
+                        tcBuildType(
+                            id = "Build",
+                            steps = listOf(
+                                org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityStep(
+                                    id = "s1",
+                                    name = "Compile",
+                                    type = "custom",
+                                    disabled = null,
+                                    properties = TeamcityProperties()
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+            stubChildren("Root")
+
+            val actual = service.findSubprojects("Root")
+
+            val onlyStep = actual.single().buildConfigurations.single().steps.single()
+            assertEquals(true, onlyStep.disabled)
+        }
+
+        @Test
+        @DisplayName("TeamCity client error is wrapped into ExternalServiceException")
+        fun clientErrorWrappedAsExternal() {
+            whenever(client.getProjectsWithLocatorAndFields(locatorWithId("Root"), any()))
+                .thenThrow(RuntimeException("boom"))
+            assertThrows(ExternalServiceException::class.java) {
+                service.findSubprojects("Root")
+            }
+        }
     }
+
+    @Nested
+    @DisplayName("getTemplateByProjectIdAndTemplateId")
+    inner class GetTemplate {
+
+        @Test
+        @DisplayName("Maps TeamCity template to domain BuildConfiguration")
+        fun gradleTemplate() {
+            val project = tcProject(id = "RDDepartment").copy(
+                templates = TeamcityBuildTypes(
+                    buildTypes = listOf(
+                        tcBuildType(
+                            id = "CDCompileUTGradle",
+                            parameters = mapOf("XRAY" to "true"),
+                            steps = listOf(tcStep("Compile", disabled = false, id = "s1"))
+                        )
+                    )
+                )
+            )
+            whenever(client.getProjectsWithLocatorAndFields(locatorWithId("RDDepartment"), any()))
+                .thenReturn(TeamcityProjects(projects = listOf(project)))
+
+            val actual = service.getTemplateByProjectIdAndTemplateId("RDDepartment", "CDCompileUTGradle")
+
+            assertEquals(
+                build(
+                    buildTypeId = "CDCompileUTGradle",
+                    parameters = listOf(
+                        BuildConfigurationParameter("XRAY", "true")
+                    ),
+                    steps = listOf(step("Compile", disabled = false, id = "s1"))
+                ),
+                actual
+            )
+        }
+
+        @Test
+        @DisplayName("Template id not found -> NotFoundException")
+        fun templateIdAbsent() {
+            val project = tcProject(id = "RDDepartment").copy(
+                templates = TeamcityBuildTypes(
+                    buildTypes = listOf(tcBuildType(id = "SomeOtherTemplate"))
+                )
+            )
+            whenever(client.getProjectsWithLocatorAndFields(locatorWithId("RDDepartment"), any()))
+                .thenReturn(TeamcityProjects(projects = listOf(project)))
+
+            assertThrows(NotFoundException::class.java) {
+                service.getTemplateByProjectIdAndTemplateId("RDDepartment", "Missing")
+            }
+        }
+
+        @Test
+        @DisplayName("Project not found -> NotFoundException")
+        fun projectAbsent() {
+            stubProjectAbsent("RDDepartment")
+            assertThrows(NotFoundException::class.java) {
+                service.getTemplateByProjectIdAndTemplateId("RDDepartment", "Any")
+            }
+        }
+    }
+
+    private fun locatorWithId(expectedId: String): ProjectLocator =
+        argThat { this.id == expectedId && this.affectedProject == null }
+
+    private fun locatorWithAffectedProject(expectedAffectedId: String): ProjectLocator =
+        argThat { this.affectedProject?.id == expectedAffectedId }
 }

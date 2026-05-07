@@ -17,38 +17,53 @@ class TeamCityMockServer(
 
     fun stubRootProjects(rootProjectId: String, bodyResourcePath: String) {
         client
-            .`when`(
-                request()
-                    .withMethod("GET")
-                    .withPath(PROJECTS_PATH)
-                    .withQueryStringParameter("locator", "archived:false,id:$rootProjectId")
-            )
+            .`when`(rootProjectsRequest(rootProjectId))
             .respond(jsonResponse(readResource(bodyResourcePath)))
+    }
+
+    fun stubRootProjectsStatus(rootProjectId: String, statusCode: Int) {
+        client
+            .`when`(rootProjectsRequest(rootProjectId))
+            .respond(response().withStatusCode(statusCode))
     }
 
     fun stubChildrenPages(rootProjectId: String, vararg pageBodyResourcePaths: String) {
         pageBodyResourcePaths.forEach { resourcePath ->
             client
-                .`when`(request()
-                    .withMethod("GET")
-                    .withPath(PROJECTS_PATH)
-                    .withQueryStringParameter("locator", "affectedProject:\\(id:$rootProjectId\\).*"),
-                    Times.once()
-                )
+                .`when`(childrenPagesRequest(rootProjectId), Times.once())
                 .respond(jsonResponse(readResource(resourcePath)))
         }
     }
 
     fun stubTemplate(bodyResourcePath: String) {
         client
-            .`when`(
-                request()
-                    .withMethod("GET")
-                    .withPath(PROJECTS_PATH)
-                    .withQueryStringParameter("locator", "id:$baseProjectId")
-            )
+            .`when`(templateRequest())
             .respond(jsonResponse(readResource(bodyResourcePath)))
     }
+
+    fun stubTemplateStatus(statusCode: Int) {
+        client
+            .`when`(templateRequest())
+            .respond(response().withStatusCode(statusCode))
+    }
+
+    private fun rootProjectsRequest(rootProjectId: String) =
+        request()
+            .withMethod("GET")
+            .withPath(PROJECTS_PATH)
+            .withQueryStringParameter("locator", "archived:false,id:$rootProjectId")
+
+    private fun childrenPagesRequest(rootProjectId: String) =
+        request()
+            .withMethod("GET")
+            .withPath(PROJECTS_PATH)
+            .withQueryStringParameter("locator", "affectedProject:\\(id:$rootProjectId\\).*")
+
+    private fun templateRequest() =
+        request()
+            .withMethod("GET")
+            .withPath(PROJECTS_PATH)
+            .withQueryStringParameter("locator", "id:$baseProjectId")
 
     private fun jsonResponse(body: String) = response()
         .withStatusCode(200)

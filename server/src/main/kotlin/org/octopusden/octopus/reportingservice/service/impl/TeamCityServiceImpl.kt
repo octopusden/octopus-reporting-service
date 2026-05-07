@@ -4,17 +4,15 @@ import org.octopusden.octopus.infrastructure.teamcity.client.TeamcityClient
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityBuildType
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityProject
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.locator.ProjectLocator
+import org.octopusden.octopus.reportingservice.client.common.exception.ExternalServiceException
 import org.octopusden.octopus.reportingservice.client.common.exception.NotFoundException
-import org.octopusden.octopus.reportingservice.dto.BuildConfiguration
-import org.octopusden.octopus.reportingservice.dto.BuildConfigurationParameter
-import org.octopusden.octopus.reportingservice.dto.BuildConfigurationProject
-import org.octopusden.octopus.reportingservice.dto.BuildConfigurationStep
+import org.octopusden.octopus.reportingservice.domain.BuildConfiguration
+import org.octopusden.octopus.reportingservice.domain.BuildConfigurationParameter
+import org.octopusden.octopus.reportingservice.domain.BuildConfigurationProject
+import org.octopusden.octopus.reportingservice.domain.BuildConfigurationStep
 import org.octopusden.octopus.reportingservice.service.TeamCityService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import kotlin.collections.map
-import kotlin.collections.orEmpty
-import kotlin.text.orEmpty
 
 @Service
 class TeamCityServiceImpl(
@@ -51,7 +49,9 @@ class TeamCityServiceImpl(
             id = rootProjectId,
             archived = false
         )
-        result += client.getProjectsWithLocatorAndFields(rootLocator, fields).projects
+        result += callTeamCity("getProjects(root='$rootProjectId')") {
+            client.getProjectsWithLocatorAndFields(rootLocator, fields)
+        }.projects
             .asSequence()
             .filter { it.buildTypes?.buildTypes.orEmpty().isNotEmpty() }
             .mapNotNull { it.toBuildConfigurationProjectOrNull() }
@@ -65,7 +65,9 @@ class TeamCityServiceImpl(
                 count = DEFAULT_PAGE_SIZE,
                 start = start
             )
-            val page = client.getProjectsWithLocatorAndFields(locator, fields)
+            val page = callTeamCity("getProjects(affected='$rootProjectId', start=$start)") {
+                client.getProjectsWithLocatorAndFields(locator, fields)
+            }
             result += page.projects
                 .asSequence()
                 .filter { it.buildTypes?.buildTypes.orEmpty().isNotEmpty() }
@@ -99,8 +101,9 @@ class TeamCityServiceImpl(
             )
         """.trimIndent().replace("\\s+".toRegex(), "")
         val locator = ProjectLocator(id = projectId)
-        val result = client.getProjectsWithLocatorAndFields(locator, fields)
-            .projects.find { it.id == projectId }
+        val result = callTeamCity("getTemplate(projectId='$projectId', templateId='$templateId')") {
+            client.getProjectsWithLocatorAndFields(locator, fields)
+        }.projects.find { it.id == projectId }
             ?.templates?.buildTypes
             ?.find { it.id == templateId }?.toBuildConfiguration()
             ?: run {
@@ -111,10 +114,16 @@ class TeamCityServiceImpl(
                 throw NotFoundException("Not found template!")
             }
         logger.info(
-            "getTemplateByProjectIdAndTemplateId: loaded template '{}'. parameters{} and {} steps",
+            "getTemplateByProjectIdAndTemplateId: loaded template '{}'. amount parameters = {}, amount steps = {}",
             templateId, result.parameters.size, result.steps.size
         )
         return result
+    }
+
+    private fun <T> callTeamCity(operation: String, block: () -> T): T = try {
+        block()
+    } catch (e: Exception) {
+        throw ExternalServiceException("TeamCity call failed: $operation", e)
     }
 
     private fun TeamcityProject.toBuildConfigurationProjectOrNull(): BuildConfigurationProject? {

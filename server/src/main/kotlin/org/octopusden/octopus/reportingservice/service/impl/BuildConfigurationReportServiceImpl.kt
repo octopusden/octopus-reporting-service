@@ -8,8 +8,8 @@ import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.Bui
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.CheckType
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.ComponentReportStatus
 import org.octopusden.octopus.reportingservice.config.BuildConfigurationReportConfig
-import org.octopusden.octopus.reportingservice.dto.BuildConfiguration
-import org.octopusden.octopus.reportingservice.dto.BuildConfigurationProject
+import org.octopusden.octopus.reportingservice.domain.BuildConfiguration
+import org.octopusden.octopus.reportingservice.domain.BuildConfigurationProject
 import org.octopusden.octopus.reportingservice.service.BuildConfigurationReportService
 import org.octopusden.octopus.reportingservice.service.ComponentsRegistryService
 import org.octopusden.octopus.reportingservice.service.TeamCityService
@@ -115,7 +115,6 @@ class BuildConfigurationReportServiceImpl(
             status = ComponentReportStatus.OK,
             buildConfigurationUrl = currentProject.webUrl,
             buildTypeId = buildConfiguration.buildTypeId,
-            isRndTemplate = true,
             checks = checks
         )
     }

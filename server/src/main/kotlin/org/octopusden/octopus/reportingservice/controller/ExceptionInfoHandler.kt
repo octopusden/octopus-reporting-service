@@ -1,6 +1,7 @@
 package org.octopusden.octopus.reportingservice.controller
 
 import org.octopusden.octopus.reportingservice.client.common.exception.ErrorResponse
+import org.octopusden.octopus.reportingservice.client.common.exception.ExternalServiceException
 import org.octopusden.octopus.reportingservice.client.common.exception.NotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
@@ -12,23 +13,30 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 @RestControllerAdvice
 class ExceptionInfoHandler {
 
-    @ExceptionHandler(
-        NotFoundException::class,
-        org.octopusden.octopus.components.registry.core.exceptions.NotFoundException::class
-    )
+    @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFound(exception: NotFoundException): ErrorResponse {
+    fun handleNotFound(exception: RuntimeException): ErrorResponse {
         val message = exception.message ?: "Not found"
-        logger.warn(message, exception)
+        logger.info("Not found: {}", message)
         return ErrorResponse(
             code = HttpStatus.NOT_FOUND.value().toString(),
             message = message
         )
     }
 
+    @ExceptionHandler(ExternalServiceException::class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    fun handleExternalServiceException(exception: ExternalServiceException): ErrorResponse {
+        val message = exception.message ?: "External service is unavailable"
+        logger.error("External service error: {}", exception.message, exception)
+        return ErrorResponse(
+            code = HttpStatus.BAD_GATEWAY.value().toString(),
+            message = message
+        )
+    }
+
     @ExceptionHandler(Exception::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @Order(100)
     fun handleException(exception: Exception): ErrorResponse {
         val message = exception.message ?: "Unexpected error"
         logger.error(message, exception)

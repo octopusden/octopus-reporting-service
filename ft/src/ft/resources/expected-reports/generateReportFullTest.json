@@ -6,7 +6,6 @@
       "status": "OK",
       "buildConfigurationUrl": "http://tc/RootProject_ComponentA",
       "buildTypeId": "RootProject_ComponentA_Build",
-      "isRndTemplate": true,
       "checks": [
         {
           "checkType": "PARAMETER",
@@ -29,7 +28,6 @@
       "status": "OK",
       "buildConfigurationUrl": "http://tc/RootProject_ComponentB",
       "buildTypeId": "RootProject_ComponentB_Build",
-      "isRndTemplate": true,
       "checks": [
         {
           "checkType": "PARAMETER",
@@ -52,7 +50,6 @@
       "status": "NO_BUILD_CONFIGURATION",
       "buildConfigurationUrl": "http://tc/RootProject_ComponentC",
       "buildTypeId": null,
-      "isRndTemplate": false,
       "checks": []
     },
     {
@@ -60,7 +57,6 @@
       "status": "NO_PROJECT",
       "buildConfigurationUrl": null,
       "buildTypeId": null,
-      "isRndTemplate": false,
       "checks": []
     }
   ]

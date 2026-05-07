@@ -22,6 +22,7 @@ objects:
       containers:
         - name: reporting
           image: ${DOCKER_REGISTRY}/octopusden/reporting-service:${REPORTING_SERVICE_VERSION}
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
               protocol: TCP
