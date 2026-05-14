@@ -1,5 +1,6 @@
 package org.octopusden.octopus.reportingservice.controller
 
+import jakarta.validation.Valid
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportRequestDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportResponseDto
 import org.octopusden.octopus.reportingservice.service.BuildConfigurationReportService
@@ -16,7 +17,7 @@ class BuildConfigurationReportController(
 ) {
     @PostMapping
     fun generateReport(
-        @RequestBody request: BuildConfigurationReportRequestDto
+        @Valid @RequestBody request: BuildConfigurationReportRequestDto
     ): BuildConfigurationReportResponseDto {
         logger.info("Generate Build Configuration Report: request={}", request)
         return buildConfigurationReportService.generateReport(request)

@@ -3,6 +3,7 @@ package org.octopusden.octopus.reportingservice.service.impl
 import org.octopusden.octopus.components.registry.core.dto.ComponentV2
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationCheckResultDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationComponentReportDto
+import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationConstants.NOT_DEFINED
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportRequestDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportResponseDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.CheckType
@@ -166,6 +167,5 @@ class BuildConfigurationReportServiceImpl(
 
     companion object {
         private val logger = LoggerFactory.getLogger(BuildConfigurationReportServiceImpl::class.java)
-        private const val NOT_DEFINED = "Not defined"
     }
 }

@@ -11,6 +11,7 @@ import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityStep
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcitySteps
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationCheckResultDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationComponentReportDto
+import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationConstants
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportChecksDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportComponentsFilterDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportRequestDto
@@ -161,7 +162,7 @@ object Fixtures {
         name: String,
         actual: String,
         expected: String,
-        status: Boolean = actual == expected && actual != NOT_DEFINED
+        status: Boolean = actual == expected && actual != BuildConfigurationConstants.NOT_DEFINED
     ): BuildConfigurationCheckResultDto =
         BuildConfigurationCheckResultDto(
             checkType = type,
@@ -172,7 +173,6 @@ object Fixtures {
         )
 
     // Common constants
-    const val NOT_DEFINED = "Not defined"
     const val ROOT_PROJECT_ID = "RootProject"
     const val BASE_PROJECT_ID = "RDDepartment"
     const val BUILD_TEMPLATE_ID = "CDCompileUTGradle"

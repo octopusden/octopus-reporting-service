@@ -56,4 +56,5 @@ tasks.withType<KotlinCompile>().configureEach {
 
 dependencies {
     implementation("com.fasterxml.jackson.core:jackson-annotations")
+    implementation("jakarta.validation:jakarta.validation-api")
 }

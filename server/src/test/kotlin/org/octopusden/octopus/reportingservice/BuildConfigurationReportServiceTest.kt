@@ -9,6 +9,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.octopusden.octopus.components.registry.core.dto.ComponentV2
+import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationConstants
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.CheckType
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.ComponentReportStatus
 import org.octopusden.octopus.reportingservice.config.BuildConfigurationReportConfig
@@ -21,7 +22,6 @@ import org.octopusden.octopus.reportingservice.fixtures.Fixtures.COMPONENT_A
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.COMPONENT_A_BUILD_ID
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.COMPONENT_A_PROJECT_ID
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.COMPONENT_A_PROJECT_URL
-import org.octopusden.octopus.reportingservice.fixtures.Fixtures.NOT_DEFINED
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.ROOT_PROJECT_ID
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.build
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.checkResult
@@ -180,7 +180,7 @@ class BuildConfigurationReportServiceTest {
                             status = ComponentReportStatus.OK,
                             buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                             buildTypeId = COMPONENT_A_BUILD_ID,
-                            checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", NOT_DEFINED, NOT_DEFINED, status = false))
+                            checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", BuildConfigurationConstants.NOT_DEFINED, BuildConfigurationConstants.NOT_DEFINED, status = false))
                         )
                     )
                 ),

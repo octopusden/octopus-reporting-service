@@ -4,8 +4,8 @@ import org.octopusden.octopus.reportingservice.client.common.exception.ErrorResp
 import org.octopusden.octopus.reportingservice.client.common.exception.ExternalServiceException
 import org.octopusden.octopus.reportingservice.client.common.exception.NotFoundException
 import org.slf4j.LoggerFactory
-import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -31,6 +31,19 @@ class ExceptionInfoHandler {
         logger.error("External service error: {}", exception.message, exception)
         return ErrorResponse(
             code = HttpStatus.BAD_GATEWAY.value().toString(),
+            message = message
+        )
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleMethodArgumentNotValid(exception: MethodArgumentNotValidException): ErrorResponse {
+        val message = exception.bindingResult.fieldErrors.joinToString("; ") { err ->
+            "${err.field}: ${err.defaultMessage}"
+        }.ifBlank { "Validation failed" }
+        logger.info("Validation failed: {}", message)
+        return ErrorResponse(
+            code = HttpStatus.BAD_REQUEST.value().toString(),
             message = message
         )
     }

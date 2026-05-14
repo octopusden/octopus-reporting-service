@@ -1,5 +1,6 @@
 package org.octopusden.octopus.reportingservice.service.impl
 
+import feign.FeignException
 import org.octopusden.octopus.infrastructure.teamcity.client.TeamcityClient
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityBuildType
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityProject
@@ -122,6 +123,8 @@ class TeamCityServiceImpl(
 
     private fun <T> callTeamCity(operation: String, block: () -> T): T = try {
         block()
+    } catch (e: FeignException.NotFound) {
+        throw NotFoundException("TeamCity entity not found: $operation")
     } catch (e: Exception) {
         throw ExternalServiceException("TeamCity call failed: $operation", e)
     }
