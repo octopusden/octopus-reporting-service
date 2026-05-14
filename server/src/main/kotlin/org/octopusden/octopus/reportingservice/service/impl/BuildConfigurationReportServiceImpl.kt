@@ -16,6 +16,7 @@ import org.octopusden.octopus.reportingservice.service.ComponentsRegistryService
 import org.octopusden.octopus.reportingservice.service.TeamCityService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.Locale
 
 @Service
 class BuildConfigurationReportServiceImpl(
@@ -42,15 +43,16 @@ class BuildConfigurationReportServiceImpl(
         }
         logger.info("generateReport: components found {}", components.size)
         val stageTemplates = getBuildStageTemplates(request)
-        val projects = teamCityService.findSubprojects(request.rootProjectId)
+        val projectsByComponentId = teamCityService.findSubprojects(request.rootProjectId)
+            .associateBy { it.componentId }
         val result = components.map { component ->
             buildComponentReport(
-                component = component,
-                projects = projects,
+                componentId = component.id,
+                project = projectsByComponentId[component.id],
                 stageTemplates = stageTemplates,
                 request = request
             )
-        }.sortedBy { it.componentId.lowercase() }
+        }.sortedBy { it.componentId.lowercase(Locale.ROOT) }
         logger.info(
             "generateReport: done. rootProjectId='{}', total component reports={}",
             request.rootProjectId, result.size
@@ -77,32 +79,30 @@ class BuildConfigurationReportServiceImpl(
     }
 
     private fun buildComponentReport(
-        component: ComponentV2,
-        projects: List<BuildConfigurationProject>,
+        componentId: String,
+        project: BuildConfigurationProject?,
         stageTemplates: Map<String, BuildConfiguration>,
         request: BuildConfigurationReportRequestDto
     ): BuildConfigurationComponentReportDto {
-        val componentId = component.id
-        val currentProject = projects.find { it.componentId == componentId }
-        if (currentProject == null) {
+        if (project == null) {
             logger.info("buildComponentReport: no TeamCity project found for component '{}'", componentId)
             return BuildConfigurationComponentReportDto(
                 componentId = componentId,
                 status = ComponentReportStatus.NO_PROJECT
             )
         }
-        val matched = findBuildConfigurationForStage(currentProject, stageTemplates.keys)
+        val matched = findBuildConfigurationForStage(project, stageTemplates.keys)
         if (matched == null) {
             logger.info(
                 "buildComponentReport: no build configuration inherited from stage templates {} " +
                         "for component '{}' and project '{}'. Available buildConfigurations: {}",
-                stageTemplates.keys, componentId, currentProject.id,
-                currentProject.buildConfigurations.joinToString { "${it.buildTypeId}(templates=${it.templateIds})" }
+                stageTemplates.keys, componentId, project.id,
+                project.buildConfigurations.joinToString { "${it.buildTypeId}(templates=${it.templateIds})" }
             )
             return BuildConfigurationComponentReportDto(
                 componentId = componentId,
                 status = ComponentReportStatus.NO_BUILD_CONFIGURATION,
-                buildConfigurationUrl = currentProject.webUrl
+                buildConfigurationUrl = project.webUrl
             )
         }
         val (buildConfiguration, matchedTemplateId) = matched
@@ -114,7 +114,7 @@ class BuildConfigurationReportServiceImpl(
         return BuildConfigurationComponentReportDto(
             componentId = componentId,
             status = ComponentReportStatus.OK,
-            buildConfigurationUrl = currentProject.webUrl,
+            buildConfigurationUrl = project.webUrl,
             buildTypeId = buildConfiguration.buildTypeId,
             checks = checks
         )

@@ -6,6 +6,7 @@ import feign.codec.ErrorDecoder
 import org.octopusden.octopus.reportingservice.client.common.exception.ExternalServiceException
 import org.octopusden.octopus.reportingservice.client.common.exception.InternalException
 import org.octopusden.octopus.reportingservice.client.common.exception.NotFoundException
+import org.octopusden.octopus.reportingservice.client.common.exception.ValidationException
 import java.io.IOException
 
 class ReportingServiceErrorDecoder : ErrorDecoder {
@@ -16,6 +17,7 @@ class ReportingServiceErrorDecoder : ErrorDecoder {
         val body = response.safelyReadBody()
         val message = buildMessage(status, method, url, body)
         return when (status) {
+            400 -> ValidationException(message)
             404 -> NotFoundException(message)
             502 -> ExternalServiceException(message)
             else -> InternalException(message)

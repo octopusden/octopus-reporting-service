@@ -108,14 +108,10 @@ class TeamCityServiceImpl(
             ?.templates?.buildTypes
             ?.find { it.id == templateId }?.toBuildConfiguration()
             ?: run {
-                logger.warn(
-                    "getTemplateByProjectIdAndTemplateId: not found template. projectId='{}', templateId='{}'",
-                    projectId, templateId
-                )
-                throw NotFoundException("Not found template!")
+                throw NotFoundException("Not found template with templateId='$templateId' in project with projectId='$projectId'!")
             }
         logger.info(
-            "getTemplateByProjectIdAndTemplateId: loaded template '{}'. amount parameters = {}, amount steps = {}",
+            "getTemplateByProjectIdAndTemplateId: loaded template '{}'; amount parameters = {}, amount steps = {}",
             templateId, result.parameters.size, result.steps.size
         )
         return result
@@ -164,7 +160,12 @@ class TeamCityServiceImpl(
                 BuildConfigurationStep(
                     id = it.id,
                     name = it.name,
-                    disabled = it.disabled ?: true,
+                    disabled = it.disabled ?: run {
+                        logger.warn(
+                            "TeamCity step '{}' in buildType '{}' has no disabled field; treating as enabled", it.id, id
+                        )
+                        false
+                    }
                 )
             }
         return BuildConfiguration(
