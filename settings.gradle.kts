@@ -18,6 +18,6 @@ rootProject.name = "octopus-reporting-service"
 //include("automation")
 include("client")
 include("common")
-//include("ft")
+include("ft")
 include("server")
 findProject(":server")?.name = "reporting-service"

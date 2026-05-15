@@ -16,12 +16,12 @@ reporting:
         - CDRelease
 
 components-registry-service:
-  url: ${COMPONENTS_REGISTRY_SERVICE_URL}
+  url: http://${TEST_COMPONENTS_REGISTRY_HOST}
 
 teamcity:
-  url: ${TEAMCITY_URL}
-  user: ${TEAMCITY_USER}
-  password: ${TEAMCITY_PASSWORD}
+  url: http://${TEST_MOCKSERVER_HOST}
+  user: admin
+  password: admin
 
 management:
   endpoints:

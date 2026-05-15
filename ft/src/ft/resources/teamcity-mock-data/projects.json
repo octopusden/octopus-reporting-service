@@ -1,0 +1,14 @@
+{
+  "count": 1,
+  "project": [
+    {
+      "id": "RootProject",
+      "name": "RootProject",
+      "href": "/app/rest/projects/id:RootProject",
+      "webUrl": "http://tc/RootProject",
+      "archived": false,
+      "parameters": { "property": [] },
+      "buildTypes": { "buildType": [] }
+    }
+  ]
+}

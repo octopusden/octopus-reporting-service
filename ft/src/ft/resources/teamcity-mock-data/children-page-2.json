@@ -1,0 +1,32 @@
+{
+  "count": 1,
+  "href": "/app/rest/projects?locator=affectedProject:(id:RootProject),archived:false,count:200,start:200",
+  "project": [
+    {
+      "id": "RootProject_ComponentC",
+      "name": "RootProject_ComponentC",
+      "href": "/app/rest/projects/id:RootProject_ComponentC",
+      "webUrl": "http://tc/RootProject_ComponentC",
+      "archived": false,
+      "parameters": {
+        "property": [
+          { "name": "COMPONENT_NAME", "value": "componentC" }
+        ]
+      },
+      "buildTypes": {
+        "buildType": [
+          {
+            "id": "RootProject_ComponentC_CustomBuild",
+            "templates": {
+              "buildType": [
+                { "id": "SomeCustomTemplate" }
+              ]
+            },
+            "parameters": { "property": [] },
+            "steps": { "step": [] }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "count": 1,
+  "project": [
+    {
+      "id": "RDDepartment",
+      "name": "RDDepartment",
+      "href": "/app/rest/projects/id:RDDepartment",
+      "webUrl": "http://tc/RDDepartment",
+      "archived": false,
+      "templates": {
+        "buildType": [
+          {
+            "id": "CDCompileUTGradle",
+            "parameters": {
+              "property": [
+                { "name": "XRAY", "value": "true" }
+              ]
+            },
+            "steps": {
+              "step": [
+                {
+                  "id": "s1",
+                  "name": "Compile",
+                  "type": "gradle",
+                  "disabled": false,
+                  "properties": { "property": [] }
+                }
+              ]
+            }
+          },
+          {
+            "id": "CDCompileUTMaven",
+            "parameters": {
+              "property": [
+                { "name": "XRAY", "value": "true" }
+              ]
+            },
+            "steps": {
+              "step": [
+                {
+                  "id": "s1",
+                  "name": "Compile",
+                  "type": "maven",
+                  "disabled": false,
+                  "properties": { "property": [] }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

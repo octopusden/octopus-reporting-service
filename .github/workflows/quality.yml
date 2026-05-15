@@ -1,0 +1,21 @@
+name: Quality Gates
+
+on:
+  push:
+    branches:
+      - main
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-quality-gates.yml@v2.3.4
+    with:
+      java-version: "21"
+      coverage-command: >-
+        ./gradlew qualityCoverage
+        -x :reporting-service:test
+        --no-daemon --stacktrace
