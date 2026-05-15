@@ -204,8 +204,8 @@ class TeamCityServiceTest {
         }
 
         @Test
-        @DisplayName("Step without explicit 'disabled' flag is treated as disabled (current behaviour)")
-        fun stepWithoutDisabledIsTreatedAsDisabled() {
+        @DisplayName("Step without explicit 'disabled' flag is treated as enabled (current behaviour)")
+        fun stepWithoutDisabledIsTreatedAsEnabled() {
             stubRoot(
                 "Root",
                 tcProject(
@@ -232,7 +232,7 @@ class TeamCityServiceTest {
             val actual = service.findSubprojects("Root")
 
             val onlyStep = actual.single().buildConfigurations.single().steps.single()
-            assertEquals(true, onlyStep.disabled)
+            assertEquals(false, onlyStep.disabled)
         }
 
         @Test
