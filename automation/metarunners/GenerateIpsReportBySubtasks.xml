@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Generate IPS Report by subtasks">
+    <description>
+        Depends on following TeamCity parameters:
+        * RELENG_STANDARD_PARAMETERS
+        * RELENG_EXTRA_PARAMETERS
+        * RELENG_JVM_OPTS
+        * RELENG_JDK_VERSION
+        * RELENG_MAVEN_VERSION
+        * env.BUILD_ENV
+        Additional info:
+        * Exactly one of the RELEASE_QUARTER, SINCE_YEAR, SINCE_LAST_DAYS parameters has to be specified
+
+    </description>
+    <settings>
+        <parameters>
+            <param name="IPS" value="" spec="text description='Name of IPS' validationMode='any' display='normal'" />
+            <param name="RELEASE_QUARTER" value="" spec="text description='Quarter of IPS release (example 2018.4)' validationMode='any' display='normal'" />
+            <param name="SINCE_YEAR" value="" spec="text description='The year in format yyyy. First day of the year will be used as lower bound for selection of the issues' validationMode='any' display='normal'" />
+            <param name="SINCE_LAST_DAYS" value="" spec="text description='The number of days to look back from the current date to select issues for the report' validationMode='any' display='normal'" />
+            <param name="SYSTEM" value="" spec="text description='System. Possible values are: CLASSIC, SIGMA' validationMode='not_empty' display='normal'"/>
+            <param name="CUSTOM_REPORT" value="false" spec="checkbox description='Generate custom report' uncheckedValue='false' checkedValue='true' display='normal'"/>
+            <param name="CUSTOM_REPORT_TEMPLATE" value="" spec="text description='Path to velocity template. Used only if CUSTOM_REPORT is enabled' validationMode='any' display='normal'"/>
+            <param name="CUSTOM_REPORT_FILE" value="" spec="text description='Path to custom report file. Used only if CUSTOM_REPORT is enabled' validationMode='any' display='normal'"/>
+            <param name="CUSTOM_REPORT_ESCAPE_HTML" value="true" spec="checkbox description='Escape HTML symbols in custom report. Used only if CUSTOM_REPORT is enabled' uncheckedValue='false' checkedValue='true' display='normal'"/>
+            <param name="JSON_REPORT_FILE" value="" spec="text description='Path to json report file' validationMode='not_empty' display='normal'"/>
+            <param name="MANDATORY" value="true" spec="text description='Only mandatory issues' uncheckedValue='false' checkedValue='true' display='normal'" />
+        </parameters>
+        <build-runners>
+            <runner name="ips report" type="OctopusReportingAutomation">
+                <parameters>
+                    <param name="ARGS"
+                           value="--json-file=%JSON_REPORT_FILE%
+                           --report-custom=%CUSTOM_REPORT%
+                           --report-custom-template=%CUSTOM_REPORT_TEMPLATE%
+                           --report-custom-file=%CUSTOM_REPORT_FILE%
+                           --report-escape=%CUSTOM_REPORT_ESCAPE_HTML% g
+                           enerate-ips-report
+                           --url=%%
+                           &quot;--ips=%IPS%&quot;
+                           --sinceYear=%SINCE_YEAR%
+                           --sinceDate=%SINCE_LAST_DAYS%
+                           --release=%RELEASE_QUARTER%
+                           --system=%SYSTEM%
+                           --mandatory=%MANDATORY%"
+                    />
+                </parameters>
+            </runner>
+        </build-runners>
+        <requirements/>
+    </settings>
+</meta-runner>
