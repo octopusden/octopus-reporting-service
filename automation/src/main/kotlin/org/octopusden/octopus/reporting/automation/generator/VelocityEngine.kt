@@ -1,35 +1,23 @@
 package org.octopusden.octopus.reporting.automation.generator
 
 import org.apache.commons.lang.StringEscapeUtils
-//import org.apache.logging.log4j.LogManager
 import org.apache.velocity.Template
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.app.event.EventCartridge
 import org.apache.velocity.app.event.ReferenceInsertionEventHandler
 import org.apache.velocity.runtime.RuntimeConstants
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
 import java.io.File
 import java.io.StringWriter
 
-/**
- * @author Denis Ageev
- * *         Created at 16.06.2015 17:08
- */
 class VelocityEngine {
 
-//    companion object {
-//        private val LOG = LogManager.getLogger(VelocityEngine::class.java)
-//    }
-
     fun generate(contextMap: Map<String, Any>, templateFile: File, escapeHtml: Boolean = false): String {
-//        LOG.info("Loading $templateFile")
         val ve = initVelocityEngineWithSimpleLog4jLog()
         val template = getTemplate(ve, templateFile)
         return getResult(contextMap, template, escapeHtml)
     }
 
     fun generate(contextMap: Map<String, Any>, templateFile: String, escapeHtml: Boolean = false): String {
-//        LOG.info("Loading $templateFile")
         val ve = initVelocityEngineWithNullLog()
         val template = ve.getTemplate(templateFile, "UTF-8")
         return getResult(contextMap, template, escapeHtml)
