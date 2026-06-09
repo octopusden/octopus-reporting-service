@@ -17,8 +17,8 @@
         {
           "checkType": "STEP",
           "checkName": "Compile",
-          "actualValue": "false",
-          "expectedValue": "false",
+          "actualValue": "ENABLED",
+          "expectedValue": "ENABLED",
           "status": true
         }
       ]
@@ -39,8 +39,8 @@
         {
           "checkType": "STEP",
           "checkName": "Compile",
-          "actualValue": "false",
-          "expectedValue": "false",
+          "actualValue": "ENABLED",
+          "expectedValue": "ENABLED",
           "status": true
         }
       ]
