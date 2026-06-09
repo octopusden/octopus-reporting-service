@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 class BuildConfigurationReportController(
     private val buildConfigurationReportService: BuildConfigurationReportService
 ) {
+    // TODO Make async
     @PostMapping
     fun generateReport(
         @Valid @RequestBody request: BuildConfigurationReportRequestDto

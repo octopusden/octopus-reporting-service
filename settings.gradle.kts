@@ -7,7 +7,7 @@ pluginManagement {
         id("com.bmuschko.docker-spring-boot-application") version providers.gradleProperty("bmuschko-docker-plugin.version").get()
         id("org.octopusden.octopus.oc-template") version providers.gradleProperty("octopus-oc-template.version").get()
         id("io.github.gradle-nexus.publish-plugin") version providers.gradleProperty("gradle-nexus-publish-plugin.version").get()
-        id("com.gradleup.shadow") version ("8.3.6")
+        id("com.gradleup.shadow") version providers.gradleProperty("shadow-plugin.version").get()
     }
     repositories {
         gradlePluginPortal()
