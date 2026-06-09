@@ -7,6 +7,8 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.types.file
+import org.octopusden.octopus.reporting.automation.generator.VelocityEngine
 import org.octopusden.octopus.reportingservice.client.ReportingServiceClientConfig
 import org.octopusden.octopus.reportingservice.client.ReportingServiceClientFactory
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportChecksDto
@@ -55,6 +57,11 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
         .convert { it.trim() }
         .default("")
 
+    private val wikiFile by option(WIKI_FILE_OPTION, help = "Wiki report file (Confluence Storage Format)")
+        .file(mustExist = false)
+
+    private val reportEngine = VelocityEngine()
+
     override fun run() {
         // TODO decrease timeout after async
         val client = ReportingServiceClientFactory.create(
@@ -86,6 +93,17 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
             "result" to response.result
         )
         report.write(reportContext, response)
+
+        wikiFile?.let { file ->
+            log.info("Generate wiki report: ${file.absolutePath}")
+            val wikiContent = reportEngine.generate(
+                reportContext,
+                "/templates/buildConfigurationReport.wiki.vm"
+            )
+            file.writeText(wikiContent)
+            log.info("Wiki report saved: ${file.absolutePath}")
+        }
+
         log.info("Build Configuration Report is done!")
     }
 
@@ -98,5 +116,6 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
         const val BUILD_STAGE_OPTION = "--build-stage"
         const val PARAMETERS_OPTION = "--parameters"
         const val STEPS_OPTION = "--steps"
+        const val WIKI_FILE_OPTION = "--wiki-file"
     }
 }
