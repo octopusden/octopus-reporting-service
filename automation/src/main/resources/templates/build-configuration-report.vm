@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Build Configuration Report - $rootProjectId</title>
+
+    <style>
+        body {
+            font-family: Inter, Arial, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background: #f7f8fc;
+            color: #1f2937;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin: 0 0 8px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 28px 0 12px;
+            color: #111827;
+        }
+
+        a {
+            color: #1f4b99;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .mono {
+            font-family: Consolas, monospace;
+            font-size: 12px;
+        }
+
+        .meta {
+            margin-bottom: 16px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+            overflow: hidden;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            padding: 16px;
+        }
+
+        .summary-card {
+            background: #fff;
+            border: 1px solid #e7ebf3;
+            border-radius: 12px;
+            padding: 14px 16px;
+            box-shadow: 0 2px 10px rgba(16, 24, 40, 0.04);
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #667085;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #101828;
+        }
+
+        .summary-value.ok {
+            color: #2e7d32;
+        }
+
+        .summary-value.warning {
+            color: #ef6c00;
+        }
+
+        .summary-value.error {
+            color: #c62828;
+        }
+
+        .table-wrap {
+            overflow: auto;
+            max-height: 85vh;
+            width: 100%;
+            margin-bottom: 24px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th,
+        td {
+            border: 1px solid #dcdcdc;
+            padding: 8px;
+            vertical-align: top;
+            min-width: 0;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            box-sizing: border-box;
+        }
+
+        th {
+            background: #f0f0f0;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            user-select: none;
+            color: #111827;
+            font-weight: 700;
+        }
+
+        tbody tr:nth-child(even) td {
+            background: #fafafa;
+        }
+
+        .component-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .component-name {
+            font-weight: 700;
+        }
+
+        .muted {
+            color: #667085;
+            font-size: 12px;
+        }
+
+        .check-pass {
+            background: #e8f5e9 !important;
+            color: #2e7d32;
+        }
+
+        .check-fail {
+            background: #ffebee !important;
+            color: #c62828;
+        }
+
+        .check-value {
+            font-weight: 700;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-ok {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-warning {
+            background: #fff4e5;
+            color: #ef6c00;
+        }
+
+        .status-error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .empty-state {
+            padding: 16px;
+            color: #667085;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body>
+<h1>Build Configuration Report</h1>
+
+    #set($okComponents = [])
+    #set($failedComponents = [])
+    #set($successfulComponents = [])
+    #set($noProjectComponents = [])
+    #set($noBuildConfigComponents = [])
+
+    #foreach($component in $result)
+        #if($component.status.name() == "OK")
+            #set($dummy = $okComponents.add($component))
+
+            #set($hasFailedCheck = false)
+            #foreach($check in $component.checks)
+                #if(!$check.status)
+                    #set($hasFailedCheck = true)
+                #end
+            #end
+
+            #if($hasFailedCheck)
+                #set($dummy = $failedComponents.add($component))
+            #else
+                #set($dummy = $successfulComponents.add($component))
+            #end
+        #elseif($component.status.name() == "NO_PROJECT")
+            #set($dummy = $noProjectComponents.add($component))
+        #else
+            #set($dummy = $noBuildConfigComponents.add($component))
+        #end
+    #end
+
+    #macro(formatValue $value)
+        #set($stringValue = "$!value")
+
+        #if($stringValue == "" || $stringValue == "null")
+        <span class="muted">not specified</span>
+        #elseif($stringValue == "NOT_DEFINED")
+        <span class="muted">not defined</span>
+        #elseif($stringValue == "ENABLED")
+        <span class="check-value">enabled</span>
+        #elseif($stringValue == "DISABLED")
+        <span class="check-value">disabled</span>
+        #else
+        <span class="check-value">$stringValue</span>
+        #end
+    #end
+
+<div class="meta">
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-label">Root Project</div>
+            <div class="summary-value mono">$rootProjectId</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">Total Components</div>
+            <div class="summary-value">$result.size()</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">Failed Checks</div>
+            <div class="summary-value error">$failedComponents.size()</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">No Build Config</div>
+            <div class="summary-value warning">$noBuildConfigComponents.size()</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">No Project</div>
+            <div class="summary-value warning">$noProjectComponents.size()</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">Successful</div>
+            <div class="summary-value ok">$successfulComponents.size()</div>
+        </div>
+    </div>
+</div>
+
+    #if($failedComponents.size() > 0)
+    <h2>Failed Checks</h2>
+
+    <div class="table-wrap">
+        <table id="failedChecksTable">
+            <colgroup>
+                <col style="width: 24%;">
+                <col style="width: 16%;">
+                <col style="width: 20%;">
+                <col style="width: 20%;">
+                <col style="width: 20%;">
+            </colgroup>
+
+            <thead>
+            <tr>
+                <th>Component</th>
+                <th>Check Type</th>
+                <th>Check</th>
+                <th>Actual Value</th>
+                <th>Expected Value</th>
+            </tr>
+            </thead>
+
+            <tbody>
+                #foreach($component in $failedComponents)
+                    #foreach($check in $component.checks)
+                        #if(!$check.status)
+                        <tr>
+                            <td>
+                                <div class="component-cell">
+                                    #if($component.buildConfigurationUrl)
+                                        <a class="component-name" href="$component.buildConfigurationUrl" target="_blank" rel="noopener noreferrer">
+                                            $component.componentId
+                                        </a>
+                                    #else
+                                        <span class="component-name">$component.componentId</span>
+                                    #end
+
+                                    #if($component.buildTypeId)
+                                        <span class="muted mono">$component.buildTypeId</span>
+                                    #end
+                                </div>
+                            </td>
+
+                            <td>$check.checkType</td>
+
+                            <td>$check.checkName</td>
+
+                            <td class="check-fail">
+                                &#10007; #formatValue($check.actualValue)
+                            </td>
+
+                            <td>
+                                #formatValue($check.expectedValue)
+                            </td>
+                        </tr>
+                        #end
+                    #end
+                #end
+            </tbody>
+        </table>
+    </div>
+    #end
+
+    #if($noBuildConfigComponents.size() > 0)
+    <h2>Components without Build Configuration</h2>
+
+    <div class="table-wrap">
+        <table id="noBuildConfigTable">
+            <colgroup>
+                <col style="width: 75%;">
+                <col style="width: 25%;">
+            </colgroup>
+
+            <thead>
+            <tr>
+                <th>Component</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+
+            <tbody>
+                #foreach($component in $noBuildConfigComponents)
+                <tr>
+                    <td>$component.componentId</td>
+                    <td>
+                        <span class="status-badge status-warning">NO_BUILD_CONFIGURATION</span>
+                    </td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+    #end
+
+    #if($noProjectComponents.size() > 0)
+    <h2>Components without Project</h2>
+
+    <div class="table-wrap">
+        <table id="noProjectTable">
+            <colgroup>
+                <col style="width: 75%;">
+                <col style="width: 25%;">
+            </colgroup>
+
+            <thead>
+            <tr>
+                <th>Component</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+
+            <tbody>
+                #foreach($component in $noProjectComponents)
+                <tr>
+                    <td>$component.componentId</td>
+                    <td>
+                        <span class="status-badge status-warning">NO_PROJECT</span>
+                    </td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+    #end
+
+    #if($successfulComponents.size() > 0)
+    <h2>Successful Components</h2>
+
+    <div class="table-wrap">
+        <table id="successfulComponentsTable">
+            <colgroup>
+                <col style="width: 75%;">
+                <col style="width: 25%;">
+            </colgroup>
+
+            <thead>
+            <tr>
+                <th>Component</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+
+            <tbody>
+                #foreach($component in $successfulComponents)
+                <tr>
+                    <td>
+                        <div class="component-cell">
+                            #if($component.buildConfigurationUrl)
+                                <a class="component-name" href="$component.buildConfigurationUrl" target="_blank" rel="noopener noreferrer">
+                                    $component.componentId
+                                </a>
+                            #else
+                                <span class="component-name">$component.componentId</span>
+                            #end
+
+                            #if($component.buildTypeId)
+                                <span class="muted mono">$component.buildTypeId</span>
+                            #else
+                                <span class="muted">not specified</span>
+                            #end
+                        </div>
+                    </td>
+
+                    <td>
+                        <span class="status-badge status-ok">OK</span>
+                    </td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+    #end
+
+    #if($failedComponents.size() == 0 && $noBuildConfigComponents.size() == 0 && $noProjectComponents.size() == 0 && $successfulComponents.size() == 0)
+    <div class="empty-state">No components found.</div>
+    #end
+
+</body>
+</html>

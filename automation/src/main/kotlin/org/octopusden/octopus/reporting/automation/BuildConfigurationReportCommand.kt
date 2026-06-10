@@ -8,6 +8,14 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
+import feign.RequestInterceptor
+import org.octopusden.octopus.infrastructure.client.commons.ClientParametersProvider
+import org.octopusden.octopus.infrastructure.client.commons.CredentialProvider
+import org.octopusden.octopus.infrastructure.confluence.client.ConfluenceClassicClient
+import org.octopusden.octopus.infrastructure.confluence.client.dto.ConfluencePageBody
+import org.octopusden.octopus.infrastructure.confluence.client.dto.ConfluencePageUpdateRequest
+import org.octopusden.octopus.infrastructure.confluence.client.dto.ConfluencePageVersion
+import org.octopusden.octopus.infrastructure.confluence.client.dto.ConfluenceStorage
 import org.octopusden.octopus.reporting.automation.generator.VelocityEngine
 import org.octopusden.octopus.reportingservice.client.ReportingServiceClientConfig
 import org.octopusden.octopus.reportingservice.client.ReportingServiceClientFactory
@@ -16,6 +24,7 @@ import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.Bui
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportRequestDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildStage
 import org.slf4j.Logger
+import java.util.Base64
 
 class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
 
@@ -57,13 +66,28 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
         .convert { it.trim() }
         .default("")
 
-    private val wikiFile by option(WIKI_FILE_OPTION, help = "Wiki report file (Confluence Storage Format)")
-        .file(mustExist = false)
+    private val publishToWiki by option(PUBLISH_TO_WIKI_OPTION, help = "Publish report to Confluence wiki")
+        .convert { it.trim().toBoolean() }.default(false)
+
+    private val wikiReportTemplate by option(WIKI_REPORT_TEMPLATE_OPTION, help = "Wiki report template file (Velocity)")
+        .file()
+
+    private val wikiPageId by option(WIKI_PAGE_ID_OPTION, help = "Confluence page ID to update")
+        .convert { it.trim() }
+
+    private val wikiURL by option(WIKI_URL_OPTION, help = "Confluence base URL")
+        .convert { it.trim() }
+
+    private val wikiUser by option(WIKI_USER_OPTION, help = "Confluence username")
+        .convert { it.trim() }
+
+    private val wikiPassword by option(WIKI_PASSWORD_OPTION, help = "Confluence password")
+        .convert { it.trim() }
 
     private val reportEngine = VelocityEngine()
 
     override fun run() {
-        // TODO decrease timeout after async
+        // TODO Decrease timeout after implementing async call
         val client = ReportingServiceClientFactory.create(
             ReportingServiceClientConfig(
                 baseUrl = reportingServiceUrl,
@@ -71,9 +95,7 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
                 readTimeoutMs = 200_000
             )
         )
-
         log.info("Generate Build Configuration Report")
-
         val request = BuildConfigurationReportRequestDto(
             rootProjectId = rootProjectId,
             componentsFilter = BuildConfigurationReportComponentsFilterDto(
@@ -86,25 +108,58 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
                 steps = steps.split(SPLIT_SYMBOLS.toRegex()).filter { it.isNotEmpty() }
             )
         )
-
         val response = client.generateBuildConfigurationReport(request)
-        val reportContext = mutableMapOf<String, Any>(
+        val reportContext = mutableMapOf(
             "rootProjectId" to response.rootProjectId,
             "result" to response.result
         )
         report.write(reportContext, response)
-
-        wikiFile?.let { file ->
-            log.info("Generate wiki report: ${file.absolutePath}")
-            val wikiContent = reportEngine.generate(
-                reportContext,
-                "/templates/buildConfigurationReport.wiki.vm"
-            )
-            file.writeText(wikiContent)
-            log.info("Wiki report saved: ${file.absolutePath}")
+        if (publishToWiki) {
+            publishToWIki(reportContext)
         }
-
         log.info("Build Configuration Report is done!")
+    }
+
+    private fun publishToWIki(reportContext: Map<String, Any>) {
+        val url = wikiURL
+            ?: throw IllegalArgumentException("$WIKI_URL_OPTION is required when $PUBLISH_TO_WIKI_OPTION is true")
+        val user = wikiUser
+            ?: throw IllegalArgumentException("$WIKI_USER_OPTION is required when $PUBLISH_TO_WIKI_OPTION is true")
+        val password = wikiPassword
+            ?: throw IllegalArgumentException("$WIKI_PASSWORD_OPTION is required when $PUBLISH_TO_WIKI_OPTION is true")
+        val template = wikiReportTemplate
+            ?: throw IllegalArgumentException("$WIKI_REPORT_TEMPLATE_OPTION is required when $PUBLISH_TO_WIKI_OPTION is true")
+        val pageId = wikiPageId
+            ?: throw IllegalArgumentException("$WIKI_URL_OPTION is required when $PUBLISH_TO_WIKI_OPTION is true")
+
+        log.info("Publishing report to Confluence: pageId=$wikiPageId")
+
+        val confluenceClient = ConfluenceClassicClient(
+            object : ClientParametersProvider {
+                override fun getApiUrl() = url
+                override fun getAuth(): CredentialProvider =
+                    object : CredentialProvider({
+                        RequestInterceptor { template ->
+                            val basic = Base64.getEncoder()
+                                .encodeToString("$user:$password".toByteArray())
+                            template.header("Authorization", "Basic $basic")
+                        }
+                    }) {}
+            }
+        )
+        val page = confluenceClient.getPageById(wikiPageId!!, mapOf("expand" to "body.storage,version,space,ancestors"))
+        log.info("Fetched Confluence page: id=${page.id}, title=${page.title}, version=${page.version?.number}")
+
+        val wikiContent = reportEngine.generate(reportContext, template)
+
+        val updateRequest = ConfluencePageUpdateRequest(
+            id = pageId,
+            title = page.title,
+            body = ConfluencePageBody(ConfluenceStorage(wikiContent)),
+            version = ConfluencePageVersion(number = page.version!!.number + 1)
+        )
+        val updated = confluenceClient.updatePage(wikiPageId!!, updateRequest)
+        log.info("Confluence page updated: id=${updated.id}, title=${updated.title}, version=${updated.version?.number}")
     }
 
     companion object {
@@ -116,6 +171,11 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
         const val BUILD_STAGE_OPTION = "--build-stage"
         const val PARAMETERS_OPTION = "--parameters"
         const val STEPS_OPTION = "--steps"
-        const val WIKI_FILE_OPTION = "--wiki-file"
+        const val PUBLISH_TO_WIKI_OPTION = "--publish-to-wiki"
+        const val WIKI_REPORT_TEMPLATE_OPTION = "--wiki-report-template"
+        const val WIKI_PAGE_ID_OPTION = "--wiki-page-id"
+        const val WIKI_URL_OPTION = "--wiki-url"
+        const val WIKI_USER_OPTION = "--wiki-user"
+        const val WIKI_PASSWORD_OPTION = "--wiki-password"
     }
 }
