@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Generate Build Configuration Report">
+    <description>
+        Depends on following TeamCity parameters:
+        * env.BUILD_ENV
+    </description>
+    <settings>
+        <parameters>
+            <param name="REPORTING_SERVICE_URL" value="" spec="text description='Reporting Service URL' validationMode='not_empty' display='normal'"/>
+            <param name="ROOT_PROJECT_ID" value="" spec="text description='Root project ID' validationMode='not_empty' display='normal'"/>
+            <param name="INCLUDE_SYSTEMS" value="" spec="text description='Comma-separated list of systems to include' validationMode='any' display='normal'"/>
+            <param name="EXCLUDE_COMPONENTS" value="" spec="text description='Comma-separated list of components to exclude' validationMode='any' display='normal'"/>
+            <param name="BUILD_STAGE" value="BUILD" spec="text description='Build stage: BUILD, RELEASE_CANDIDATE, RELEASE' validationMode='any' display='normal'"/>
+            <param name="PARAMETERS" value="" spec="text description='Comma-separated list of parameters to check' validationMode='any' display='normal'"/>
+            <param name="STEPS" value="" spec="text description='Comma-separated list of steps to check' validationMode='any' display='normal'"/>
+            <param name="PUBLISH_TO_WIKI" value="false" spec="text description='Publish report to Confluence wiki' display='normal'"/>
+            <param name="WIKI_REPORT_TEMPLATE" value="" spec="text description='Wiki report Velocity template file path (classpath)' validationMode='any' display='normal'"/>
+            <param name="WIKI_PAGE_ID" value="" spec="text description='Confluence page ID to update' validationMode='any' display='normal'"/>
+            <param name="WIKI_URL" value="" spec="text description='Confluence base URL' validationMode='any' display='normal'"/>
+            <param name="WIKI_USER" value="" spec="text description='Confluence username' validationMode='any' display='normal'"/>
+            <param name="WIKI_PASSWORD" value="" spec="text description='Confluence password' validationMode='any' display='normal' displayStyle='hidden_password_hint'"/>
+            <param name="CUSTOM_REPORT" value="false" spec="checkbox description='Generate custom report' uncheckedValue='false' checkedValue='true' display='normal'"/>
+            <param name="CUSTOM_REPORT_TEMPLATE" value="" spec="text description='Path to velocity template. Used only if CUSTOM_REPORT is enabled' validationMode='any' display='normal'"/>
+            <param name="CUSTOM_REPORT_FILE" value="" spec="text description='Path to custom report file. Used only if CUSTOM_REPORT is enabled' validationMode='any' display='normal'"/>
+            <param name="CUSTOM_REPORT_ESCAPE_HTML" value="true" spec="checkbox description='Escape HTML symbols in custom report' uncheckedValue='false' checkedValue='true' display='normal'"/>
+            <param name="JSON_REPORT_FILE" value="" spec="text description='Path to json report file' validationMode='not_empty' display='normal'"/>
+        </parameters>
+        <build-runners>
+            <runner name="build configuration report" type="OctopusReportingAutomation">
+                <parameters>
+                    <param name="ARGS"
+                           value="--json-file=%JSON_REPORT_FILE%
+                           --report-custom=%CUSTOM_REPORT%
+                           --report-custom-template=%CUSTOM_REPORT_TEMPLATE%
+                           --report-custom-file=%CUSTOM_REPORT_FILE%
+                           --report-escape=%CUSTOM_REPORT_ESCAPE_HTML%
+                           generate-build-configuration-report
+                           --reporting-service-url=%REPORTING_SERVICE_URL%
+                           --root-project-id=%ROOT_PROJECT_ID%
+                           --include-systems=%INCLUDE_SYSTEMS%
+                           --exclude-components=%EXCLUDE_COMPONENTS%
+                           --build-stage=%BUILD_STAGE%
+                           --parameters=%PARAMETERS%
+                           --steps=%STEPS%
+                           --publish-to-wiki=%PUBLISH_TO_WIKI%
+                           --wiki-report-template=%WIKI_REPORT_TEMPLATE%
+                           --wiki-page-id=%WIKI_PAGE_ID%
+                           --wiki-url=%WIKI_URL%
+                           --wiki-user=%WIKI_USER%
+                           --wiki-password=%WIKI_PASSWORD%"
+                    />
+                </parameters>
+            </runner>
+        </build-runners>
+        <requirements/>
+    </settings>
+</meta-runner>
