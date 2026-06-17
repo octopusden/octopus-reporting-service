@@ -115,12 +115,12 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
         )
         report.write(reportContext, response)
         if (publishToWiki) {
-            publishToWIki(reportContext)
+            publishToWiki(reportContext)
         }
         log.info("Build Configuration Report is done!")
     }
 
-    private fun publishToWIki(reportContext: Map<String, Any>) {
+    private fun publishToWiki(reportContext: Map<String, Any>) {
         val url = wikiURL
             ?: throw IllegalArgumentException("$WIKI_URL_OPTION is required when $PUBLISH_TO_WIKI_OPTION is true")
         val user = wikiUser
@@ -130,9 +130,9 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
         val template = wikiReportTemplate
             ?: throw IllegalArgumentException("$WIKI_REPORT_TEMPLATE_OPTION is required when $PUBLISH_TO_WIKI_OPTION is true")
         val pageId = wikiPageId
-            ?: throw IllegalArgumentException("$WIKI_URL_OPTION is required when $PUBLISH_TO_WIKI_OPTION is true")
+            ?: throw IllegalArgumentException("$WIKI_PAGE_ID_OPTION is required when $PUBLISH_TO_WIKI_OPTION is true")
 
-        log.info("Publishing report to Confluence: pageId=$wikiPageId")
+        log.info("Publishing report to Confluence: pageId=$pageId")
 
         val confluenceClient = ConfluenceClassicClient(
             object : ClientParametersProvider {
@@ -147,7 +147,7 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
                     }) {}
             }
         )
-        val page = confluenceClient.getPageById(wikiPageId!!, mapOf("expand" to "body.storage,version,space,ancestors"))
+        val page = confluenceClient.getPageById(pageId, mapOf("expand" to "body.storage,version,space,ancestors"))
         log.info("Fetched Confluence page: id=${page.id}, title=${page.title}, version=${page.version?.number}")
 
         val wikiContent = reportEngine.generate(reportContext, template)
@@ -156,9 +156,9 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
             id = pageId,
             title = page.title,
             body = ConfluencePageBody(ConfluenceStorage(wikiContent)),
-            version = ConfluencePageVersion(number = page.version!!.number + 1)
+            version = ConfluencePageVersion(number = page.version?.number?.plus(1) ?: 1)
         )
-        val updated = confluenceClient.updatePage(wikiPageId!!, updateRequest)
+        val updated = confluenceClient.updatePage(pageId, updateRequest)
         log.info("Confluence page updated: id=${updated.id}, title=${updated.title}, version=${updated.version?.number}")
     }
 

@@ -14,7 +14,7 @@
             <param name="PARAMETERS" value="" spec="text description='Comma-separated list of parameters to check' validationMode='any' display='normal'"/>
             <param name="STEPS" value="" spec="text description='Comma-separated list of steps to check' validationMode='any' display='normal'"/>
             <param name="PUBLISH_TO_WIKI" value="false" spec="text description='Publish report to Confluence wiki' display='normal'"/>
-            <param name="WIKI_REPORT_TEMPLATE" value="" spec="text description='Wiki report Velocity template file path (classpath)' validationMode='any' display='normal'"/>
+            <param name="WIKI_REPORT_TEMPLATE" value="" spec="text description='Wiki report Velocity template absolute file path' validationMode='any' display='normal'"/>
             <param name="WIKI_PAGE_ID" value="" spec="text description='Confluence page ID to update' validationMode='any' display='normal'"/>
             <param name="WIKI_URL" value="" spec="text description='Confluence base URL' validationMode='any' display='normal'"/>
             <param name="WIKI_USER" value="" spec="text description='Confluence username' validationMode='any' display='normal'"/>

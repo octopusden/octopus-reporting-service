@@ -96,10 +96,15 @@ class BuildConfigurationReportServiceImpl(
             matched?.let { project to it }
         }
         if (matchedProjectAndBuild == null) {
+            logger.info(
+                "buildComponentReport: no build configuration inherited from stage templates {} " +
+                        "for component '{}'. Searched projects: {}",
+                stageTemplates.keys, componentId,
+                projects.joinToString { "${it.id}(buildConfigurations=${it.buildConfigurations.joinToString { "${it.buildTypeId}(templates=${it.templateIds})" }})" }
+            )
             return BuildConfigurationComponentReportDto(
                 componentId = componentId,
-                status = ComponentReportStatus.NO_BUILD_CONFIGURATION,
-                buildConfigurationUrl = projects.first().webUrl
+                status = ComponentReportStatus.NO_BUILD_CONFIGURATION
             )
         }
         val (project, matched) = matchedProjectAndBuild
