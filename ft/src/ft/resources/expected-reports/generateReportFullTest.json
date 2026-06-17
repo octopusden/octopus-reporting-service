@@ -48,7 +48,6 @@
     {
       "componentId": "componentC",
       "status": "NO_BUILD_CONFIGURATION",
-      "buildConfigurationUrl": "http://tc/RootProject_ComponentC",
       "buildTypeId": null,
       "checks": []
     },

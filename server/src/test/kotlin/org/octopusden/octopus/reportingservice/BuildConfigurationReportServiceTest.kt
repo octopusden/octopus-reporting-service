@@ -323,8 +323,7 @@ class BuildConfigurationReportServiceTest {
                     result = listOf(
                         componentReport(
                             componentId = COMPONENT_A,
-                            status = ComponentReportStatus.NO_BUILD_CONFIGURATION,
-                            buildConfigurationUrl = COMPONENT_A_PROJECT_URL
+                            status = ComponentReportStatus.NO_BUILD_CONFIGURATION
                         )
                     )
                 ),
