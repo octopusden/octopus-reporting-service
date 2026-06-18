@@ -1,0 +1,141 @@
+<ac:structured-macro ac:name="toc" ac:schema-version="1"/>
+<h1>Build Configuration Report - $rootProjectId</h1>
+
+#set($okComponents = [])
+#set($failedComponents = [])
+#set($successfulComponents = [])
+#set($noProjectComponents = [])
+#set($noBuildConfigComponents = [])
+
+#foreach($component in $result)
+    #if($component.status.name() == "OK")
+        #set($dummy = $okComponents.add($component))
+
+        #set($hasFailedCheck = false)
+        #foreach($check in $component.checks)
+            #if(!$check.status)
+                #set($hasFailedCheck = true)
+            #end
+        #end
+
+        #if($hasFailedCheck)
+            #set($dummy = $failedComponents.add($component))
+        #else
+            #set($dummy = $successfulComponents.add($component))
+        #end
+    #elseif($component.status.name() == "NO_PROJECT")
+        #set($dummy = $noProjectComponents.add($component))
+    #else
+        #set($dummy = $noBuildConfigComponents.add($component))
+    #end
+#end
+
+<h2>Summary</h2>
+<table>
+    <tbody>
+    <tr><td><strong>Root Project</strong></td><td><code>$rootProjectId</code></td></tr>
+    <tr><td><strong>Total Components</strong></td><td>$result.size()</td></tr>
+    <tr><td><strong>Failed Checks</strong></td><td><ac:structured-macro ac:name="status"><ac:parameter ac:name="colour">Red</ac:parameter><ac:parameter ac:name="title">$failedComponents.size()</ac:parameter></ac:structured-macro></td></tr>
+    <tr><td><strong>No Build Config</strong></td><td><ac:structured-macro ac:name="status"><ac:parameter ac:name="colour">Yellow</ac:parameter><ac:parameter ac:name="title">$noBuildConfigComponents.size()</ac:parameter></ac:structured-macro></td></tr>
+    <tr><td><strong>No Project</strong></td><td><ac:structured-macro ac:name="status"><ac:parameter ac:name="colour">Yellow</ac:parameter><ac:parameter ac:name="title">$noProjectComponents.size()</ac:parameter></ac:structured-macro></td></tr>
+    <tr><td><strong>Successful</strong></td><td><ac:structured-macro ac:name="status"><ac:parameter ac:name="colour">Green</ac:parameter><ac:parameter ac:name="title">$successfulComponents.size()</ac:parameter></ac:structured-macro></td></tr>
+    </tbody>
+</table>
+
+#if($failedComponents.size() > 0)
+<h2>Failed Checks</h2>
+<table>
+    <tbody>
+    <tr>
+        <th>Component</th>
+        <th>Check Type</th>
+        <th>Check</th>
+        <th>Actual Value</th>
+        <th>Expected Value</th>
+    </tr>
+        #foreach($component in $failedComponents)
+            #foreach($check in $component.checks)
+                #if(!$check.status)
+                <tr>
+                    <td>
+                        #if($component.buildConfigurationUrl)
+                            <a href="$component.buildConfigurationUrl">$component.componentId</a>
+                        #else
+                            $component.componentId
+                        #end
+                        #if($component.buildTypeId)
+                            <br/><code>$component.buildTypeId</code>
+                        #end
+                    </td>
+                    <td>$check.checkType</td>
+                    <td>$check.checkName</td>
+                    <td><ac:structured-macro ac:name="status"><ac:parameter ac:name="colour">Red</ac:parameter><ac:parameter ac:name="title">$check.actualValue</ac:parameter></ac:structured-macro></td>
+                    <td>$check.expectedValue</td>
+                </tr>
+                #end
+            #end
+        #end
+    </tbody>
+</table>
+#end
+
+#if($noBuildConfigComponents.size() > 0)
+<h2>Components without Build Configuration</h2>
+<table>
+    <tbody>
+    <tr><th>Component</th><th>Status</th></tr>
+        #foreach($component in $noBuildConfigComponents)
+        <tr>
+            <td>$component.componentId</td>
+            <td><ac:structured-macro ac:name="status"><ac:parameter ac:name="colour">Yellow</ac:parameter><ac:parameter ac:name="title">NO_BUILD_CONFIGURATION</ac:parameter></ac:structured-macro></td>
+        </tr>
+        #end
+    </tbody>
+</table>
+#end
+
+#if($noProjectComponents.size() > 0)
+<h2>Components without Project</h2>
+<table>
+    <tbody>
+    <tr><th>Component</th><th>Status</th></tr>
+        #foreach($component in $noProjectComponents)
+        <tr>
+            <td>$component.componentId</td>
+            <td><ac:structured-macro ac:name="status"><ac:parameter ac:name="colour">Yellow</ac:parameter><ac:parameter ac:name="title">NO_PROJECT</ac:parameter></ac:structured-macro></td>
+        </tr>
+        #end
+    </tbody>
+</table>
+#end
+
+#if($successfulComponents.size() > 0)
+<h2>Successful Components</h2>
+<table>
+    <tbody>
+    <tr><th>Component</th><th>Status</th></tr>
+        #foreach($component in $successfulComponents)
+        <tr>
+            <td>
+                #if($component.buildConfigurationUrl)
+                    <a href="$component.buildConfigurationUrl">$component.componentId</a>
+                #else
+                    $component.componentId
+                #end
+
+                #if($component.buildTypeId)
+                    <br/><code>$component.buildTypeId</code>
+                #else
+                    <br/>-
+                #end
+            </td>
+            <td><ac:structured-macro ac:name="status"><ac:parameter ac:name="colour">Green</ac:parameter><ac:parameter ac:name="title">OK</ac:parameter></ac:structured-macro></td>
+        </tr>
+        #end
+    </tbody>
+</table>
+#end
+
+#if($failedComponents.size() == 0 && $noBuildConfigComponents.size() == 0 && $noProjectComponents.size() == 0 && $successfulComponents.size() == 0)
+<p><em>No components found.</em></p>
+#end

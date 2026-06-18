@@ -80,15 +80,14 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 dependencies {
-}
-
-dependencies {
+    implementation(project(":client"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${properties["jackson.version"]}")
     implementation("org.slf4j:slf4j-api:2.0.13")
     implementation("ch.qos.logback:logback-classic:1.3.14")
     implementation("com.github.ajalt.clikt:clikt:4.4.0")
     implementation("org.apache.velocity:velocity:${properties["velocity.version"]}")
     implementation("org.octopusden.octopus.jira:octopus-jira-api-client:${properties["octopus-jira-api-client.version"]}")
+    implementation("org.octopusden.octopus.octopus-external-systems-clients:confluence-client:${properties["octopus-confluence-client.version"]}")
 }
 
 application {

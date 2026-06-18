@@ -224,7 +224,7 @@ class BuildConfigurationReportServiceTest {
                             status = ComponentReportStatus.OK,
                             buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                             buildTypeId = COMPONENT_A_BUILD_ID,
-                            checks = listOf(checkResult(CheckType.STEP, "Compile", "false", "false"))
+                            checks = listOf(checkResult(CheckType.STEP, "Compile", "ENABLED", "ENABLED"))
                         )
                     )
                 ),
@@ -263,7 +263,7 @@ class BuildConfigurationReportServiceTest {
                             status = ComponentReportStatus.OK,
                             buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                             buildTypeId = COMPONENT_A_BUILD_ID,
-                            checks = listOf(checkResult(CheckType.STEP, "Compile", "true", "false"))
+                            checks = listOf(checkResult(CheckType.STEP, "Compile", "DISABLED", "ENABLED"))
                         )
                     )
                 ),
@@ -323,8 +323,7 @@ class BuildConfigurationReportServiceTest {
                     result = listOf(
                         componentReport(
                             componentId = COMPONENT_A,
-                            status = ComponentReportStatus.NO_BUILD_CONFIGURATION,
-                            buildConfigurationUrl = COMPONENT_A_PROJECT_URL
+                            status = ComponentReportStatus.NO_BUILD_CONFIGURATION
                         )
                     )
                 ),

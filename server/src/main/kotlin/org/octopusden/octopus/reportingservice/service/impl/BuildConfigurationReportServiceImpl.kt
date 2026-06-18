@@ -8,6 +8,7 @@ import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.Bui
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportResponseDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.CheckType
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.ComponentReportStatus
+import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.StepState
 import org.octopusden.octopus.reportingservice.config.BuildConfigurationReportConfig
 import org.octopusden.octopus.reportingservice.domain.BuildConfiguration
 import org.octopusden.octopus.reportingservice.domain.BuildConfigurationProject
@@ -44,11 +45,11 @@ class BuildConfigurationReportServiceImpl(
         logger.info("generateReport: components found {}", components.size)
         val stageTemplates = getBuildStageTemplates(request)
         val projectsByComponentId = teamCityService.findSubprojects(request.rootProjectId)
-            .associateBy { it.componentId }
+            .groupBy { it.componentId }
         val result = components.map { component ->
             buildComponentReport(
                 componentId = component.id,
-                project = projectsByComponentId[component.id],
+                projects = projectsByComponentId[component.id].orEmpty(),
                 stageTemplates = stageTemplates,
                 request = request
             )
@@ -80,31 +81,33 @@ class BuildConfigurationReportServiceImpl(
 
     private fun buildComponentReport(
         componentId: String,
-        project: BuildConfigurationProject?,
+        projects: List<BuildConfigurationProject>,
         stageTemplates: Map<String, BuildConfiguration>,
         request: BuildConfigurationReportRequestDto
     ): BuildConfigurationComponentReportDto {
-        if (project == null) {
-            logger.info("buildComponentReport: no TeamCity project found for component '{}'", componentId)
+        if (projects.isEmpty()) {
             return BuildConfigurationComponentReportDto(
                 componentId = componentId,
                 status = ComponentReportStatus.NO_PROJECT
             )
         }
-        val matched = findBuildConfigurationForStage(project, stageTemplates.keys)
-        if (matched == null) {
+        val matchedProjectAndBuild = projects.firstNotNullOfOrNull { project ->
+            val matched = findBuildConfigurationForStage(project, stageTemplates.keys)
+            matched?.let { project to it }
+        }
+        if (matchedProjectAndBuild == null) {
             logger.info(
                 "buildComponentReport: no build configuration inherited from stage templates {} " +
-                        "for component '{}' and project '{}'. Available buildConfigurations: {}",
-                stageTemplates.keys, componentId, project.id,
-                project.buildConfigurations.joinToString { "${it.buildTypeId}(templates=${it.templateIds})" }
+                        "for component '{}'. Searched projects: {}",
+                stageTemplates.keys, componentId,
+                projects.joinToString { "${it.id}(buildConfigurations=${it.buildConfigurations.joinToString { "${it.buildTypeId}(templates=${it.templateIds})" }})" }
             )
             return BuildConfigurationComponentReportDto(
                 componentId = componentId,
-                status = ComponentReportStatus.NO_BUILD_CONFIGURATION,
-                buildConfigurationUrl = project.webUrl
+                status = ComponentReportStatus.NO_BUILD_CONFIGURATION
             )
         }
+        val (project, matched) = matchedProjectAndBuild
         val (buildConfiguration, matchedTemplateId) = matched
         val template = stageTemplates.getValue(matchedTemplateId)
         val checks = buildList {
@@ -141,8 +144,14 @@ class BuildConfigurationReportServiceImpl(
         template: BuildConfiguration,
         stepNames: List<String>
     ): List<BuildConfigurationCheckResultDto> = stepNames.map { stepName ->
-        val expectedValue = template.steps.find { it.name == stepName }?.disabled?.toString() ?: NOT_DEFINED
-        val actualValue = buildConfiguration.steps.find { it.name == stepName }?.disabled?.toString() ?: NOT_DEFINED
+        val expectedValue = template.steps.find { it.name == stepName }
+            ?.disabled
+            ?.toStepState()
+            ?: NOT_DEFINED
+        val actualValue = buildConfiguration.steps.find { it.name == stepName }
+            ?.disabled
+            ?.toStepState()
+            ?: NOT_DEFINED
         BuildConfigurationCheckResultDto(
             checkType = CheckType.STEP,
             checkName = stepName,
@@ -151,6 +160,9 @@ class BuildConfigurationReportServiceImpl(
             status = actualValue == expectedValue && actualValue != NOT_DEFINED
         )
     }
+
+    private fun Boolean.toStepState(): String =
+        if (this) StepState.DISABLED.name else StepState.ENABLED.name
 
     private fun findBuildConfigurationForStage(
         project: BuildConfigurationProject,
