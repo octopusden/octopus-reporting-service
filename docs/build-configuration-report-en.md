@@ -1,13 +1,13 @@
 # Build Configuration Report
 
-This report verifies that the build configurations of components match the reference TeamCity templates.
+This report verifies that the build configurations of components match the standard TeamCity templates.
 For each component, the parameters and steps of its configuration are compared with the templates
 defined for the selected build stage (`BUILD`, `RELEASE_CANDIDATE`, `RELEASE`).
 
 Possible component statuses in the report:
 
 - `OK` - configuration found and matches the template
-- `NO_BUILD_CONFIGURATION` - TeamCity project found, but no configuration inherits the reference template
+- `NO_BUILD_CONFIGURATION` - TeamCity project found, but no configuration inherits the standard template
 - `NO_PROJECT` - TeamCity project not found
 
 ## API
