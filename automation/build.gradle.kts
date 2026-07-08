@@ -87,6 +87,7 @@ dependencies {
     implementation("com.github.ajalt.clikt:clikt:4.4.0")
     implementation("org.apache.velocity:velocity:${properties["velocity.version"]}")
     implementation("org.octopusden.octopus.jira:octopus-jira-api-client:${properties["octopus-jira-api-client.version"]}")
+    implementation("org.octopusden.octopus.octopus-external-systems-clients:artifactory-client:${properties["octopus-artifactory-client.version"]}")
     implementation("org.octopusden.octopus.octopus-external-systems-clients:confluence-client:${properties["octopus-confluence-client.version"]}")
 }
 

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Generate Published Artifacts Report">
+    <description>
+        Depends on following TeamCity parameters:
+        * env.BUILD_ENV
+    </description>
+    <settings>
+        <parameters>
+            <param name="ARTIFACTORY_URL" value="" spec="text description='Artifactory URL' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_USER" value="" spec="text description='Artifactory user' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_PASSWORD" value="" spec="text description='Artifactory password' validationMode='not_empty' display='normal'"/>
+            <param name="BUILD_NAMES" value="" spec="text description='Artifactory build name' validationMode='not_empty' display='normal'"/>
+            <param name="BUILD_NUMBER" value="" spec="text description='Artifactory build number' validationMode='not_empty' display='normal'"/>
+            <param name="CUSTOM_REPORT" value="false" spec="checkbox description='Generate custom report' uncheckedValue='false' checkedValue='true' display='normal'"/>
+            <param name="CUSTOM_REPORT_TEMPLATE" value="" spec="text description='Path to velocity template. Used only if CUSTOM_REPORT is enabled' validationMode='any' display='normal'"/>
+            <param name="CUSTOM_REPORT_TEMPLATE_CLASSPATH" value="" spec="text description='Path to template in resources directory' validationMode='any' display='normal'"/>
+            <param name="CUSTOM_REPORT_FILE" value="" spec="text description='Path to custom report file. Used only if CUSTOM_REPORT is enabled' validationMode='any' display='normal'"/>
+            <param name="CUSTOM_REPORT_ESCAPE_HTML" value="true" spec="checkbox description='Escape HTML symbols in custom report' uncheckedValue='false' checkedValue='true' display='normal'"/>
+            <param name="JSON_REPORT_FILE" value="" spec="text description='Path to json report file' validationMode='not_empty' display='normal'"/>
+        </parameters>
+        <build-runners>
+            <runner name="published artifacts report" type="OctopusReportingAutomation">
+                <parameters>
+                    <param name="ARGS"
+                           value="--json-file=%JSON_REPORT_FILE%
+                           --report-custom=%CUSTOM_REPORT%
+                           --report-custom-template=%CUSTOM_REPORT_TEMPLATE%
+                           --report-custom-template-classpath=%CUSTOM_REPORT_TEMPLATE_CLASSPATH%
+                           --report-custom-file=%CUSTOM_REPORT_FILE%
+                           --report-escape=%CUSTOM_REPORT_ESCAPE_HTML%
+                           generate-published-artifacts-report
+                           --artifactory-url=%ARTIFACTORY_URL%
+                           --artifactory-user=%ARTIFACTORY_USER%
+                           --artifactory-password=%ARTIFACTORY_PASSWORD%
+                           --build-names=%BUILD_NAMES%
+                           --build-number=%BUILD_NUMBER%"
+                    />
+                </parameters>
+            </runner>
+        </build-runners>
+        <requirements/>
+    </settings>
+</meta-runner>

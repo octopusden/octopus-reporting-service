@@ -7,6 +7,7 @@ const val SPLIT_SYMBOLS = "[,;]"
 fun main(args: Array<String>) {
     ReportCommand().subcommands(
         IpsReportCommand(),
-        BuildConfigurationReportCommand()
+        BuildConfigurationReportCommand(),
+        PublishedArtifactsReportCommand()
     ).main(args)
 }

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Published Artifacts Report</title>
+
+    <style>
+        body {
+            font-family: Inter, Arial, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background: #f7f8fc;
+            color: #1f2937;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin: 0 0 8px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 28px 0 12px;
+            color: #111827;
+        }
+
+        a {
+            color: #1f4b99;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .mono {
+            font-family: Consolas, monospace;
+            font-size: 12px;
+        }
+
+        .meta {
+            margin-bottom: 16px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+            overflow: hidden;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            padding: 16px;
+        }
+
+        .summary-card {
+            background: #fff;
+            border: 1px solid #e7ebf3;
+            border-radius: 12px;
+            padding: 14px 16px;
+            box-shadow: 0 2px 10px rgba(16, 24, 40, 0.04);
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #667085;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #101828;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            width: 100%;
+            margin-bottom: 24px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th,
+        td {
+            border: 1px solid #dcdcdc;
+            padding: 8px;
+            vertical-align: top;
+            min-width: 0;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            box-sizing: border-box;
+        }
+
+        th {
+            background: #f0f0f0;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            user-select: none;
+            color: #111827;
+            font-weight: 700;
+        }
+
+        tbody tr:nth-child(even) td {
+            background: #fafafa;
+        }
+
+        .artifact-name {
+            font-weight: 700;
+        }
+
+        .empty-state {
+            padding: 16px;
+            color: #667085;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body>
+<h1>Published Artifacts Report</h1>
+
+    #set($nonEmptyBuilds = 0)
+
+    #foreach($build in $result.builds)
+        #if($build.size > 0)
+            #set($nonEmptyBuilds = $nonEmptyBuilds + 1)
+        #end
+    #end
+
+<div class="meta">
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-label">Total Artifacts</div>
+            <div class="summary-value">$result.size</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">Builds</div>
+            <div class="summary-value">$nonEmptyBuilds</div>
+        </div>
+    </div>
+</div>
+
+    #foreach($build in $result.builds)
+        #if($build.size > 0)
+
+        <h2>
+            $build.buildName | $build.buildNumber
+        </h2>
+
+        <div class="table-wrap">
+            <table>
+                <colgroup>
+                    <col style="width: 5%;">
+                    <col style="width: 47%;">
+                    <col style="width: 13%;">
+                    <col style="width: 25%;">
+                    <col style="width: 10%;">
+                </colgroup>
+
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Artifact</th>
+                    <th>Repository</th>
+                    <th>Path</th>
+                    <th>Created</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                    #foreach($artifact in $build.artifacts)
+                    <tr>
+                        <td>$foreach.index</td>
+                        <td>
+                            <a class="artifact-name" href="$artifact.url" target="_blank" rel="noopener noreferrer">$artifact.name</a>
+                        </td>
+                        <td class="mono">$artifact.repository</td>
+                        <td class="mono">$artifact.path</td>
+                        <td class="mono">$artifact.created</td>
+                    </tr>
+                    #end
+                </tbody>
+            </table>
+        </div>
+
+        #end
+    #end
+
+    #if($nonEmptyBuilds == 0)
+    <div class="empty-state">No published artifacts found.</div>
+    #end
+
+</body>
+</html>
