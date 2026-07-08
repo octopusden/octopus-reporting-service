@@ -1,5 +1,7 @@
 package org.octopusden.octopus.reporting.automation
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.options.check
@@ -14,6 +16,8 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 class PublishedArtifactsReportCommand : CliktCommand(name = COMMAND) {
+
+    private val objectMapper: ObjectMapper = jacksonObjectMapper()
 
     private val context by requireObject<MutableMap<String, Any>>()
     private val log by lazy { context[ReportCommand.LOG] as Logger }
@@ -121,13 +125,23 @@ class PublishedArtifactsReportCommand : CliktCommand(name = COMMAND) {
         names: List<String>,
         buildNumber: String
     ): String {
-        val buildNameConditions = names.joinToString(",") { buildName ->
-            $$"""{"@build.name":{"$eq":"$$buildName"}}""".trimIndent()
-        }
-        return $$"""
-            items.find({"$or":[$$buildNameConditions],"@build.number":{"$eq":"$$buildNumber"}})
+        val criteria = mapOf(
+            $$"$or" to names.map { buildName ->
+                mapOf(
+                    "@build.name" to mapOf(
+                        $$"$eq" to buildName
+                    )
+                )
+            },
+            "@build.number" to mapOf(
+                $$"$eq" to buildNumber
+            )
+        )
+        val serializedCriteria = objectMapper.writeValueAsString(criteria)
+        return """
+            items.find($serializedCriteria)
             .include("repo","path","name","created","property")
-            """.trimIndent()
+        """.trimIndent()
     }
 
     data class PublishedArtifactsReportResponse(
@@ -160,6 +174,6 @@ class PublishedArtifactsReportCommand : CliktCommand(name = COMMAND) {
         const val BUILD_NUMBER_OPTION = "--build-number"
 
         private val CREATED_FORMATTER: DateTimeFormatter =
-            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
+            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss XXX")
     }
 }

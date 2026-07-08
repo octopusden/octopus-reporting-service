@@ -53,7 +53,6 @@ class ReportCommand : CliktCommand(name = "") {
         .convert { it.trim().toBoolean() }
         .default(true)
 
-
     private val reportEngine = VelocityEngine()
 
     override fun run() {
