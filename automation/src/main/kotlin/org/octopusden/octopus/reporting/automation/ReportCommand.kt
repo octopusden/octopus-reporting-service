@@ -53,6 +53,13 @@ class ReportCommand : CliktCommand(name = "") {
         .convert { it.trim().toBoolean() }
         .default(true)
 
+    private val teamCityPublish by option(
+        TEAMCITY_PUBLISH,
+        help = "Publish generated reports to TeamCity artifacts"
+    )
+        .convert { it.trim().toBoolean() }
+        .default(false)
+
     private val reportEngine = VelocityEngine()
 
     override fun run() {
@@ -91,22 +98,33 @@ class ReportCommand : CliktCommand(name = "") {
     }
 
     fun write(reportContext: Map<String, Any>, reportData: Any) {
-        jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValue(jsonFile, reportData)
+        jacksonObjectMapper()
+            .writerWithDefaultPrettyPrinter()
+            .writeValue(jsonFile, reportData)
 
-        if (!reportCustom) {
-            return
+        if (reportCustom) {
+            val templateFile = reportCustomTemplate
+                ?: loadClasspathTemplate(reportCustomTemplateClasspath!!)
+
+            reportCustomFile!!.writeText(
+                reportEngine.generate(
+                    reportContext,
+                    templateFile,
+                    reportCustomEscapeHtml
+                )
+            )
         }
 
-        val templateFile = reportCustomTemplate
-            ?: loadClasspathTemplate(reportCustomTemplateClasspath!!)
+        if (teamCityPublish) {
+            publishReportToTeamCity()
+        }
+    }
 
-        reportCustomFile!!.writeText(
-            reportEngine.generate(
-                reportContext,
-                templateFile,
-                reportCustomEscapeHtml
-            )
-        )
+    private fun publishReportToTeamCity() {
+        println("##teamcity[publishArtifacts '${escapeTeamCityValue(jsonFile.path)}']")
+        if (reportCustom) {
+            println("##teamcity[publishArtifacts '${escapeTeamCityValue(reportCustomFile!!.path)}']")
+        }
     }
 
     private fun loadClasspathTemplate(resource: String): File {
@@ -129,6 +147,16 @@ class ReportCommand : CliktCommand(name = "") {
         const val REPORT_CUSTOM_TEMPLATE_CLASSPATH = "--report-custom-template-classpath"
         const val REPORT_CUSTOM_FILE = "--report-custom-file"
         const val REPORT_ESCAPE = "--report-escape"
+        const val TEAMCITY_PUBLISH = "--teamcity-publish"
         const val LOG = "log"
+
+        fun escapeTeamCityValue(value: String): String =
+            value
+                .replace("|", "||")
+                .replace("'", "|'")
+                .replace("\n", "|n")
+                .replace("\r", "|r")
+                .replace("[", "|[")
+                .replace("]", "|]")
     }
 }
