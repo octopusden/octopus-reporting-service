@@ -127,15 +127,6 @@ class ReportCommand : CliktCommand(name = "") {
         }
     }
 
-    private fun escapeTeamCityValue(value: String): String =
-        value
-            .replace("|", "||")
-            .replace("'", "|'")
-            .replace("\n", "|n")
-            .replace("\r", "|r")
-            .replace("[", "|[")
-            .replace("]", "|]")
-
     private fun loadClasspathTemplate(resource: String): File {
         val input = javaClass.classLoader.getResourceAsStream(resource)
             ?: throw BadParameterValue("$REPORT_CUSTOM_TEMPLATE_CLASSPATH: Resource '$resource' does not exist")
@@ -158,5 +149,14 @@ class ReportCommand : CliktCommand(name = "") {
         const val REPORT_ESCAPE = "--report-escape"
         const val TEAMCITY_PUBLISH = "--teamcity-publish"
         const val LOG = "log"
+
+        fun escapeTeamCityValue(value: String): String =
+            value
+                .replace("|", "||")
+                .replace("'", "|'")
+                .replace("\n", "|n")
+                .replace("\r", "|r")
+                .replace("[", "|[")
+                .replace("]", "|]")
     }
 }
