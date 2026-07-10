@@ -17,6 +17,7 @@
             <param name="CUSTOM_REPORT_FILE" value="" spec="text description='Path to custom report file. Used only if CUSTOM_REPORT is enabled' validationMode='any' display='normal'"/>
             <param name="CUSTOM_REPORT_ESCAPE_HTML" value="true" spec="checkbox description='Escape HTML symbols in custom report' uncheckedValue='false' checkedValue='true' display='normal'"/>
             <param name="JSON_REPORT_FILE" value="" spec="text description='Path to json report file' validationMode='not_empty' display='normal'"/>
+            <param name="TEAMCITY_PUBLISH" value="false" spec="checkbox description='Publish generated reports to TeamCity artifacts' uncheckedValue='false' checkedValue='true' display='normal'"/>
         </parameters>
         <build-runners>
             <runner name="published artifacts report" type="OctopusReportingAutomation">
@@ -28,6 +29,7 @@
                            --report-custom-template-classpath=%CUSTOM_REPORT_TEMPLATE_CLASSPATH%
                            --report-custom-file=%CUSTOM_REPORT_FILE%
                            --report-escape=%CUSTOM_REPORT_ESCAPE_HTML%
+                           --teamcity-publish=%TEAMCITY_PUBLISH%
                            generate-published-artifacts-report
                            --artifactory-url=%ARTIFACTORY_URL%
                            --artifactory-user=%ARTIFACTORY_USER%
