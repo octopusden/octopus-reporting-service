@@ -25,10 +25,11 @@ import org.octopusden.octopus.reportingservice.domain.BuildConfigurationProject
 import org.octopusden.octopus.reportingservice.domain.BuildConfigurationStep
 
 object Fixtures {
-
     // Components Registry
-    fun component(id: String, owner: String = "owner"): ComponentV2 =
-        ComponentV2(id = id, name = id, componentOwner = owner)
+    fun component(
+        id: String,
+        owner: String = "owner",
+    ): ComponentV2 = ComponentV2(id = id, name = id, componentOwner = owner)
 
     // Internal domain
     fun project(
@@ -36,41 +37,46 @@ object Fixtures {
         componentId: String,
         webUrl: String = "http://tc/$id",
         name: String = id,
-        buildConfigurations: Set<BuildConfiguration> = emptySet()
+        buildConfigurations: Set<BuildConfiguration> = emptySet(),
     ): BuildConfigurationProject =
         BuildConfigurationProject(
             id = id,
             name = name,
             webUrl = webUrl,
             componentId = componentId,
-            buildConfigurations = buildConfigurations
+            buildConfigurations = buildConfigurations,
         )
 
     fun build(
         buildTypeId: String,
         templateIds: Set<String> = emptySet(),
         parameters: List<BuildConfigurationParameter> = emptyList(),
-        steps: List<BuildConfigurationStep> = emptyList()
+        steps: List<BuildConfigurationStep> = emptyList(),
     ): BuildConfiguration =
         BuildConfiguration(
             buildTypeId = buildTypeId,
             templateIds = templateIds,
             parameters = parameters,
-            steps = steps
+            steps = steps,
         )
 
-    fun param(name: String, value: String): BuildConfigurationParameter =
-        BuildConfigurationParameter(name = name, value = value)
+    fun param(
+        name: String,
+        value: String,
+    ): BuildConfigurationParameter = BuildConfigurationParameter(name = name, value = value)
 
-    fun step(name: String, disabled: Boolean = false, id: String = "s_$name"): BuildConfigurationStep =
-        BuildConfigurationStep(id = id, name = name, disabled = disabled)
+    fun step(
+        name: String,
+        disabled: Boolean = false,
+        id: String = "s_$name",
+    ): BuildConfigurationStep = BuildConfigurationStep(id = id, name = name, disabled = disabled)
 
     // TeamCity raw DTOs
     fun tcProject(
         id: String,
         componentName: String? = null,
         buildTypes: List<TeamcityBuildType> = emptyList(),
-        webUrl: String = "http://tc/$id"
+        webUrl: String = "http://tc/$id",
     ): TeamcityProject =
         TeamcityProject(
             id = id,
@@ -81,38 +87,41 @@ object Fixtures {
             parameters = componentName?.let {
                 TeamcityProperties(properties = listOf(TeamcityProperty(name = "COMPONENT_NAME", value = it)))
             },
-            buildTypes = TeamcityBuildTypes(buildTypes = buildTypes)
+            buildTypes = TeamcityBuildTypes(buildTypes = buildTypes),
         )
 
     fun tcBuildType(
         id: String,
         templateIds: Set<String> = emptySet(),
         parameters: Map<String, String> = emptyMap(),
-        steps: List<TeamcityStep> = emptyList()
+        steps: List<TeamcityStep> = emptyList(),
     ): TeamcityBuildType =
         TeamcityBuildType(
             id = id,
             templates = TeamcityBuildTypes(buildTypes = templateIds.map { TeamcityBuildType(id = it) }),
             parameters = TeamcityProperties(
-                properties = parameters.map { (k, v) -> TeamcityProperty(name = k, value = v) }
+                properties = parameters.map { (k, v) -> TeamcityProperty(name = k, value = v) },
             ),
-            steps = TeamcitySteps(steps = steps)
+            steps = TeamcitySteps(steps = steps),
         )
 
-    fun tcStep(name: String, disabled: Boolean = false, id: String = "s_$name"): TeamcityStep =
+    fun tcStep(
+        name: String,
+        disabled: Boolean = false,
+        id: String = "s_$name",
+    ): TeamcityStep =
         TeamcityStep(
             id = id,
             name = name,
             type = "custom",
             disabled = disabled,
-            properties = TeamcityProperties()
+            properties = TeamcityProperties(),
         )
 
     fun tcProjectsPage(
         nextHref: String? = null,
-        projects: List<TeamcityProject> = emptyList()
-    ): TeamcityProjects =
-        TeamcityProjects(nextHref = nextHref, projects = projects)
+        projects: List<TeamcityProject> = emptyList(),
+    ): TeamcityProjects = TeamcityProjects(nextHref = nextHref, projects = projects)
 
     // Build Configuration Report public API DTOs
     fun request(
@@ -121,40 +130,39 @@ object Fixtures {
         excludeComponents: Set<String> = emptySet(),
         stage: BuildStage = BuildStage.BUILD,
         parameters: List<String> = emptyList(),
-        steps: List<String> = emptyList()
+        steps: List<String> = emptyList(),
     ): BuildConfigurationReportRequestDto =
         BuildConfigurationReportRequestDto(
             rootProjectId = rootProjectId,
             componentsFilter = BuildConfigurationReportComponentsFilterDto(
                 includeSystems = systems,
-                excludeComponents = excludeComponents
+                excludeComponents = excludeComponents,
             ),
             checks = BuildConfigurationReportChecksDto(
                 buildStage = stage,
                 parameters = parameters,
-                steps = steps
-            )
+                steps = steps,
+            ),
         )
 
     fun response(
         rootProjectId: String = ROOT_PROJECT_ID,
-        result: List<BuildConfigurationComponentReportDto> = emptyList()
-    ): BuildConfigurationReportResponseDto =
-        BuildConfigurationReportResponseDto(rootProjectId = rootProjectId, result = result)
+        result: List<BuildConfigurationComponentReportDto> = emptyList(),
+    ): BuildConfigurationReportResponseDto = BuildConfigurationReportResponseDto(rootProjectId = rootProjectId, result = result)
 
     fun componentReport(
         componentId: String,
         status: ComponentReportStatus = ComponentReportStatus.OK,
         buildConfigurationUrl: String? = null,
         buildTypeId: String? = null,
-        checks: List<BuildConfigurationCheckResultDto> = emptyList()
+        checks: List<BuildConfigurationCheckResultDto> = emptyList(),
     ): BuildConfigurationComponentReportDto =
         BuildConfigurationComponentReportDto(
             componentId = componentId,
             status = status,
             buildConfigurationUrl = buildConfigurationUrl,
             buildTypeId = buildTypeId,
-            checks = checks
+            checks = checks,
         )
 
     fun checkResult(
@@ -162,14 +170,14 @@ object Fixtures {
         name: String,
         actual: String,
         expected: String,
-        status: Boolean = actual == expected && actual != BuildConfigurationConstants.NOT_DEFINED
+        status: Boolean = actual == expected && actual != BuildConfigurationConstants.NOT_DEFINED,
     ): BuildConfigurationCheckResultDto =
         BuildConfigurationCheckResultDto(
             checkType = type,
             checkName = name,
             actualValue = actual,
             expectedValue = expected,
-            status = status
+            status = status,
         )
 
     // Common constants

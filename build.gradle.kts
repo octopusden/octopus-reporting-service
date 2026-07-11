@@ -13,6 +13,26 @@ plugins {
     kotlin("jvm")
     id("io.github.gradle-nexus.publish-plugin")
     id("io.spring.dependency-management")
+    id("io.gitlab.arturbosch.detekt") apply false
+    id("org.jlleitschuh.gradle.ktlint") apply false
+    id("org.jetbrains.kotlinx.kover") apply false
+    id("org.octopusden.octopus-quality")
+}
+
+octopusQuality {
+    coverage {
+        enabled.set(true)
+        tool.set(org.octopusden.octopus.quality.CoverageExtension.Tool.KOVER)
+    }
+    kotlin {
+        failOnViolation.set(true)
+    }
+    // The functional-test task requires a live OKD/Docker environment; keep it out of the gate.
+    excludeTasks("ft")
+    // The :ft module runs only against a live OKD/Docker environment (its Kover instrumentation
+    // would otherwise drag in :reporting-service:dockerBuildImage via :ft:ocProcess). It carries
+    // no meaningful unit coverage, so drop it from coverage verification entirely.
+    excludeProjects("ft")
 }
 
 val defaultVersion = "${
@@ -50,6 +70,24 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "signing")
     apply(plugin = "io.spring.dependency-management")
+    // Quality gates: apply Kotlin static-analysis + coverage tools per module.
+    // The octopus-quality convention plugin (applied at root) configures them.
+    apply(plugin = "io.gitlab.arturbosch.detekt")
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+    apply(plugin = "org.jetbrains.kotlinx.kover")
+
+    // detekt 1.23.x embeds Kotlin 2.0.21 and refuses to run against a newer Kotlin on its
+    // classpath (this repo uses Kotlin 2.3.0). Pin detekt's OWN resolution to the Kotlin
+    // version it was compiled against — the fix documented at
+    // https://detekt.dev/docs/gettingstarted/gradle#dependencies. Scoped to the `detekt`
+    // configuration only, so production/test compilation still uses Kotlin 2.3.0.
+    configurations.matching { it.name == "detekt" }.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jetbrains.kotlin") {
+                useVersion(io.gitlab.arturbosch.detekt.getSupportedKotlinVersion())
+            }
+        }
+    }
 
     repositories {
         mavenCentral()

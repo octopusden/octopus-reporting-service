@@ -10,21 +10,29 @@ import java.io.File
 import java.io.StringWriter
 
 class VelocityEngine {
-
-    fun generate(contextMap: Map<String, Any>, templateFile: File, escapeHtml: Boolean = false): String {
+    fun generate(
+        contextMap: Map<String, Any>,
+        templateFile: File,
+        escapeHtml: Boolean = false,
+    ): String {
         val ve = initVelocityEngineWithSimpleLog4jLog()
         val template = getTemplate(ve, templateFile)
         return getResult(contextMap, template, escapeHtml)
     }
 
-    fun generate(contextMap: Map<String, Any>, templateFile: String, escapeHtml: Boolean = false): String {
+    fun generate(
+        contextMap: Map<String, Any>,
+        templateFile: String,
+        escapeHtml: Boolean = false,
+    ): String {
         val ve = initVelocityEngineWithNullLog()
         val template = ve.getTemplate(templateFile, "UTF-8")
         return getResult(contextMap, template, escapeHtml)
     }
 
     private fun initVelocityEngineWithSimpleLog4jLog(): org.apache.velocity.app.VelocityEngine {
-        val ve = org.apache.velocity.app.VelocityEngine()
+        val ve = org.apache.velocity.app
+            .VelocityEngine()
         ve.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, "org.apache.velocity.runtime.log.SimpleLog4JLogSystem")
         ve.setProperty("runtime.log.logsystem.log4j.category", "velocity")
         ve.setProperty("runtime.log.logsystem.log4j.logger", "velocity")
@@ -33,24 +41,32 @@ class VelocityEngine {
 
     private fun getEventCartridge(): EventCartridge {
         val eventCartridge = EventCartridge()
-        eventCartridge.addReferenceInsertionEventHandler(ReferenceInsertionEventHandler { _, value ->
-            if (value == null) {
-                return@ReferenceInsertionEventHandler null
-            }
-            StringEscapeUtils.escapeHtml(value.toString())
-        })
+        eventCartridge.addReferenceInsertionEventHandler(
+            ReferenceInsertionEventHandler { _, value ->
+                if (value == null) {
+                    return@ReferenceInsertionEventHandler null
+                }
+                StringEscapeUtils.escapeHtml(value.toString())
+            },
+        )
         return eventCartridge
     }
 
-    private fun getResult(contextMap: Map<String, Any>, template: Template, escapeHtml: Boolean): String {
+    private fun getResult(
+        contextMap: Map<String, Any>,
+        template: Template,
+        escapeHtml: Boolean,
+    ): String {
         val context = getVelocityContext(contextMap, escapeHtml)
         val writer = StringWriter()
         template.merge(context, writer)
         return writer.toString()
     }
 
-
-    private fun getTemplate(velocityEngine: org.apache.velocity.app.VelocityEngine, templateFile: File): Template {
+    private fun getTemplate(
+        velocityEngine: org.apache.velocity.app.VelocityEngine,
+        templateFile: File,
+    ): Template {
         velocityEngine.setProperty(RuntimeConstants.ENCODING_DEFAULT, "UTF-8")
         velocityEngine.setProperty(RuntimeConstants.OUTPUT_ENCODING, "UTF-8")
         velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "file")
@@ -58,7 +74,10 @@ class VelocityEngine {
         return velocityEngine.getTemplate(templateFile.name, "UTF-8")
     }
 
-    private fun getVelocityContext(contextMap: Map<String, Any>, escapeHtml: Boolean): VelocityContext {
+    private fun getVelocityContext(
+        contextMap: Map<String, Any>,
+        escapeHtml: Boolean,
+    ): VelocityContext {
         val context = createVelocityContext(escapeHtml)
         for (key in contextMap.keys) {
             context.put(key, contextMap[key])
@@ -74,13 +93,12 @@ class VelocityEngine {
         return context
     }
 
-
     private fun initVelocityEngineWithNullLog(): org.apache.velocity.app.VelocityEngine {
-        val ve = org.apache.velocity.app.VelocityEngine()
+        val ve = org.apache.velocity.app
+            .VelocityEngine()
         fixLogging(ve)
         return ve
     }
-
 
     // MRELENG-92
     private fun fixLogging(ve: org.apache.velocity.app.VelocityEngine) {
@@ -89,4 +107,3 @@ class VelocityEngine {
 //        ve.setProperty("classpath.resource.loader.class", ClasspathResourceLoader::class.java.name)
     }
 }
-

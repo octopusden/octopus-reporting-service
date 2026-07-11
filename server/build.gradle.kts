@@ -60,8 +60,10 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 signing {
-    isRequired = System.getenv().containsKey("ORG_GRADLE_PROJECT_signingKey") && System.getenv()
-        .containsKey("ORG_GRADLE_PROJECT_signingPassword")
+    isRequired = System.getenv().containsKey("ORG_GRADLE_PROJECT_signingKey") &&
+        System
+            .getenv()
+            .containsKey("ORG_GRADLE_PROJECT_signingPassword")
     val signingKey: String? by project
     val signingPassword: String? by project
     useInMemoryPgpKeys(signingKey, signingPassword)
@@ -77,8 +79,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${properties["springdoc-openapi.version"]}")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.octopusden.octopus.infrastructure:components-registry-service-client:${properties["octopus-components-registry.version"]}")
-    implementation("org.octopusden.octopus.octopus-external-systems-clients:teamcity-client:${properties["octopus-teamcity-client.version"]}")
+    implementation(
+        "org.octopusden.octopus.infrastructure:components-registry-service-client:${properties["octopus-components-registry.version"]}",
+    )
+    implementation(
+        "org.octopusden.octopus.octopus-external-systems-clients:teamcity-client:${properties["octopus-teamcity-client.version"]}",
+    )
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

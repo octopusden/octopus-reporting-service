@@ -19,7 +19,6 @@ import org.octopusden.octopus.reportingservice.service.impl.ComponentsRegistrySe
 
 @DisplayName("ComponentsRegistryService")
 class ComponentsRegistryServiceTest {
-
     private lateinit var client: ClassicComponentsRegistryServiceClient
     private lateinit var service: ComponentsRegistryServiceImpl
 
@@ -35,15 +34,14 @@ class ComponentsRegistryServiceTest {
                 vcsPath = ArgumentMatchers.isNull(),
                 buildSystem = ArgumentMatchers.isNull(),
                 solution = ArgumentMatchers.isNull(),
-                systems = any()
-            )
+                systems = any(),
+            ),
         ).thenReturn(ComponentsDTO(components.toList()))
     }
 
     @Nested
     @DisplayName("getComponentsBySystems")
     inner class GetComponentsBySystems {
-
         @Test
         @DisplayName("Returns non-archived components")
         fun returnsNonArchivedComponents() {
@@ -83,8 +81,8 @@ class ComponentsRegistryServiceTest {
                     vcsPath = ArgumentMatchers.isNull(),
                     buildSystem = ArgumentMatchers.isNull(),
                     solution = ArgumentMatchers.isNull(),
-                    systems = any()
-                )
+                    systems = any(),
+                ),
             ).thenThrow(RuntimeException("boom"))
 
             assertThrows(ExternalServiceException::class.java) {

@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "reporting.teamcity")
 data class BuildConfigurationReportConfig(
     val baseProjectId: String,
-    val templates: Templates = Templates()
+    val templates: Templates = Templates(),
 ) {
     fun getTemplates(stage: BuildStage): List<String> = templates.getTemplates(stage)
 }
@@ -14,7 +14,7 @@ data class BuildConfigurationReportConfig(
 data class Templates(
     val build: List<String> = emptyList(),
     val releaseCandidate: List<String> = emptyList(),
-    val release: List<String> = emptyList()
+    val release: List<String> = emptyList(),
 ) {
     fun getTemplates(stage: BuildStage): List<String> {
         val result = when (stage) {

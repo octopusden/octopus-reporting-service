@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>NewLineAtEndOfFile:ReportingServiceClient.kt$org.octopusden.octopus.reportingservice.client.ReportingServiceClient.kt</ID>
+    <ID>NewLineAtEndOfFile:ReportingServiceClientFactory.kt$org.octopusden.octopus.reportingservice.client.ReportingServiceClientFactory.kt</ID>
+    <ID>NewLineAtEndOfFile:ReportingServiceErrorDecoder.kt$org.octopusden.octopus.reportingservice.client.ReportingServiceErrorDecoder.kt</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -27,7 +27,6 @@ import org.slf4j.Logger
 import java.util.Base64
 
 class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
-
     private val context by requireObject<MutableMap<String, Any>>()
     private val log by lazy { context[ReportCommand.LOG] as Logger }
     private val report by lazy { context[ReportCommand.REPORT] as ReportCommand }
@@ -67,7 +66,8 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
         .default("")
 
     private val publishToWiki by option(PUBLISH_TO_WIKI_OPTION, help = "Publish report to Confluence wiki")
-        .convert { it.trim().toBoolean() }.default(false)
+        .convert { it.trim().toBoolean() }
+        .default(false)
 
     private val wikiReportTemplate by option(WIKI_REPORT_TEMPLATE_OPTION, help = "Wiki report template file (Velocity)")
         .file()
@@ -92,26 +92,26 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
             ReportingServiceClientConfig(
                 baseUrl = reportingServiceUrl,
                 connectTimeoutMs = 180_000,
-                readTimeoutMs = 200_000
-            )
+                readTimeoutMs = 200_000,
+            ),
         )
         log.info("Generate Build Configuration Report")
         val request = BuildConfigurationReportRequestDto(
             rootProjectId = rootProjectId,
             componentsFilter = BuildConfigurationReportComponentsFilterDto(
                 includeSystems = includeSystems.split(SPLIT_SYMBOLS.toRegex()).filter { it.isNotEmpty() }.toSet(),
-                excludeComponents = excludeComponents.split(SPLIT_SYMBOLS.toRegex()).filter { it.isNotEmpty() }.toSet()
+                excludeComponents = excludeComponents.split(SPLIT_SYMBOLS.toRegex()).filter { it.isNotEmpty() }.toSet(),
             ),
             checks = BuildConfigurationReportChecksDto(
                 buildStage = BuildStage.valueOf(buildStage),
                 parameters = parameters.split(SPLIT_SYMBOLS.toRegex()).filter { it.isNotEmpty() },
-                steps = steps.split(SPLIT_SYMBOLS.toRegex()).filter { it.isNotEmpty() }
-            )
+                steps = steps.split(SPLIT_SYMBOLS.toRegex()).filter { it.isNotEmpty() },
+            ),
         )
         val response = client.generateBuildConfigurationReport(request)
         val reportContext = mutableMapOf(
             "rootProjectId" to response.rootProjectId,
-            "result" to response.result
+            "result" to response.result,
         )
         report.write(reportContext, response)
         if (publishToWiki) {
@@ -137,15 +137,17 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
         val confluenceClient = ConfluenceClassicClient(
             object : ClientParametersProvider {
                 override fun getApiUrl() = url
+
                 override fun getAuth(): CredentialProvider =
                     object : CredentialProvider({
                         RequestInterceptor { template ->
-                            val basic = Base64.getEncoder()
+                            val basic = Base64
+                                .getEncoder()
                                 .encodeToString("$user:$password".toByteArray())
                             template.header("Authorization", "Basic $basic")
                         }
                     }) {}
-            }
+            },
         )
         val page = confluenceClient.getPageById(pageId, mapOf("expand" to "body.storage,version,space,ancestors"))
         log.info("Fetched Confluence page: id=${page.id}, title=${page.title}, version=${page.version?.number}")
@@ -156,7 +158,7 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
             id = pageId,
             title = page.title,
             body = ConfluencePageBody(ConfluenceStorage(wikiContent)),
-            version = ConfluencePageVersion(number = page.version?.number?.plus(1) ?: 1)
+            version = ConfluencePageVersion(number = page.version?.number?.plus(1) ?: 1),
         )
         val updated = confluenceClient.updatePage(pageId, updateRequest)
         log.info("Confluence page updated: id=${updated.id}, title=${updated.title}, version=${updated.version?.number}")

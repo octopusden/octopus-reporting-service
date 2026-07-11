@@ -16,7 +16,6 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 class PublishedArtifactsReportCommand : CliktCommand(name = COMMAND) {
-
     private val objectMapper: ObjectMapper = jacksonObjectMapper()
 
     private val context by requireObject<MutableMap<String, Any>>()
@@ -60,7 +59,7 @@ class PublishedArtifactsReportCommand : CliktCommand(name = COMMAND) {
         val response = generateReport(names)
         report.write(
             mutableMapOf("result" to response),
-            response
+            response,
         )
 
         log.info("Published artifacts report generated: {} artifacts", response.size)
@@ -70,15 +69,16 @@ class PublishedArtifactsReportCommand : CliktCommand(name = COMMAND) {
         val client = ArtifactoryClassicClient(
             object : ClientParametersProvider {
                 override fun getApiUrl(): String = artifactoryUrl
-                override fun getAuth() =
-                    StandardBasicCredCredentialProvider(artifactoryUser, artifactoryPassword)
-            }
+
+                override fun getAuth() = StandardBasicCredCredentialProvider(artifactoryUser, artifactoryPassword)
+            },
         )
 
         val aqlQuery = buildAqlQuery(names, buildNumber)
         log.debug("Find artifacts AQL: {}", aqlQuery)
 
-        val artifactsByBuildName = client.searchByAQL(aqlQuery)
+        val artifactsByBuildName = client
+            .searchByAQL(aqlQuery)
             .results
             .mapNotNull { item ->
                 val repo = item.repo
@@ -87,7 +87,7 @@ class PublishedArtifactsReportCommand : CliktCommand(name = COMMAND) {
                 val buildName = item.properties
                     ?.firstOrNull { it.key == "build.name" }
                     ?.value
-                if (repo == null || path == null || name == null || buildName == null){
+                if (repo == null || path == null || name == null || buildName == null) {
                     log.warn("Skip published artifact: repo={}, path={}, name={}, buildName={}", repo, path, name, buildName)
                     return@mapNotNull null
                 }
@@ -96,12 +96,11 @@ class PublishedArtifactsReportCommand : CliktCommand(name = COMMAND) {
                     url = "$artifactoryUrl/artifactory/$repo/$path/$name",
                     repository = repo,
                     path = path,
-                    created = item.created?.let { OffsetDateTime.parse(it).format(CREATED_FORMATTER) }.orEmpty()
+                    created = item.created?.let { OffsetDateTime.parse(it).format(CREATED_FORMATTER) }.orEmpty(),
                 )
-            }
-            .groupBy(
+            }.groupBy(
                 keySelector = { it.first },
-                valueTransform = { it.second }
+                valueTransform = { it.second },
             )
         val builds = names.map { buildName ->
             val artifacts = artifactsByBuildName[buildName]
@@ -111,49 +110,49 @@ class PublishedArtifactsReportCommand : CliktCommand(name = COMMAND) {
                 buildName = buildName,
                 buildNumber = buildNumber,
                 size = artifacts.size,
-                artifacts = artifacts
+                artifacts = artifacts,
             )
         }
 
         return PublishedArtifactsReportResponse(
             size = builds.sumOf { it.size },
-            builds = builds
+            builds = builds,
         )
     }
 
     private fun buildAqlQuery(
         names: List<String>,
-        buildNumber: String
+        buildNumber: String,
     ): String {
         val criteria = mapOf(
             $$"$or" to names.map { buildName ->
                 mapOf(
                     "@build.name" to mapOf(
-                        $$"$eq" to buildName
-                    )
+                        $$"$eq" to buildName,
+                    ),
                 )
             },
             "@build.number" to mapOf(
-                $$"$eq" to buildNumber
-            )
+                $$"$eq" to buildNumber,
+            ),
         )
         val serializedCriteria = objectMapper.writeValueAsString(criteria)
         return """
             items.find($serializedCriteria)
             .include("repo","path","name","created","property")
-        """.trimIndent()
+            """.trimIndent()
     }
 
     data class PublishedArtifactsReportResponse(
         val size: Int,
-        val builds: List<PublishedBuildArtifacts>
+        val builds: List<PublishedBuildArtifacts>,
     )
 
     data class PublishedBuildArtifacts(
         val buildName: String,
         val buildNumber: String,
         val size: Int,
-        val artifacts: List<ArtifactInfo>
+        val artifacts: List<ArtifactInfo>,
     )
 
     data class ArtifactInfo(
@@ -161,7 +160,7 @@ class PublishedArtifactsReportCommand : CliktCommand(name = COMMAND) {
         val url: String,
         val repository: String,
         val path: String,
-        val created: String
+        val created: String,
     )
 
     companion object {

@@ -7,5 +7,5 @@ data class BuildConfigurationReportChecksDto(
     @field:NoBlankElements(message = "parameters must not contain blank values")
     val parameters: List<String> = emptyList(),
     @field:NoBlankElements(message = "steps must not contain blank values")
-    val steps: List<String> = emptyList()
+    val steps: List<String> = emptyList(),
 )

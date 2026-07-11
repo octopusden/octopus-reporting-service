@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
 class ExceptionInfoHandler {
-
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFound(exception: RuntimeException): ErrorResponse {
@@ -20,7 +19,7 @@ class ExceptionInfoHandler {
         logger.info("Not found: {}", message)
         return ErrorResponse(
             code = HttpStatus.NOT_FOUND.value().toString(),
-            message = message
+            message = message,
         )
     }
 
@@ -31,20 +30,21 @@ class ExceptionInfoHandler {
         logger.error("External service error: {}", exception.message, exception)
         return ErrorResponse(
             code = HttpStatus.BAD_GATEWAY.value().toString(),
-            message = message
+            message = message,
         )
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleMethodArgumentNotValid(exception: MethodArgumentNotValidException): ErrorResponse {
-        val message = exception.bindingResult.fieldErrors.joinToString("; ") { err ->
-            "${err.field}: ${err.defaultMessage}"
-        }.ifBlank { "Validation failed" }
+        val message = exception.bindingResult.fieldErrors
+            .joinToString("; ") { err ->
+                "${err.field}: ${err.defaultMessage}"
+            }.ifBlank { "Validation failed" }
         logger.info("Validation failed: {}", message)
         return ErrorResponse(
             code = HttpStatus.BAD_REQUEST.value().toString(),
-            message = message
+            message = message,
         )
     }
 
@@ -55,7 +55,7 @@ class ExceptionInfoHandler {
         logger.error(message, exception)
         return ErrorResponse(
             code = HttpStatus.INTERNAL_SERVER_ERROR.value().toString(),
-            message = message
+            message = message,
         )
     }
 

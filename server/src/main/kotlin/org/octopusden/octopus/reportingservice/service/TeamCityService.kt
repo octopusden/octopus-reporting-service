@@ -5,5 +5,9 @@ import org.octopusden.octopus.reportingservice.domain.BuildConfigurationProject
 
 interface TeamCityService {
     fun findSubprojects(rootProjectId: String): List<BuildConfigurationProject>
-    fun getTemplateByProjectIdAndTemplateId(projectId: String, templateId: String): BuildConfiguration
+
+    fun getTemplateByProjectIdAndTemplateId(
+        projectId: String,
+        templateId: String,
+    ): BuildConfiguration
 }
