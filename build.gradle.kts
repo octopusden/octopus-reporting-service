@@ -74,7 +74,15 @@ subprojects {
     // The octopus-quality convention plugin (applied at root) configures them.
     apply(plugin = "io.gitlab.arturbosch.detekt")
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
-    apply(plugin = "org.jetbrains.kotlinx.kover")
+    // Kover wires each module's `koverVerify` into `check`, and koverGenerateArtifact depends on
+    // every instrumented test task. The :ft module's only test task (`ft`) runs against a live
+    // OKD/Docker environment (ocProcess -> :reporting-service:dockerPushImage), which is not
+    // available in the build / merge gate — applying Kover to :ft therefore drags dockerPushImage
+    // into `./gradlew build`. The module carries no meaningful unit coverage and is already
+    // dropped from coverage verification (excludeProjects("ft")), so skip Kover for it entirely.
+    if (name != "ft") {
+        apply(plugin = "org.jetbrains.kotlinx.kover")
+    }
 
     // detekt 1.23.x embeds Kotlin 2.0.21 and refuses to run against a newer Kotlin on its
     // classpath (this repo uses Kotlin 2.3.0). Pin detekt's OWN resolution to the Kotlin
