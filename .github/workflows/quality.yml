@@ -12,10 +12,9 @@ permissions:
 
 jobs:
   quality:
-    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-quality-gates.yml@v2.3.5
+    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-quality-gates.yml@v2.4.0
     with:
       java-version: "21"
       coverage-command: >-
         ./gradlew qualityCoverage
-        -x :reporting-service:test
         --no-daemon --stacktrace
