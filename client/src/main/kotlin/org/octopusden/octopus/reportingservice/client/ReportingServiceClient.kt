@@ -6,7 +6,6 @@ import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.Bui
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportResponseDto
 
 interface ReportingServiceClient {
-
     @RequestLine("POST /rest/api/1/reports/build-configuration")
     @Headers("Content-Type: application/json")
     fun generateBuildConfigurationReport(request: BuildConfigurationReportRequestDto): BuildConfigurationReportResponseDto

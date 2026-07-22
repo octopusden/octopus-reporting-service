@@ -5,5 +5,5 @@ data class BuildConfigurationComponentReportDto(
     val status: ComponentReportStatus,
     val buildConfigurationUrl: String? = null,
     val buildTypeId: String? = null,
-    val checks: List<BuildConfigurationCheckResultDto> = emptyList()
+    val checks: List<BuildConfigurationCheckResultDto> = emptyList(),
 )

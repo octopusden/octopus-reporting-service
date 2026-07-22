@@ -9,17 +9,15 @@ import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.Bui
 
 @DisplayName("BuildConfigurationReportConfig")
 class BuildConfigurationReportConfigTest {
-
     @Nested
     @DisplayName("getTemplates")
     inner class GetTemplates {
-
         @Test
         @DisplayName("Returns templates for BUILD stage")
         fun buildStage() {
             val config = BuildConfigurationReportConfig(
                 baseProjectId = "base",
-                templates = Templates(build = listOf("B1", "B2"))
+                templates = Templates(build = listOf("B1", "B2")),
             )
 
             assertEquals(listOf("B1", "B2"), config.getTemplates(BuildStage.BUILD))
@@ -30,7 +28,7 @@ class BuildConfigurationReportConfigTest {
         fun releaseCandidateStage() {
             val config = BuildConfigurationReportConfig(
                 baseProjectId = "base",
-                templates = Templates(releaseCandidate = listOf("RC1"))
+                templates = Templates(releaseCandidate = listOf("RC1")),
             )
 
             assertEquals(listOf("RC1"), config.getTemplates(BuildStage.RELEASE_CANDIDATE))
@@ -41,7 +39,7 @@ class BuildConfigurationReportConfigTest {
         fun releaseStage() {
             val config = BuildConfigurationReportConfig(
                 baseProjectId = "base",
-                templates = Templates(release = listOf("R1"))
+                templates = Templates(release = listOf("R1")),
             )
 
             assertEquals(listOf("R1"), config.getTemplates(BuildStage.RELEASE))
@@ -52,7 +50,7 @@ class BuildConfigurationReportConfigTest {
         fun emptyTemplatesForStageThrows() {
             val config = BuildConfigurationReportConfig(
                 baseProjectId = "base",
-                templates = Templates()
+                templates = Templates(),
             )
 
             val ex = assertThrows(IllegalStateException::class.java) {

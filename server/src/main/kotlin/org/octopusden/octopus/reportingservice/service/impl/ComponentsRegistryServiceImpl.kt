@@ -8,12 +8,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class ComponentsRegistryServiceImpl(
-    private val client: ClassicComponentsRegistryServiceClient
+    private val client: ClassicComponentsRegistryServiceClient,
 ) : ComponentsRegistryService {
-
-    override fun getComponentsBySystems(systems: Set<String>): List<ComponentV2> = try {
-        client.getAllComponents(systems = systems.toList()).components.filter { !it.archived }
-    } catch (e: Exception) {
-        throw ExternalServiceException("Components Registry call failed: getAllComponents(systems=$systems)", e)
-    }
+    override fun getComponentsBySystems(systems: Set<String>): List<ComponentV2> =
+        try {
+            client.getAllComponents(systems = systems.toList()).components.filter { !it.archived }
+        } catch (e: Exception) {
+            throw ExternalServiceException("Components Registry call failed: getAllComponents(systems=$systems)", e)
+        }
 }

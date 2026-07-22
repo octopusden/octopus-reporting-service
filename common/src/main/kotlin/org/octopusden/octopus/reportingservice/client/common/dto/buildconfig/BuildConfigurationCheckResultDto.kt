@@ -5,5 +5,5 @@ data class BuildConfigurationCheckResultDto(
     val checkName: String,
     val actualValue: String,
     val expectedValue: String,
-    val status: Boolean
+    val status: Boolean,
 )

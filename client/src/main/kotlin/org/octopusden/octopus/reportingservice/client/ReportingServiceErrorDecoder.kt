@@ -10,7 +10,10 @@ import org.octopusden.octopus.reportingservice.client.common.exception.Validatio
 import java.io.IOException
 
 class ReportingServiceErrorDecoder : ErrorDecoder {
-    override fun decode(methodKey: String, response: Response): Exception {
+    override fun decode(
+        methodKey: String,
+        response: Response,
+    ): Exception {
         val status = response.status()
         val method = response.request().httpMethod().name
         val url = response.request().url()
@@ -24,13 +27,19 @@ class ReportingServiceErrorDecoder : ErrorDecoder {
         }
     }
 
-    private fun buildMessage(status: Int, method: String, url: String, body: String?): String =
+    private fun buildMessage(
+        status: Int,
+        method: String,
+        url: String,
+        body: String?,
+    ): String =
         "reporting-service responded $status on $method $url" +
-                (body?.takeIf { it.isNotBlank() }?.let { ": $it" } ?: "")
+            (body?.takeIf { it.isNotBlank() }?.let { ": $it" } ?: "")
 
-    private fun Response.safelyReadBody(): String? = try {
-        body()?.asInputStream()?.use { Util.toString(it.reader(Charsets.UTF_8)) }
-    } catch (_: IOException) {
-        null
-    }
+    private fun Response.safelyReadBody(): String? =
+        try {
+            body()?.asInputStream()?.use { Util.toString(it.reader(Charsets.UTF_8)) }
+        } catch (_: IOException) {
+            null
+        }
 }

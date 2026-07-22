@@ -6,5 +6,5 @@ data class BuildConfigurationReportComponentsFilterDto(
     @field:NoBlankElements(message = "includeSystems must not contain blank values")
     val includeSystems: Set<String> = emptySet(),
     @field:NoBlankElements(message = "excludeComponents must not contain blank values")
-    val excludeComponents: Set<String> = emptySet()
+    val excludeComponents: Set<String> = emptySet(),
 )

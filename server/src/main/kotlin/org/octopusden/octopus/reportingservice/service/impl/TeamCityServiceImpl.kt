@@ -17,12 +17,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class TeamCityServiceImpl(
-    private val client: TeamcityClient
+    private val client: TeamcityClient,
 ) : TeamCityService {
-
     override fun findSubprojects(rootProjectId: String): List<BuildConfigurationProject> {
         logger.info("findSubprojects: rootProjectId='{}'", rootProjectId)
-        val fields = """
+        val fields =
+            """
             count,
             href,
             nextHref,
@@ -43,19 +43,23 @@ class TeamCityServiceImpl(
                     )
                 )
             )
-        """.trimIndent().replace("\\s+".toRegex(), "")
+            """.trimIndent().replace("\\s+".toRegex(), "")
         val result = mutableListOf<BuildConfigurationProject>()
 
         val rootLocator = ProjectLocator(
             id = rootProjectId,
-            archived = false
+            archived = false,
         )
         result += callTeamCity("getProjects(root='$rootProjectId')") {
             client.getProjectsWithLocatorAndFields(rootLocator, fields)
         }.projects
             .asSequence()
-            .filter { it.buildTypes?.buildTypes.orEmpty().isNotEmpty() }
-            .mapNotNull { it.toBuildConfigurationProjectOrNull() }
+            .filter {
+                it.buildTypes
+                    ?.buildTypes
+                    .orEmpty()
+                    .isNotEmpty()
+            }.mapNotNull { it.toBuildConfigurationProjectOrNull() }
             .toList()
 
         var start = 0
@@ -64,15 +68,19 @@ class TeamCityServiceImpl(
                 affectedProject = ProjectLocator(id = rootProjectId),
                 archived = false,
                 count = DEFAULT_PAGE_SIZE,
-                start = start
+                start = start,
             )
             val page = callTeamCity("getProjects(affected='$rootProjectId', start=$start)") {
                 client.getProjectsWithLocatorAndFields(locator, fields)
             }
             result += page.projects
                 .asSequence()
-                .filter { it.buildTypes?.buildTypes.orEmpty().isNotEmpty() }
-                .mapNotNull { it.toBuildConfigurationProjectOrNull() }
+                .filter {
+                    it.buildTypes
+                        ?.buildTypes
+                        .orEmpty()
+                        .isNotEmpty()
+                }.mapNotNull { it.toBuildConfigurationProjectOrNull() }
                 .toList()
             if (page.nextHref == null) {
                 break
@@ -83,9 +91,13 @@ class TeamCityServiceImpl(
         return result
     }
 
-    override fun getTemplateByProjectIdAndTemplateId(projectId: String, templateId: String): BuildConfiguration {
+    override fun getTemplateByProjectIdAndTemplateId(
+        projectId: String,
+        templateId: String,
+    ): BuildConfiguration {
         logger.info("getTemplateByProjectIdAndTemplateId: projectId='{}' templateId='{}'", projectId, templateId)
-        val fields = """
+        val fields =
+            """
             project(
                 id,
                 name,
@@ -100,39 +112,53 @@ class TeamCityServiceImpl(
                     )
                 )
             )
-        """.trimIndent().replace("\\s+".toRegex(), "")
+            """.trimIndent().replace("\\s+".toRegex(), "")
         val locator = ProjectLocator(id = projectId)
         val result = callTeamCity("getTemplate(projectId='$projectId', templateId='$templateId')") {
             client.getProjectsWithLocatorAndFields(locator, fields)
-        }.projects.find { it.id == projectId }
-            ?.templates?.buildTypes
-            ?.find { it.id == templateId }?.toBuildConfiguration()
+        }.projects
+            .find { it.id == projectId }
+            ?.templates
+            ?.buildTypes
+            ?.find { it.id == templateId }
+            ?.toBuildConfiguration()
             ?: run {
                 throw NotFoundException("Not found template with templateId='$templateId' in project with projectId='$projectId'!")
             }
         logger.info(
             "getTemplateByProjectIdAndTemplateId: loaded template '{}'; amount parameters = {}, amount steps = {}",
-            templateId, result.parameters.size, result.steps.size
+            templateId,
+            result.parameters.size,
+            result.steps.size,
         )
         return result
     }
 
-    private fun <T> callTeamCity(operation: String, block: () -> T): T = try {
-        block()
-    } catch (e: FeignException.NotFound) {
-        throw NotFoundException("TeamCity entity not found: $operation")
-    } catch (e: Exception) {
-        throw ExternalServiceException("TeamCity call failed: $operation", e)
-    }
+    private fun <T> callTeamCity(
+        operation: String,
+        block: () -> T,
+    ): T =
+        try {
+            block()
+        } catch (e: FeignException.NotFound) {
+            throw NotFoundException("TeamCity entity not found: $operation")
+        } catch (e: Exception) {
+            throw ExternalServiceException("TeamCity call failed: $operation", e)
+        }
 
     private fun TeamcityProject.toBuildConfigurationProjectOrNull(): BuildConfigurationProject? {
-        val componentName = parameters?.properties.orEmpty()
+        val componentName = parameters
+            ?.properties
+            .orEmpty()
             .find { it.name == TC_PROPERTY_COMPONENT_NAME }
-            ?.value.orEmpty()
+            ?.value
+            .orEmpty()
         if (componentName.isEmpty()) {
             return null
         }
-        val buildTypes = buildTypes?.buildTypes.orEmpty()
+        val buildTypes = buildTypes
+            ?.buildTypes
+            .orEmpty()
             .map { it.toBuildConfiguration() }
             .toSet()
         return BuildConfigurationProject(
@@ -140,39 +166,47 @@ class TeamCityServiceImpl(
             name = name,
             webUrl = webUrl,
             componentId = componentName,
-            buildConfigurations = buildTypes
+            buildConfigurations = buildTypes,
         )
     }
 
     private fun TeamcityBuildType.toBuildConfiguration(): BuildConfiguration {
-        val templateIds = templates?.buildTypes.orEmpty()
+        val templateIds = templates
+            ?.buildTypes
+            .orEmpty()
             .map { it.id }
             .toSet()
-        val parameters = parameters?.properties.orEmpty()
+        val parameters = parameters
+            ?.properties
+            .orEmpty()
             .map {
                 BuildConfigurationParameter(
                     name = it.name,
-                    value = it.value.orEmpty()
+                    value = it.value.orEmpty(),
                 )
             }
-        val steps = steps?.steps.orEmpty()
+        val steps = steps
+            ?.steps
+            .orEmpty()
             .map {
                 BuildConfigurationStep(
                     id = it.id,
                     name = it.name,
                     disabled = it.disabled ?: run {
                         logger.warn(
-                            "TeamCity step '{}' in buildType '{}' has no disabled field; treating as enabled", it.id, id
+                            "TeamCity step '{}' in buildType '{}' has no disabled field; treating as enabled",
+                            it.id,
+                            id,
                         )
                         false
-                    }
+                    },
                 )
             }
         return BuildConfiguration(
             buildTypeId = id,
             templateIds = templateIds,
             parameters = parameters,
-            steps = steps
+            steps = steps,
         )
     }
 
