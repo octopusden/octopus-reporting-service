@@ -135,7 +135,7 @@ class BuildConfigurationReportServiceImpl(
             checkName = parameterName,
             actualValue = actualValue,
             expectedValue = expectedValue,
-            status = actualValue == expectedValue && actualValue != NOT_DEFINED
+            status = actualValue == expectedValue
         )
     }
 
@@ -157,7 +157,7 @@ class BuildConfigurationReportServiceImpl(
             checkName = stepName,
             actualValue = actualValue,
             expectedValue = expectedValue,
-            status = actualValue == expectedValue && actualValue != NOT_DEFINED
+            status = actualValue == expectedValue
         )
     }
 
