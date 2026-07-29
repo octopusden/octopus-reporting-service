@@ -56,29 +56,12 @@
             margin-bottom: 20px;
         }
 
-        .hero-eyebrow {
-            margin-bottom: 6px;
-            color: #526076;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: .08em;
-            text-transform: uppercase;
-        }
-
         .hero-title {
             margin: 0;
             color: #0f172a;
             font-size: 28px;
             line-height: 1.2;
             letter-spacing: -.02em;
-        }
-
-        .hero-subtitle {
-            max-width: 720px;
-            margin: 8px 0 0;
-            color: #526076;
-            font-size: 14px;
-            line-height: 1.5;
         }
 
         .summary-grid {
@@ -371,13 +354,13 @@
         #set($stringValue = "$!value")
 
         #if($stringValue == "" || $stringValue == "null")
-        <span class="muted">not specified</span>
+        <span class="muted">Not specified</span>
         #elseif($stringValue == "NOT_DEFINED")
-        <span class="muted">not defined</span>
+        <span class="muted">Not defined</span>
         #elseif($stringValue == "ENABLED")
-        <span class="check-value">enabled</span>
+        <span class="check-value">Enabled</span>
         #elseif($stringValue == "DISABLED")
-        <span class="check-value">disabled</span>
+        <span class="check-value">Disabled</span>
         #else
         <span class="check-value">$stringValue</span>
         #end
@@ -387,12 +370,7 @@
 <header class="report-hero">
     <div class="hero-top">
         <div>
-            <div class="hero-eyebrow">Build validation</div>
             <h1 class="hero-title">Build Configuration Report</h1>
-            <p class="hero-subtitle">
-                Configuration coverage and validation results for
-                <strong>$request.rootProjectId</strong>.
-            </p>
         </div>
     </div>
 

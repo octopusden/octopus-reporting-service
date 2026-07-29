@@ -34,6 +34,22 @@
     #end
 #end
 
+#macro(formatValue $value)
+    #set($stringValue = "$!value")
+
+    #if($stringValue == "" || $stringValue == "null")
+    <em>Not specified</em>
+    #elseif($stringValue == "NOT_DEFINED")
+    <strong>Not defined</strong>
+    #elseif($stringValue == "ENABLED")
+    <strong>Enabled</strong>
+    #elseif($stringValue == "DISABLED")
+    <strong>Disabled</strong>
+    #else
+    <strong>$stringValue</strong>
+    #end
+#end
+
 <h2>Overview</h2>
 <table>
     <colgroup>
@@ -207,13 +223,8 @@
                     </td>
                     <td><code>$check.checkType</code></td>
                     <td><code>$check.checkName</code></td>
-                    <td>
-                        <ac:structured-macro ac:name="status" ac:schema-version="1">
-                            <ac:parameter ac:name="colour">Red</ac:parameter>
-                            <ac:parameter ac:name="title">$!check.actualValue</ac:parameter>
-                        </ac:structured-macro>
-                    </td>
-                    <td><code>$!check.expectedValue</code></td>
+                    <td>#formatValue($check.actualValue)</td>
+                    <td>#formatValue($check.expectedValue)</td>
                 </tr>
                 #end
             #end
@@ -278,7 +289,6 @@
         <th>Check</th>
         <th>Actual Value</th>
         <th>Expected Value</th>
-        <th>Status</th>
     </tr>
 
         #foreach($component in $successfulComponents)
@@ -297,21 +307,10 @@
                         <br/><em>Build type not specified</em>
                     #end
                 </td>
-
                 <td><code>$check.checkType</code></td>
-
                 <td><code>$check.checkName</code></td>
-
-                <td><code>$!check.actualValue</code></td>
-
-                <td><code>$!check.expectedValue</code></td>
-
-                <td>
-                    <ac:structured-macro ac:name="status" ac:schema-version="1">
-                        <ac:parameter ac:name="colour">Green</ac:parameter>
-                        <ac:parameter ac:name="title">OK</ac:parameter>
-                    </ac:structured-macro>
-                </td>
+                <td>#formatValue($check.actualValue)</td>
+                <td>#formatValue($check.expectedValue)</td>
             </tr>
             #end
         #end
