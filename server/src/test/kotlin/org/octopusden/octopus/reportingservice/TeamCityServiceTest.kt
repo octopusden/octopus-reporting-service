@@ -29,7 +29,6 @@ import org.octopusden.octopus.reportingservice.service.impl.TeamCityServiceImpl
 
 @DisplayName("TeamCityService")
 class TeamCityServiceTest {
-
     private lateinit var client: TeamcityClient
     private lateinit var service: TeamCityServiceImpl
 
@@ -39,12 +38,18 @@ class TeamCityServiceTest {
         service = TeamCityServiceImpl(client = client)
     }
 
-    private fun stubRoot(rootProjectId: String, vararg rootProjects: org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityProject) {
+    private fun stubRoot(
+        rootProjectId: String,
+        vararg rootProjects: org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityProject,
+    ) {
         whenever(client.getProjectsWithLocatorAndFields(locatorWithId(rootProjectId), any()))
             .thenReturn(TeamcityProjects(projects = rootProjects.toList()))
     }
 
-    private fun stubChildren(rootProjectId: String, vararg pages: TeamcityProjects) {
+    private fun stubChildren(
+        rootProjectId: String,
+        vararg pages: TeamcityProjects,
+    ) {
         var stub = whenever(client.getProjectsWithLocatorAndFields(locatorWithAffectedProject(rootProjectId), any()))
         if (pages.isEmpty()) {
             stub.thenReturn(TeamcityProjects(nextHref = null, projects = emptyList()))
@@ -61,7 +66,6 @@ class TeamCityServiceTest {
     @Nested
     @DisplayName("findSubprojects")
     inner class FindSubprojects {
-
         @Test
         @DisplayName("Maps TeamCity project to domain BuildConfigurationProject")
         fun singleRootProject() {
@@ -75,10 +79,10 @@ class TeamCityServiceTest {
                             id = "RootProject_ComponentA_Build",
                             templateIds = setOf("CDCompileUTGradle"),
                             parameters = mapOf("P1" to "v1"),
-                            steps = listOf(tcStep("Compile", disabled = false, id = "s1"))
-                        )
-                    )
-                )
+                            steps = listOf(tcStep("Compile", disabled = false, id = "s1")),
+                        ),
+                    ),
+                ),
             )
             stubChildren("RootProject_ComponentA")
 
@@ -95,14 +99,14 @@ class TeamCityServiceTest {
                                 buildTypeId = "RootProject_ComponentA_Build",
                                 templateIds = setOf("CDCompileUTGradle"),
                                 parameters = listOf(
-                                    BuildConfigurationParameter("P1", "v1")
+                                    BuildConfigurationParameter("P1", "v1"),
                                 ),
-                                steps = listOf(step("Compile", disabled = false, id = "s1"))
-                            )
-                        )
-                    )
+                                steps = listOf(step("Compile", disabled = false, id = "s1")),
+                            ),
+                        ),
+                    ),
                 ),
-                actual
+                actual,
             )
         }
 
@@ -115,8 +119,8 @@ class TeamCityServiceTest {
                 tcProject(
                     id = "RootProject_Ok",
                     componentName = "ok",
-                    buildTypes = listOf(tcBuildType(id = "RootProject_Ok_Build"))
-                )
+                    buildTypes = listOf(tcBuildType(id = "RootProject_Ok_Build")),
+                ),
             )
             stubChildren("RootProject")
 
@@ -128,10 +132,10 @@ class TeamCityServiceTest {
                         id = "RootProject_Ok",
                         componentId = "ok",
                         webUrl = "http://tc/RootProject_Ok",
-                        buildConfigurations = setOf(build(buildTypeId = "RootProject_Ok_Build"))
-                    )
+                        buildConfigurations = setOf(build(buildTypeId = "RootProject_Ok_Build")),
+                    ),
                 ),
-                actual
+                actual,
             )
         }
 
@@ -143,8 +147,8 @@ class TeamCityServiceTest {
                 tcProject(
                     id = "RootProject_X",
                     componentName = null,
-                    buildTypes = listOf(tcBuildType(id = "b"))
-                )
+                    buildTypes = listOf(tcBuildType(id = "b")),
+                ),
             )
             stubChildren("RootProject")
 
@@ -161,8 +165,8 @@ class TeamCityServiceTest {
                 tcProject(
                     id = "RootProject",
                     componentName = "s-root",
-                    buildTypes = listOf(tcBuildType(id = "RootProject_Build"))
-                )
+                    buildTypes = listOf(tcBuildType(id = "RootProject_Build")),
+                ),
             )
             stubChildren(
                 "RootProject",
@@ -172,9 +176,9 @@ class TeamCityServiceTest {
                         tcProject(
                             id = "RootProject_A",
                             componentName = "a",
-                            buildTypes = listOf(tcBuildType(id = "RootProject_A_Build"))
-                        )
-                    )
+                            buildTypes = listOf(tcBuildType(id = "RootProject_A_Build")),
+                        ),
+                    ),
                 ),
                 tcProjectsPage(
                     nextHref = null,
@@ -182,24 +186,33 @@ class TeamCityServiceTest {
                         tcProject(
                             id = "RootProject_B",
                             componentName = "b",
-                            buildTypes = listOf(tcBuildType(id = "RootProject_B_Build"))
-                        )
-                    )
-                )
+                            buildTypes = listOf(tcBuildType(id = "RootProject_B_Build")),
+                        ),
+                    ),
+                ),
             )
 
             val actual = service.findSubprojects("RootProject")
 
             assertEquals(
                 listOf(
-                    project(id = "RootProject", componentId = "s-root",
-                        buildConfigurations = setOf(build("RootProject_Build"))),
-                    project(id = "RootProject_A", componentId = "a",
-                        buildConfigurations = setOf(build("RootProject_A_Build"))),
-                    project(id = "RootProject_B", componentId = "b",
-                        buildConfigurations = setOf(build("RootProject_B_Build")))
+                    project(
+                        id = "RootProject",
+                        componentId = "s-root",
+                        buildConfigurations = setOf(build("RootProject_Build")),
+                    ),
+                    project(
+                        id = "RootProject_A",
+                        componentId = "a",
+                        buildConfigurations = setOf(build("RootProject_A_Build")),
+                    ),
+                    project(
+                        id = "RootProject_B",
+                        componentId = "b",
+                        buildConfigurations = setOf(build("RootProject_B_Build")),
+                    ),
                 ),
-                actual
+                actual,
             )
         }
 
@@ -220,18 +233,23 @@ class TeamCityServiceTest {
                                     name = "Compile",
                                     type = "custom",
                                     disabled = null,
-                                    properties = TeamcityProperties()
-                                )
-                            )
-                        )
-                    )
-                )
+                                    properties = TeamcityProperties(),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
             )
             stubChildren("Root")
 
             val actual = service.findSubprojects("Root")
 
-            val onlyStep = actual.single().buildConfigurations.single().steps.single()
+            val onlyStep = actual
+                .single()
+                .buildConfigurations
+                .single()
+                .steps
+                .single()
             assertEquals(false, onlyStep.disabled)
         }
 
@@ -249,7 +267,6 @@ class TeamCityServiceTest {
     @Nested
     @DisplayName("getTemplateByProjectIdAndTemplateId")
     inner class GetTemplate {
-
         @Test
         @DisplayName("Maps TeamCity template to domain BuildConfiguration")
         fun gradleTemplate() {
@@ -259,10 +276,10 @@ class TeamCityServiceTest {
                         tcBuildType(
                             id = "CDCompileUTGradle",
                             parameters = mapOf("XRAY" to "true"),
-                            steps = listOf(tcStep("Compile", disabled = false, id = "s1"))
-                        )
-                    )
-                )
+                            steps = listOf(tcStep("Compile", disabled = false, id = "s1")),
+                        ),
+                    ),
+                ),
             )
             whenever(client.getProjectsWithLocatorAndFields(locatorWithId("RDDepartment"), any()))
                 .thenReturn(TeamcityProjects(projects = listOf(project)))
@@ -273,11 +290,11 @@ class TeamCityServiceTest {
                 build(
                     buildTypeId = "CDCompileUTGradle",
                     parameters = listOf(
-                        BuildConfigurationParameter("XRAY", "true")
+                        BuildConfigurationParameter("XRAY", "true"),
                     ),
-                    steps = listOf(step("Compile", disabled = false, id = "s1"))
+                    steps = listOf(step("Compile", disabled = false, id = "s1")),
                 ),
-                actual
+                actual,
             )
         }
 
@@ -286,8 +303,8 @@ class TeamCityServiceTest {
         fun templateIdAbsent() {
             val project = tcProject(id = "RDDepartment").copy(
                 templates = TeamcityBuildTypes(
-                    buildTypes = listOf(tcBuildType(id = "SomeOtherTemplate"))
-                )
+                    buildTypes = listOf(tcBuildType(id = "SomeOtherTemplate")),
+                ),
             )
             whenever(client.getProjectsWithLocatorAndFields(locatorWithId("RDDepartment"), any()))
                 .thenReturn(TeamcityProjects(projects = listOf(project)))
@@ -307,8 +324,7 @@ class TeamCityServiceTest {
         }
     }
 
-    private fun locatorWithId(expectedId: String): ProjectLocator =
-        argThat { this.id == expectedId && this.affectedProject == null }
+    private fun locatorWithId(expectedId: String): ProjectLocator = argThat { this.id == expectedId && this.affectedProject == null }
 
     private fun locatorWithAffectedProject(expectedAffectedId: String): ProjectLocator =
         argThat { this.affectedProject?.id == expectedAffectedId }

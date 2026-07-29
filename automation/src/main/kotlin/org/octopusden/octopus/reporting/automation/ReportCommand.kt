@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 class ReportCommand : CliktCommand(name = "") {
-
     private val context by findOrSetObject { mutableMapOf<String, Any>() }
 
     private val jsonFile by option(JSON_FILE, help = "Report json file")
@@ -29,12 +28,12 @@ class ReportCommand : CliktCommand(name = "") {
 
     private val reportCustomTemplateValue by option(
         REPORT_CUSTOM_TEMPLATE,
-        help = "Report custom template file"
+        help = "Report custom template file",
     ).convert { it.trim() }
 
     private val reportCustomTemplateClasspathValue by option(
         REPORT_CUSTOM_TEMPLATE_CLASSPATH,
-        help = "Report custom template classpath resource"
+        help = "Report custom template classpath resource",
     ).convert { it.trim() }
 
     private val reportCustomTemplate: File?
@@ -55,9 +54,8 @@ class ReportCommand : CliktCommand(name = "") {
 
     private val teamCityPublish by option(
         TEAMCITY_PUBLISH,
-        help = "Publish generated reports to TeamCity artifacts"
-    )
-        .convert { it.trim().toBoolean() }
+        help = "Publish generated reports to TeamCity artifacts",
+    ).convert { it.trim().toBoolean() }
         .default(false)
 
     private val reportEngine = VelocityEngine()
@@ -70,7 +68,9 @@ class ReportCommand : CliktCommand(name = "") {
         // Check parameters
         if (reportCustom) {
             if (reportCustomTemplate == null && reportCustomTemplateClasspath == null) {
-                throw BadParameterValue("$REPORT_CUSTOM_TEMPLATE or $REPORT_CUSTOM_TEMPLATE_CLASSPATH is required when $REPORT_CUSTOM is true")
+                throw BadParameterValue(
+                    "$REPORT_CUSTOM_TEMPLATE or $REPORT_CUSTOM_TEMPLATE_CLASSPATH is required when $REPORT_CUSTOM is true",
+                )
             }
 
             if (reportCustomTemplate != null && reportCustomTemplateClasspath != null) {
@@ -84,7 +84,7 @@ class ReportCommand : CliktCommand(name = "") {
             reportCustomTemplate?.let { templateFile ->
                 if (!templateFile.exists()) {
                     throw BadParameterValue(
-                        "$REPORT_CUSTOM_TEMPLATE: File ${templateFile.absolutePath} does not exist"
+                        "$REPORT_CUSTOM_TEMPLATE: File ${templateFile.absolutePath} does not exist",
                     )
                 }
             }
@@ -97,7 +97,10 @@ class ReportCommand : CliktCommand(name = "") {
         }
     }
 
-    fun write(reportContext: Map<String, Any>, reportData: Any) {
+    fun write(
+        reportContext: Map<String, Any>,
+        reportData: Any,
+    ) {
         jacksonObjectMapper()
             .writerWithDefaultPrettyPrinter()
             .writeValue(jsonFile, reportData)
@@ -110,8 +113,8 @@ class ReportCommand : CliktCommand(name = "") {
                 reportEngine.generate(
                     reportContext,
                     templateFile,
-                    reportCustomEscapeHtml
-                )
+                    reportCustomEscapeHtml,
+                ),
             )
         }
 

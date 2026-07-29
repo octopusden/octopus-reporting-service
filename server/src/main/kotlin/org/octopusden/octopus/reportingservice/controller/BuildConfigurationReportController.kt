@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/rest/api/1/reports/build-configuration")
 @RestController
 class BuildConfigurationReportController(
-    private val buildConfigurationReportService: BuildConfigurationReportService
+    private val buildConfigurationReportService: BuildConfigurationReportService,
 ) {
     // TODO Make async
     @PostMapping
     fun generateReport(
-        @Valid @RequestBody request: BuildConfigurationReportRequestDto
+        @Valid @RequestBody request: BuildConfigurationReportRequestDto,
     ): BuildConfigurationReportResponseDto {
         logger.info("Generate Build Configuration Report: request={}", request)
         return buildConfigurationReportService.generateReport(request)

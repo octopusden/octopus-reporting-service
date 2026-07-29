@@ -29,7 +29,7 @@ fun String.getExt() = project.ext[this] as String
 
 val commonOkdParameters = mapOf(
     "ACTIVE_DEADLINE_SECONDS" to "okdActiveDeadlineSeconds".getExt(),
-    "DOCKER_REGISTRY" to "dockerRegistry".getExt()
+    "DOCKER_REGISTRY" to "dockerRegistry".getExt(),
 )
 
 tasks["ocProcess"].dependsOn(":reporting-service:dockerPushImage")
@@ -42,37 +42,52 @@ ocTemplate {
     prefix.set("reporting-ft")
     attempts.set(25)
 
-    "okdWebConsoleUrl".getExt().takeIf { it.isNotBlank() }?.let{
+    "okdWebConsoleUrl".getExt().takeIf { it.isNotBlank() }?.let {
         webConsoleUrl.set(it)
     }
 
     service("comp-reg") {
         templateFile.set(rootProject.layout.projectDirectory.file("okd/components-registry.yaml"))
-        val componentsRegistryWorkDir = layout.projectDirectory.dir("src/ft/resources/components-registry-data").asFile.absolutePath
-        parameters.set(commonOkdParameters + mapOf(
-            "COMPONENTS_REGISTRY_SERVICE_VERSION" to properties["octopus-components-registry.version"] as String,
-            "AGGREGATOR_GROOVY_CONTENT" to file("${componentsRegistryWorkDir}/Aggregator.groovy").readText(),
-            "DEFAULTS_GROOVY_CONTENT" to file("${componentsRegistryWorkDir}/Defaults.groovy").readText(),
-            "TEST_COMPONENTS_GROOVY_CONTENT" to file("${componentsRegistryWorkDir}/TestComponents.groovy").readText(),
-            "APPLICATION_DEV_CONTENT" to rootProject.layout.projectDirectory.dir("okd/app-configs/components-registry-service.yaml").asFile.readText()
-        ))
+        val componentsRegistryWorkDir = layout.projectDirectory
+            .dir("src/ft/resources/components-registry-data")
+            .asFile.absolutePath
+        parameters.set(
+            commonOkdParameters + mapOf(
+                "COMPONENTS_REGISTRY_SERVICE_VERSION" to properties["octopus-components-registry.version"] as String,
+                "AGGREGATOR_GROOVY_CONTENT" to file("$componentsRegistryWorkDir/Aggregator.groovy").readText(),
+                "DEFAULTS_GROOVY_CONTENT" to file("$componentsRegistryWorkDir/Defaults.groovy").readText(),
+                "TEST_COMPONENTS_GROOVY_CONTENT" to file("$componentsRegistryWorkDir/TestComponents.groovy").readText(),
+                "APPLICATION_DEV_CONTENT" to
+                    rootProject.layout.projectDirectory
+                        .dir("okd/app-configs/components-registry-service.yaml")
+                        .asFile
+                        .readText(),
+            ),
+        )
     }
 
     service("mockserver") {
         templateFile.set(rootProject.layout.projectDirectory.file("okd/mockserver.yaml"))
-        parameters.set(commonOkdParameters + mapOf(
-            "MOCK_SERVER_VERSION" to properties["mockserver.version"] as String
-        ))
+        parameters.set(
+            commonOkdParameters + mapOf(
+                "MOCK_SERVER_VERSION" to properties["mockserver.version"] as String,
+            ),
+        )
     }
 
     service("reporting") {
         templateFile.set(rootProject.layout.projectDirectory.file("okd/reporting-service.yaml"))
-        parameters.set(commonOkdParameters + mapOf(
-            "TEST_MOCKSERVER_HOST" to ocTemplate.getOkdHost("mockserver"),
-            "TEST_COMPONENTS_REGISTRY_HOST" to ocTemplate.getOkdHost("comp-reg"),
-            "REPORTING_SERVICE_VERSION" to version.toString(),
-            "APPLICATION_DEV_CONTENT" to rootProject.layout.projectDirectory.dir("okd/app-configs/reporting-service.yaml").asFile.readText()
-        ))
+        parameters.set(
+            commonOkdParameters + mapOf(
+                "TEST_MOCKSERVER_HOST" to ocTemplate.getOkdHost("mockserver"),
+                "TEST_COMPONENTS_REGISTRY_HOST" to ocTemplate.getOkdHost("comp-reg"),
+                "REPORTING_SERVICE_VERSION" to version.toString(),
+                "APPLICATION_DEV_CONTENT" to rootProject.layout.projectDirectory
+                    .dir("okd/app-configs/reporting-service.yaml")
+                    .asFile
+                    .readText(),
+            ),
+        )
     }
 }
 

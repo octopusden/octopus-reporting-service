@@ -39,7 +39,6 @@ import org.octopusden.octopus.reportingservice.service.impl.BuildConfigurationRe
 
 @DisplayName("BuildConfigurationReportService")
 class BuildConfigurationReportServiceTest {
-
     private lateinit var teamCityService: TeamCityService
     private lateinit var componentsRegistryService: ComponentsRegistryService
     private lateinit var service: BuildConfigurationReportServiceImpl
@@ -54,18 +53,18 @@ class BuildConfigurationReportServiceTest {
                 templates = Templates(
                     build = listOf(BUILD_TEMPLATE_ID),
                     releaseCandidate = listOf("RcTemplate"),
-                    release = listOf("ReleaseTemplate")
-                )
+                    release = listOf("ReleaseTemplate"),
+                ),
             ),
             teamCityService = teamCityService,
-            componentsRegistryService = componentsRegistryService
+            componentsRegistryService = componentsRegistryService,
         )
     }
 
     private fun stubMocks(
         components: List<ComponentV2> = emptyList(),
         template: BuildConfiguration? = null,
-        projects: List<BuildConfigurationProject> = emptyList()
+        projects: List<BuildConfigurationProject> = emptyList(),
     ) {
         whenever(componentsRegistryService.getComponentsBySystems(any())).thenReturn(components)
         whenever(teamCityService.findSubprojects(any())).thenReturn(projects)
@@ -77,7 +76,7 @@ class BuildConfigurationReportServiceTest {
     private fun assertReportResult(
         expectedRequest: BuildConfigurationReportRequestDto,
         expectedResult: List<BuildConfigurationComponentReportDto>,
-        actual: BuildConfigurationReportResponseDto
+        actual: BuildConfigurationReportResponseDto,
     ) {
         assertEquals(expectedRequest, actual.request)
         assertEquals(expectedResult, actual.result)
@@ -86,7 +85,6 @@ class BuildConfigurationReportServiceTest {
     @Nested
     @DisplayName("Parameter checks")
     inner class ParameterChecks {
-
         @Test
         @DisplayName("Parameters match")
         fun parameterMatches() {
@@ -95,17 +93,18 @@ class BuildConfigurationReportServiceTest {
                 template = build(BUILD_TEMPLATE_ID, parameters = listOf(param("XRAY", "true"))),
                 projects = listOf(
                     project(
-                        COMPONENT_A_PROJECT_ID, COMPONENT_A,
+                        COMPONENT_A_PROJECT_ID,
+                        COMPONENT_A,
                         webUrl = COMPONENT_A_PROJECT_URL,
                         buildConfigurations = setOf(
                             build(
                                 COMPONENT_A_BUILD_ID,
                                 templateIds = setOf(BUILD_TEMPLATE_ID),
-                                parameters = listOf(param("XRAY", "true"))
-                            )
-                        )
-                    )
-                )
+                                parameters = listOf(param("XRAY", "true")),
+                            ),
+                        ),
+                    ),
+                ),
             )
 
             val request = reportRequest(parameters = listOf("XRAY"))
@@ -119,10 +118,10 @@ class BuildConfigurationReportServiceTest {
                         status = ComponentReportStatus.OK,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
-                        checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", "true", "true"))
-                    )
+                        checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", "true", "true")),
+                    ),
                 ),
-                actual
+                actual,
             )
         }
 
@@ -134,17 +133,18 @@ class BuildConfigurationReportServiceTest {
                 template = build(BUILD_TEMPLATE_ID, parameters = listOf(param("XRAY", "true"))),
                 projects = listOf(
                     project(
-                        COMPONENT_A_PROJECT_ID, COMPONENT_A,
+                        COMPONENT_A_PROJECT_ID,
+                        COMPONENT_A,
                         webUrl = COMPONENT_A_PROJECT_URL,
                         buildConfigurations = setOf(
                             build(
                                 COMPONENT_A_BUILD_ID,
                                 templateIds = setOf(BUILD_TEMPLATE_ID),
-                                parameters = listOf(param("XRAY", "false"))
-                            )
-                        )
-                    )
-                )
+                                parameters = listOf(param("XRAY", "false")),
+                            ),
+                        ),
+                    ),
+                ),
             )
 
             val request = reportRequest(parameters = listOf("XRAY"))
@@ -158,10 +158,10 @@ class BuildConfigurationReportServiceTest {
                         status = ComponentReportStatus.OK,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
-                        checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", "false", "true"))
-                    )
+                        checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", "false", "true")),
+                    ),
                 ),
-                actual
+                actual,
             )
         }
 
@@ -173,11 +173,12 @@ class BuildConfigurationReportServiceTest {
                 template = build(BUILD_TEMPLATE_ID),
                 projects = listOf(
                     project(
-                        COMPONENT_A_PROJECT_ID, COMPONENT_A,
+                        COMPONENT_A_PROJECT_ID,
+                        COMPONENT_A,
                         webUrl = COMPONENT_A_PROJECT_URL,
-                        buildConfigurations = setOf(build(COMPONENT_A_BUILD_ID, templateIds = setOf(BUILD_TEMPLATE_ID)))
-                    )
-                )
+                        buildConfigurations = setOf(build(COMPONENT_A_BUILD_ID, templateIds = setOf(BUILD_TEMPLATE_ID))),
+                    ),
+                ),
             )
 
             val request = reportRequest(parameters = listOf("XRAY"))
@@ -196,12 +197,12 @@ class BuildConfigurationReportServiceTest {
                                 CheckType.PARAMETER,
                                 "XRAY",
                                 BuildConfigurationConstants.NOT_DEFINED,
-                                BuildConfigurationConstants.NOT_DEFINED
-                            )
-                        )
-                    )
+                                BuildConfigurationConstants.NOT_DEFINED,
+                            ),
+                        ),
+                    ),
                 ),
-                actual
+                actual,
             )
         }
     }
@@ -209,7 +210,6 @@ class BuildConfigurationReportServiceTest {
     @Nested
     @DisplayName("Step checks")
     inner class StepChecks {
-
         @Test
         @DisplayName("Steps match")
         fun stepsMatch() {
@@ -218,17 +218,18 @@ class BuildConfigurationReportServiceTest {
                 template = build(BUILD_TEMPLATE_ID, steps = listOf(step("Compile", disabled = false))),
                 projects = listOf(
                     project(
-                        COMPONENT_A_PROJECT_ID, COMPONENT_A,
+                        COMPONENT_A_PROJECT_ID,
+                        COMPONENT_A,
                         webUrl = COMPONENT_A_PROJECT_URL,
                         buildConfigurations = setOf(
                             build(
                                 COMPONENT_A_BUILD_ID,
                                 templateIds = setOf(BUILD_TEMPLATE_ID),
-                                steps = listOf(step("Compile", disabled = false))
-                            )
-                        )
-                    )
-                )
+                                steps = listOf(step("Compile", disabled = false)),
+                            ),
+                        ),
+                    ),
+                ),
             )
 
             val request = reportRequest(steps = listOf("Compile"))
@@ -242,10 +243,10 @@ class BuildConfigurationReportServiceTest {
                         status = ComponentReportStatus.OK,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
-                        checks = listOf(checkResult(CheckType.STEP, "Compile", "ENABLED", "ENABLED"))
-                    )
+                        checks = listOf(checkResult(CheckType.STEP, "Compile", "ENABLED", "ENABLED")),
+                    ),
                 ),
-                actual
+                actual,
             )
         }
 
@@ -257,17 +258,18 @@ class BuildConfigurationReportServiceTest {
                 template = build(BUILD_TEMPLATE_ID, steps = listOf(step("Compile", disabled = false))),
                 projects = listOf(
                     project(
-                        COMPONENT_A_PROJECT_ID, COMPONENT_A,
+                        COMPONENT_A_PROJECT_ID,
+                        COMPONENT_A,
                         webUrl = COMPONENT_A_PROJECT_URL,
                         buildConfigurations = setOf(
                             build(
                                 COMPONENT_A_BUILD_ID,
                                 templateIds = setOf(BUILD_TEMPLATE_ID),
-                                steps = listOf(step("Compile", disabled = true))
-                            )
-                        )
-                    )
-                )
+                                steps = listOf(step("Compile", disabled = true)),
+                            ),
+                        ),
+                    ),
+                ),
             )
 
             val request = reportRequest(steps = listOf("Compile"))
@@ -281,10 +283,10 @@ class BuildConfigurationReportServiceTest {
                         status = ComponentReportStatus.OK,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
-                        checks = listOf(checkResult(CheckType.STEP, "Compile", "DISABLED", "ENABLED"))
-                    )
+                        checks = listOf(checkResult(CheckType.STEP, "Compile", "DISABLED", "ENABLED")),
+                    ),
                 ),
-                actual
+                actual,
             )
         }
     }
@@ -292,14 +294,13 @@ class BuildConfigurationReportServiceTest {
     @Nested
     @DisplayName("Component status")
     inner class ComponentStatuses {
-
         @Test
         @DisplayName("Component without TC project")
         fun componentWithoutProject() {
             stubMocks(
                 components = listOf(component("orphanComponent")),
                 template = build(BUILD_TEMPLATE_ID),
-                projects = emptyList()
+                projects = emptyList(),
             )
 
             val request = reportRequest(parameters = listOf("XRAY"))
@@ -310,10 +311,10 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(
                         componentId = "orphanComponent",
-                        status = ComponentReportStatus.NO_PROJECT
-                    )
+                        status = ComponentReportStatus.NO_PROJECT,
+                    ),
                 ),
-                actual
+                actual,
             )
         }
 
@@ -325,13 +326,14 @@ class BuildConfigurationReportServiceTest {
                 template = build(BUILD_TEMPLATE_ID),
                 projects = listOf(
                     project(
-                        COMPONENT_A_PROJECT_ID, COMPONENT_A,
+                        COMPONENT_A_PROJECT_ID,
+                        COMPONENT_A,
                         webUrl = COMPONENT_A_PROJECT_URL,
                         buildConfigurations = setOf(
-                            build("${COMPONENT_A_PROJECT_ID}_OtherBuild", templateIds = setOf("SomeOtherTemplate"))
-                        )
-                    )
-                )
+                            build("${COMPONENT_A_PROJECT_ID}_OtherBuild", templateIds = setOf("SomeOtherTemplate")),
+                        ),
+                    ),
+                ),
             )
 
             val request = reportRequest(parameters = listOf("XRAY"))
@@ -342,10 +344,10 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(
                         componentId = COMPONENT_A,
-                        status = ComponentReportStatus.NO_BUILD_CONFIGURATION
-                    )
+                        status = ComponentReportStatus.NO_BUILD_CONFIGURATION,
+                    ),
                 ),
-                actual
+                actual,
             )
         }
     }
@@ -353,14 +355,13 @@ class BuildConfigurationReportServiceTest {
     @Nested
     @DisplayName("Filtering and sorting")
     inner class Filtering {
-
         @Test
         @DisplayName("excludeComponents filtering")
         fun excludeComponents() {
             stubMocks(
                 components = listOf(component(COMPONENT_A), component("skipped")),
                 template = build(BUILD_TEMPLATE_ID),
-                projects = emptyList()
+                projects = emptyList(),
             )
 
             val request = reportRequest(parameters = listOf("XRAY"), excludeComponents = setOf("skipped"))
@@ -369,9 +370,9 @@ class BuildConfigurationReportServiceTest {
             assertReportResult(
                 request,
                 listOf(
-                    componentReport(componentId = COMPONENT_A, status = ComponentReportStatus.NO_PROJECT)
+                    componentReport(componentId = COMPONENT_A, status = ComponentReportStatus.NO_PROJECT),
                 ),
-                actual
+                actual,
             )
         }
 
@@ -382,10 +383,10 @@ class BuildConfigurationReportServiceTest {
                 components = listOf(
                     component("Betta"),
                     component("alpha"),
-                    component("gamma")
+                    component("gamma"),
                 ),
                 template = build(BUILD_TEMPLATE_ID),
-                projects = emptyList()
+                projects = emptyList(),
             )
 
             val request = reportRequest(parameters = listOf("XRAY"))
@@ -396,9 +397,9 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(componentId = "alpha", status = ComponentReportStatus.NO_PROJECT),
                     componentReport(componentId = "Betta", status = ComponentReportStatus.NO_PROJECT),
-                    componentReport(componentId = "gamma", status = ComponentReportStatus.NO_PROJECT)
+                    componentReport(componentId = "gamma", status = ComponentReportStatus.NO_PROJECT),
                 ),
-                actual
+                actual,
             )
         }
     }
@@ -406,7 +407,6 @@ class BuildConfigurationReportServiceTest {
     @Nested
     @DisplayName("Empty inputs")
     inner class EmptyInputs {
-
         @Test
         @DisplayName("Empty checks")
         fun emptyChecks() {

@@ -9,5 +9,5 @@ data class BuildConfigurationReportRequestDto(
     @field:Valid
     val componentsFilter: BuildConfigurationReportComponentsFilterDto,
     @field:Valid
-    val checks: BuildConfigurationReportChecksDto
+    val checks: BuildConfigurationReportChecksDto,
 )

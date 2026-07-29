@@ -8,26 +8,34 @@ import org.mockserver.model.MediaType
 
 class TeamCityMockServer(
     private val client: MockServerClient,
-    private val baseProjectId: String
+    private val baseProjectId: String,
 ) {
-
     fun reset() {
         client.reset()
     }
 
-    fun stubRootProjects(rootProjectId: String, bodyResourcePath: String) {
+    fun stubRootProjects(
+        rootProjectId: String,
+        bodyResourcePath: String,
+    ) {
         client
             .`when`(rootProjectsRequest(rootProjectId))
             .respond(jsonResponse(readResource(bodyResourcePath)))
     }
 
-    fun stubRootProjectsStatus(rootProjectId: String, statusCode: Int) {
+    fun stubRootProjectsStatus(
+        rootProjectId: String,
+        statusCode: Int,
+    ) {
         client
             .`when`(rootProjectsRequest(rootProjectId))
             .respond(response().withStatusCode(statusCode))
     }
 
-    fun stubChildrenPages(rootProjectId: String, vararg pageBodyResourcePaths: String) {
+    fun stubChildrenPages(
+        rootProjectId: String,
+        vararg pageBodyResourcePaths: String,
+    ) {
         pageBodyResourcePaths.forEach { resourcePath ->
             client
                 .`when`(childrenPagesRequest(rootProjectId), Times.once())
@@ -65,10 +73,11 @@ class TeamCityMockServer(
             .withPath(PROJECTS_PATH)
             .withQueryStringParameter("locator", "id:$baseProjectId")
 
-    private fun jsonResponse(body: String) = response()
-        .withStatusCode(200)
-        .withContentType(MediaType.APPLICATION_JSON)
-        .withBody(body)
+    private fun jsonResponse(body: String) =
+        response()
+            .withStatusCode(200)
+            .withContentType(MediaType.APPLICATION_JSON)
+            .withBody(body)
 
     private fun readResource(path: String): String {
         val stream = javaClass.classLoader.getResourceAsStream(path)

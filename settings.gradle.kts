@@ -8,6 +8,10 @@ pluginManagement {
         id("org.octopusden.octopus.oc-template") version providers.gradleProperty("octopus-oc-template.version").get()
         id("io.github.gradle-nexus.publish-plugin") version providers.gradleProperty("gradle-nexus-publish-plugin.version").get()
         id("com.gradleup.shadow") version providers.gradleProperty("shadow-plugin.version").get()
+        id("io.gitlab.arturbosch.detekt") version providers.gradleProperty("detekt.version").get()
+        id("org.jlleitschuh.gradle.ktlint") version providers.gradleProperty("ktlint-gradle.version").get()
+        id("org.jetbrains.kotlinx.kover") version providers.gradleProperty("kover.version").get()
+        id("org.octopusden.octopus-quality") version providers.gradleProperty("octopus-quality.version").get()
     }
     repositories {
         gradlePluginPortal()

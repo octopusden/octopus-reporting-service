@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ClassOrdering:Fixtures.kt$Fixtures$// Common constants const val ROOT_PROJECT_ID = "RootProject"</ID>
+    <ID>ClassOrdering:Fixtures.kt$Fixtures$const val BASE_PROJECT_ID = "RDDepartment"</ID>
+    <ID>ClassOrdering:Fixtures.kt$Fixtures$const val BUILD_TEMPLATE_ID = "CDCompileUTGradle"</ID>
+    <ID>ClassOrdering:Fixtures.kt$Fixtures$const val COMPONENT_A = "componentA"</ID>
+    <ID>ClassOrdering:Fixtures.kt$Fixtures$const val COMPONENT_A_BUILD_ID = "RootProject_ComponentA_Build"</ID>
+    <ID>ClassOrdering:Fixtures.kt$Fixtures$const val COMPONENT_A_PROJECT_ID = "RootProject_ComponentA"</ID>
+    <ID>ClassOrdering:Fixtures.kt$Fixtures$const val COMPONENT_A_PROJECT_URL = "http://tc/RootProject_ComponentA"</ID>
+    <ID>ClassOrdering:Fixtures.kt$Fixtures$const val SYSTEM = "TEST_SYSTEM"</ID>
+    <ID>MaxLineLength:BuildConfigurationReportServiceImpl.kt$BuildConfigurationReportServiceImpl$projects.joinToString { "${it.id}(buildConfigurations=${it.buildConfigurations.joinToString { "${it.buildTypeId}(templates=${it.templateIds})" }})" }</ID>
+    <ID>MaxLineLength:BuildConfigurationReportServiceTest.kt$BuildConfigurationReportServiceTest.ParameterChecks$checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", BuildConfigurationConstants.NOT_DEFINED, BuildConfigurationConstants.NOT_DEFINED, status = false))</ID>
+    <ID>MaxLineLength:TeamCityServiceTest.kt$TeamCityServiceTest$private</ID>
+    <ID>NewLineAtEndOfFile:BuildConfiguration.kt$org.octopusden.octopus.reportingservice.domain.BuildConfiguration.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationReportConfig.kt$org.octopusden.octopus.reportingservice.config.BuildConfigurationReportConfig.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationReportConfigTest.kt$org.octopusden.octopus.reportingservice.config.BuildConfigurationReportConfigTest.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationReportController.kt$org.octopusden.octopus.reportingservice.controller.BuildConfigurationReportController.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationReportService.kt$org.octopusden.octopus.reportingservice.service.BuildConfigurationReportService.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationReportServiceImpl.kt$org.octopusden.octopus.reportingservice.service.impl.BuildConfigurationReportServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationReportServiceTest.kt$org.octopusden.octopus.reportingservice.BuildConfigurationReportServiceTest.kt</ID>
+    <ID>NewLineAtEndOfFile:ClientsConfig.kt$org.octopusden.octopus.reportingservice.config.ClientsConfig.kt</ID>
+    <ID>NewLineAtEndOfFile:ComponentsRegistryService.kt$org.octopusden.octopus.reportingservice.service.ComponentsRegistryService.kt</ID>
+    <ID>NewLineAtEndOfFile:ComponentsRegistryServiceImpl.kt$org.octopusden.octopus.reportingservice.service.impl.ComponentsRegistryServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:ComponentsRegistryServiceTest.kt$org.octopusden.octopus.reportingservice.ComponentsRegistryServiceTest.kt</ID>
+    <ID>NewLineAtEndOfFile:ExceptionInfoHandler.kt$org.octopusden.octopus.reportingservice.controller.ExceptionInfoHandler.kt</ID>
+    <ID>NewLineAtEndOfFile:Fixtures.kt$org.octopusden.octopus.reportingservice.fixtures.Fixtures.kt</ID>
+    <ID>NewLineAtEndOfFile:TeamCityConfig.kt$org.octopusden.octopus.reportingservice.config.TeamCityConfig.kt</ID>
+    <ID>NewLineAtEndOfFile:TeamCityService.kt$org.octopusden.octopus.reportingservice.service.TeamCityService.kt</ID>
+    <ID>NewLineAtEndOfFile:TeamCityServiceImpl.kt$org.octopusden.octopus.reportingservice.service.impl.TeamCityServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:TeamCityServiceTest.kt$org.octopusden.octopus.reportingservice.TeamCityServiceTest.kt</ID>
+    <ID>NewLineAtEndOfFile:WebConfig.kt$org.octopusden.octopus.reportingservice.config.WebConfig.kt</ID>
+    <ID>SwallowedException:TeamCityServiceImpl.kt$TeamCityServiceImpl$e: FeignException.NotFound</ID>
+    <ID>TooGenericExceptionCaught:ComponentsRegistryServiceImpl.kt$ComponentsRegistryServiceImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:TeamCityServiceImpl.kt$TeamCityServiceImpl$e: Exception</ID>
+  </CurrentIssues>
+</SmellBaseline>

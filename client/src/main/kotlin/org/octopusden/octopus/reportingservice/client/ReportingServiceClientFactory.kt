@@ -14,15 +14,14 @@ import feign.slf4j.Slf4jLogger
 import java.util.concurrent.TimeUnit
 
 object ReportingServiceClientFactory {
-
-    fun create(config: ReportingServiceClientConfig): ReportingServiceClient =
-        create(config, defaultObjectMapper())
+    fun create(config: ReportingServiceClientConfig): ReportingServiceClient = create(config, defaultObjectMapper())
 
     fun create(
         config: ReportingServiceClientConfig,
-        objectMapper: ObjectMapper
+        objectMapper: ObjectMapper,
     ): ReportingServiceClient =
-        Feign.builder()
+        Feign
+            .builder()
             .client(ApacheHttpClient())
             .encoder(JacksonEncoder(objectMapper))
             .decoder(JacksonDecoder(objectMapper))
@@ -31,12 +30,13 @@ object ReportingServiceClientFactory {
             .retryer(Retryer.NEVER_RETRY)
             .options(
                 Request.Options(
-                    config.connectTimeoutMs, TimeUnit.MILLISECONDS,
-                    config.readTimeoutMs, TimeUnit.MILLISECONDS,
-                    true
-                )
-            )
-            .target(ReportingServiceClient::class.java, config.baseUrl.trimEnd('/'))
+                    config.connectTimeoutMs,
+                    TimeUnit.MILLISECONDS,
+                    config.readTimeoutMs,
+                    TimeUnit.MILLISECONDS,
+                    true,
+                ),
+            ).target(ReportingServiceClient::class.java, config.baseUrl.trimEnd('/'))
 
     private fun defaultObjectMapper(): ObjectMapper =
         jacksonObjectMapper().apply {

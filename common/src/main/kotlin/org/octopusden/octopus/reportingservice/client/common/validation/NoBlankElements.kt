@@ -10,18 +10,21 @@ import kotlin.reflect.KClass
 @Target(
     AnnotationTarget.FIELD,
     AnnotationTarget.PROPERTY_GETTER,
-    AnnotationTarget.VALUE_PARAMETER
+    AnnotationTarget.VALUE_PARAMETER,
 )
 @Retention(AnnotationRetention.RUNTIME)
 @Constraint(validatedBy = [NoBlankElementsValidator::class])
 annotation class NoBlankElements(
     val message: String = "must not contain blank elements",
     val groups: Array<KClass<*>> = [],
-    val payload: Array<KClass<out Payload>> = []
+    val payload: Array<KClass<out Payload>> = [],
 )
 
 class NoBlankElementsValidator : ConstraintValidator<NoBlankElements, Collection<String>> {
-    override fun isValid(value: Collection<String>?, context: ConstraintValidatorContext): Boolean {
+    override fun isValid(
+        value: Collection<String>?,
+        context: ConstraintValidatorContext,
+    ): Boolean {
         if (value == null) return true
         return value.none { it.isBlank() }
     }

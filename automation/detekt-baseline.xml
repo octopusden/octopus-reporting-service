@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:PublishedArtifactsReportCommand.kt$PublishedArtifactsReportCommand$repo == null || path == null || name == null || buildName == null</ID>
+    <ID>MaxLineLength:ReportCommand.kt$ReportCommand$throw BadParameterValue("$REPORT_CUSTOM_TEMPLATE or $REPORT_CUSTOM_TEMPLATE_CLASSPATH is required when $REPORT_CUSTOM is true")</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationReportCommand.kt$org.octopusden.octopus.reporting.automation.BuildConfigurationReportCommand.kt</ID>
+    <ID>NewLineAtEndOfFile:IpsReportCommand.kt$org.octopusden.octopus.reporting.automation.IpsReportCommand.kt</ID>
+    <ID>NewLineAtEndOfFile:ReportCommand.kt$org.octopusden.octopus.reporting.automation.ReportCommand.kt</ID>
+    <ID>ThrowsCount:BuildConfigurationReportCommand.kt$BuildConfigurationReportCommand$private fun publishToWiki(reportContext: Map&lt;String, Any&gt;)</ID>
+    <ID>WildcardImport:IpsReportCommand.kt$import com.github.ajalt.clikt.parameters.options.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

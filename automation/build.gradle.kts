@@ -22,7 +22,10 @@ configurations {
 
 val metarunners = artifacts.add(
     "distributions",
-    layout.buildDirectory.file("distributions/metarunners.zip").get().asFile
+    layout.buildDirectory
+        .file("distributions/metarunners.zip")
+        .get()
+        .asFile,
 ) {
     classifier = "metarunners"
     type = "zip"
@@ -60,8 +63,10 @@ publishing {
 }
 
 signing {
-    isRequired = System.getenv().containsKey("ORG_GRADLE_PROJECT_signingKey") && System.getenv()
-        .containsKey("ORG_GRADLE_PROJECT_signingPassword")
+    isRequired = System.getenv().containsKey("ORG_GRADLE_PROJECT_signingKey") &&
+        System
+            .getenv()
+            .containsKey("ORG_GRADLE_PROJECT_signingPassword")
     val signingKey: String? by project
     val signingPassword: String? by project
     useInMemoryPgpKeys(signingKey, signingPassword)
@@ -87,8 +92,12 @@ dependencies {
     implementation("com.github.ajalt.clikt:clikt:4.4.0")
     implementation("org.apache.velocity:velocity:${properties["velocity.version"]}")
     implementation("org.octopusden.octopus.jira:octopus-jira-api-client:${properties["octopus-jira-api-client.version"]}")
-    implementation("org.octopusden.octopus.octopus-external-systems-clients:artifactory-client:${properties["octopus-artifactory-client.version"]}")
-    implementation("org.octopusden.octopus.octopus-external-systems-clients:confluence-client:${properties["octopus-confluence-client.version"]}")
+    implementation(
+        "org.octopusden.octopus.octopus-external-systems-clients:artifactory-client:${properties["octopus-artifactory-client.version"]}",
+    )
+    implementation(
+        "org.octopusden.octopus.octopus-external-systems-clients:confluence-client:${properties["octopus-confluence-client.version"]}",
+    )
 }
 
 application {

@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>NewLineAtEndOfFile:BuildConfigurationCheckResultDto.kt$org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationCheckResultDto.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationComponentReportDto.kt$org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationComponentReportDto.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationConstants.kt$org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationConstants.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationReportChecksDto.kt$org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportChecksDto.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationReportComponentsFilterDto.kt$org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportComponentsFilterDto.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationReportRequestDto.kt$org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportRequestDto.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildConfigurationReportResponseDto.kt$org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportResponseDto.kt</ID>
+    <ID>NewLineAtEndOfFile:BuildStage.kt$org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildStage.kt</ID>
+    <ID>NewLineAtEndOfFile:CheckType.kt$org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.CheckType.kt</ID>
+    <ID>NewLineAtEndOfFile:ComponentReportStatus.kt$org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.ComponentReportStatus.kt</ID>
+    <ID>NewLineAtEndOfFile:NoBlankElements.kt$org.octopusden.octopus.reportingservice.client.common.validation.NoBlankElements.kt</ID>
+    <ID>NewLineAtEndOfFile:ReportingServiceException.kt$org.octopusden.octopus.reportingservice.client.common.exception.ReportingServiceException.kt</ID>
+    <ID>NewLineAtEndOfFile:StepState.kt$org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.StepState.kt</ID>
+  </CurrentIssues>
+</SmellBaseline>
