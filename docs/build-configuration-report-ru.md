@@ -48,7 +48,18 @@ POST /rest/api/1/reports/build-configuration
 
 ```json
 {
-  "rootProjectId": "MyRootProject",
+  "request": {
+    "rootProjectId": "MyRootProject",
+    "componentsFilter": {
+      "includeSystems": ["SYSTEM_A"],
+      "excludeComponents": []
+    },
+    "checks": {
+      "buildStage": "BUILD",
+      "parameters": ["XRAY"],
+      "steps": ["Compile"]
+    }
+  },
   "result": [
     {
       "componentId": "my-service",
@@ -82,7 +93,7 @@ POST /rest/api/1/reports/build-configuration
 
 | Поле                                 | Описание                                                     |
 |--------------------------------------|--------------------------------------------------------------|
-| `rootProjectId`                      | Корневой проект, переданный в запросе                        |
+| `request`                            | Копия запроса, по которому был сформирован отчёт             |
 | `result`                             | Список отчётов по компонентам, отсортирован по `componentId` |
 | `result[].componentId`               | Идентификатор компонента                                     |
 | `result[].status`                    | `OK`, `NO_BUILD_CONFIGURATION`, `NO_PROJECT`                 |

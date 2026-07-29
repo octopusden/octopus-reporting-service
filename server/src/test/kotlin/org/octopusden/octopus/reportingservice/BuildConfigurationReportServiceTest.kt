@@ -31,11 +31,11 @@ import org.octopusden.octopus.reportingservice.fixtures.Fixtures.component
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.componentReport
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.param
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.project
-import org.octopusden.octopus.reportingservice.fixtures.Fixtures.request as reportRequest
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.step
 import org.octopusden.octopus.reportingservice.service.ComponentsRegistryService
 import org.octopusden.octopus.reportingservice.service.TeamCityService
 import org.octopusden.octopus.reportingservice.service.impl.BuildConfigurationReportServiceImpl
+import org.octopusden.octopus.reportingservice.fixtures.Fixtures.request as reportRequest
 
 @DisplayName("BuildConfigurationReportService")
 class BuildConfigurationReportServiceTest {
