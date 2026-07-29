@@ -5,40 +5,14 @@ plugins {
     kotlin("plugin.spring")
     id("org.springframework.boot")
     id("com.bmuschko.docker-spring-boot-application")
+    // Applied but declaring NO publication: this module is not published to Maven Central.
+    // Keeping the plugin leaves the `publish` lifecycle task in place as a no-op, so a CI
+    // invocation of it does not fail. Declaring no MavenPublication is what keeps the module
+    // off Central; the allowlist in the root build enforces that (verifyCentralPublicationPolicy).
     `maven-publish`
 }
 
 fun String.getExt() = project.ext[this] as String
-
-publishing {
-    publications {
-        create<MavenPublication>("bootJar") {
-            artifact(tasks.getByName("bootJar"))
-            from(components["java"])
-            pom {
-                name.set(project.name)
-                description.set("Octopus module: ${project.name}")
-                url.set("https://github.com/octopusden/octopus-reporting-service.git")
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                scm {
-                    url.set("https://github.com/octopusden/octopus-reporting-service.git")
-                    connection.set("scm:git://github.com/octopusden/octopus-reporting-service.git")
-                }
-                developers {
-                    developer {
-                        id.set("octopus")
-                        name.set("octopus")
-                    }
-                }
-            }
-        }
-    }
-}
 
 docker {
     springBootApplication {
@@ -57,17 +31,6 @@ tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_21)
     }
-}
-
-signing {
-    isRequired = System.getenv().containsKey("ORG_GRADLE_PROJECT_signingKey") &&
-        System
-            .getenv()
-            .containsKey("ORG_GRADLE_PROJECT_signingPassword")
-    val signingKey: String? by project
-    val signingPassword: String? by project
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign(publishing.publications)
 }
 
 dependencies {
