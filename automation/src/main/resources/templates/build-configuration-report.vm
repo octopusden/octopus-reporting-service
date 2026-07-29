@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <title>Build Configuration Report - $rootProjectId</title>
+    <title>Build Configuration Report - $request.rootProjectId</title>
 
     <style>
         body {
@@ -245,7 +245,12 @@
     <div class="summary-grid">
         <div class="summary-card">
             <div class="summary-label">Root Project</div>
-            <div class="summary-value mono">$rootProjectId</div>
+            <div class="summary-value mono">$request.rootProjectId</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">Build Stage</div>
+            <div class="summary-value mono">$!request.checks.buildStage</div>
         </div>
 
         <div class="summary-card">
@@ -271,6 +276,25 @@
         <div class="summary-card">
             <div class="summary-label">Successful</div>
             <div class="summary-value ok">$successfulComponents.size()</div>
+        </div>
+    </div>
+
+    <div class="request-details">
+        <div class="request-detail-row">
+            <span class="request-detail-label">Include Systems:</span>
+            <span class="request-detail-value">#if($request.componentsFilter.includeSystems.size() > 0)#foreach($s in $request.componentsFilter.includeSystems)$s#if($foreach.hasNext), #end#end#else<span class="muted">—</span>#end</span>
+        </div>
+        <div class="request-detail-row">
+            <span class="request-detail-label">Exclude Components:</span>
+            <span class="request-detail-value">#if($request.componentsFilter.excludeComponents.size() > 0)#foreach($c in $request.componentsFilter.excludeComponents)$c#if($foreach.hasNext), #end#end#else<span class="muted">—</span>#end</span>
+        </div>
+        <div class="request-detail-row">
+            <span class="request-detail-label">Check Parameters:</span>
+            <span class="request-detail-value">#if($request.checks.parameters.size() > 0)#foreach($p in $request.checks.parameters)<span class="mono">$p</span>#if($foreach.hasNext), #end#end#else<span class="muted">—</span>#end</span>
+        </div>
+        <div class="request-detail-row">
+            <span class="request-detail-label">Check Steps:</span>
+            <span class="request-detail-value">#if($request.checks.steps.size() > 0)#foreach($st in $request.checks.steps)<span class="mono">$st</span>#if($foreach.hasNext), #end#end#else<span class="muted">—</span>#end</span>
         </div>
     </div>
 </div>

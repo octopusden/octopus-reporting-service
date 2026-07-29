@@ -138,9 +138,17 @@ object Fixtures {
 
     fun response(
         rootProjectId: String = ROOT_PROJECT_ID,
+        systems: Set<String> = setOf(SYSTEM),
+        excludeComponents: Set<String> = emptySet(),
+        stage: BuildStage = BuildStage.BUILD,
+        parameters: List<String> = emptyList(),
+        steps: List<String> = emptyList(),
         result: List<BuildConfigurationComponentReportDto> = emptyList()
     ): BuildConfigurationReportResponseDto =
-        BuildConfigurationReportResponseDto(rootProjectId = rootProjectId, result = result)
+        BuildConfigurationReportResponseDto(
+            request = request(rootProjectId, systems, excludeComponents, stage, parameters, steps),
+            result = result
+        )
 
     fun componentReport(
         componentId: String,

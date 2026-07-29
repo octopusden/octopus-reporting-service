@@ -1,5 +1,5 @@
 <ac:structured-macro ac:name="toc" ac:schema-version="1"/>
-<h1>Build Configuration Report - $rootProjectId</h1>
+<h1>Build Configuration Report - $request.rootProjectId</h1>
 
 #set($okComponents = [])
 #set($failedComponents = [])
@@ -33,12 +33,23 @@
 <h2>Summary</h2>
 <table>
     <tbody>
-    <tr><td><strong>Root Project</strong></td><td><code>$rootProjectId</code></td></tr>
+    <tr><td><strong>Root Project</strong></td><td><code>$request.rootProjectId</code></td></tr>
+    <tr><td><strong>Build Stage</strong></td><td><code>$!request.checks.buildStage</code></td></tr>
     <tr><td><strong>Total Components</strong></td><td>$result.size()</td></tr>
     <tr><td><strong>Failed Checks</strong></td><td><ac:structured-macro ac:name="status"><ac:parameter ac:name="colour">Red</ac:parameter><ac:parameter ac:name="title">$failedComponents.size()</ac:parameter></ac:structured-macro></td></tr>
     <tr><td><strong>No Build Config</strong></td><td><ac:structured-macro ac:name="status"><ac:parameter ac:name="colour">Yellow</ac:parameter><ac:parameter ac:name="title">$noBuildConfigComponents.size()</ac:parameter></ac:structured-macro></td></tr>
     <tr><td><strong>No Project</strong></td><td><ac:structured-macro ac:name="status"><ac:parameter ac:name="colour">Yellow</ac:parameter><ac:parameter ac:name="title">$noProjectComponents.size()</ac:parameter></ac:structured-macro></td></tr>
     <tr><td><strong>Successful</strong></td><td><ac:structured-macro ac:name="status"><ac:parameter ac:name="colour">Green</ac:parameter><ac:parameter ac:name="title">$successfulComponents.size()</ac:parameter></ac:structured-macro></td></tr>
+    </tbody>
+</table>
+
+<h3>Request Parameters</h3>
+<table>
+    <tbody>
+    <tr><td><strong>Include Systems</strong></td><td>#if($request.componentsFilter.includeSystems.size() > 0)#foreach($s in $request.componentsFilter.includeSystems)<code>$s</code>#if($foreach.hasNext), #end#end#else&#8212;#end</td></tr>
+    <tr><td><strong>Exclude Components</strong></td><td>#if($request.componentsFilter.excludeComponents.size() > 0)#foreach($c in $request.componentsFilter.excludeComponents)<code>$c</code>#if($foreach.hasNext), #end#end#else&#8212;#end</td></tr>
+    <tr><td><strong>Check Parameters</strong></td><td>#if($request.checks.parameters.size() > 0)#foreach($p in $request.checks.parameters)<code>$p</code>#if($foreach.hasNext), #end#end#else&#8212;#end</td></tr>
+    <tr><td><strong>Check Steps</strong></td><td>#if($request.checks.steps.size() > 0)#foreach($st in $request.checks.steps)<code>$st</code>#if($foreach.hasNext), #end#end#else&#8212;#end</td></tr>
     </tbody>
 </table>
 

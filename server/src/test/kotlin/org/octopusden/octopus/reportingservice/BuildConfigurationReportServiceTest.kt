@@ -102,6 +102,7 @@ class BuildConfigurationReportServiceTest {
 
             assertEquals(
                 response(
+                    parameters = listOf("XRAY"),
                     result = listOf(
                         componentReport(
                             componentId = COMPONENT_A,
@@ -141,6 +142,7 @@ class BuildConfigurationReportServiceTest {
 
             assertEquals(
                 response(
+                    parameters = listOf("XRAY"),
                     result = listOf(
                         componentReport(
                             componentId = COMPONENT_A,
@@ -174,13 +176,14 @@ class BuildConfigurationReportServiceTest {
 
             assertEquals(
                 response(
+                    parameters = listOf("XRAY"),
                     result = listOf(
                         componentReport(
                             componentId = COMPONENT_A,
                             status = ComponentReportStatus.OK,
                             buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                             buildTypeId = COMPONENT_A_BUILD_ID,
-                            checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", BuildConfigurationConstants.NOT_DEFINED, BuildConfigurationConstants.NOT_DEFINED, status = false))
+                            checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", BuildConfigurationConstants.NOT_DEFINED, BuildConfigurationConstants.NOT_DEFINED, status = true))
                         )
                     )
                 ),
@@ -218,6 +221,7 @@ class BuildConfigurationReportServiceTest {
 
             assertEquals(
                 response(
+                    steps = listOf("Compile"),
                     result = listOf(
                         componentReport(
                             componentId = COMPONENT_A,
@@ -257,6 +261,7 @@ class BuildConfigurationReportServiceTest {
 
             assertEquals(
                 response(
+                    steps = listOf("Compile"),
                     result = listOf(
                         componentReport(
                             componentId = COMPONENT_A,
@@ -288,6 +293,7 @@ class BuildConfigurationReportServiceTest {
             val actual = service.generateReport(request(parameters = listOf("XRAY")))
             assertEquals(
                 response(
+                    parameters = listOf("XRAY"),
                     result = listOf(
                         componentReport(
                             componentId = "orphanComponent",
@@ -320,6 +326,7 @@ class BuildConfigurationReportServiceTest {
 
             assertEquals(
                 response(
+                    parameters = listOf("XRAY"),
                     result = listOf(
                         componentReport(
                             componentId = COMPONENT_A,
@@ -351,6 +358,8 @@ class BuildConfigurationReportServiceTest {
 
             assertEquals(
                 response(
+                    parameters = listOf("XRAY"),
+                    excludeComponents = setOf("skipped"),
                     result = listOf(
                         componentReport(componentId = COMPONENT_A, status = ComponentReportStatus.NO_PROJECT)
                     )
@@ -376,6 +385,7 @@ class BuildConfigurationReportServiceTest {
 
             assertEquals(
                 response(
+                    parameters = listOf("XRAY"),
                     result = listOf(
                         componentReport(componentId = "alpha", status = ComponentReportStatus.NO_PROJECT),
                         componentReport(componentId = "Betta", status = ComponentReportStatus.NO_PROJECT),
@@ -395,7 +405,7 @@ class BuildConfigurationReportServiceTest {
         @DisplayName("Empty checks")
         fun emptyChecks() {
             val actual = service.generateReport(request())
-            assertEquals(response(rootProjectId = ROOT_PROJECT_ID, result = emptyList()), actual)
+            assertEquals(response(result = emptyList()), actual)
         }
 
         @Test
@@ -403,7 +413,7 @@ class BuildConfigurationReportServiceTest {
         fun noComponentsAfterFilter() {
             stubMocks(components = emptyList(), template = build(BUILD_TEMPLATE_ID))
             val actual = service.generateReport(request(parameters = listOf("XRAY")))
-            assertEquals(response(rootProjectId = ROOT_PROJECT_ID, result = emptyList()), actual)
+            assertEquals(response(parameters = listOf("XRAY"), result = emptyList()), actual)
         }
     }
 }
