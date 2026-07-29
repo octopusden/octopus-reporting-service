@@ -110,7 +110,6 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
         )
         val response = client.generateBuildConfigurationReport(request)
         val reportContext = mutableMapOf(
-            "rootProjectId" to response.request.rootProjectId,
             "result" to response.result,
             "request" to response.request
         )
