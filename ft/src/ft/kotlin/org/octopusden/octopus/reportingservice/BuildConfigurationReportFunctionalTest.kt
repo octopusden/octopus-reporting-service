@@ -55,7 +55,7 @@ class BuildConfigurationReportFunctionalTest {
             val response = client.generateBuildConfigurationReport(
                 requestBuildConfigurationReport(rootProjectId = ROOT_PROJECT_ID, systems = setOf(SYSTEM)),
             )
-            assertEquals(ROOT_PROJECT_ID, response.rootProjectId)
+            assertEquals(ROOT_PROJECT_ID, response.request.rootProjectId)
             assertTrue(response.result.isEmpty())
         }
 

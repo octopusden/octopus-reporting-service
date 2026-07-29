@@ -11,11 +11,9 @@ import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcityStep
 import org.octopusden.octopus.infrastructure.teamcity.client.dto.TeamcitySteps
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationCheckResultDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationComponentReportDto
-import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationConstants
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportChecksDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportComponentsFilterDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportRequestDto
-import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportResponseDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildStage
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.CheckType
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.ComponentReportStatus
@@ -145,11 +143,6 @@ object Fixtures {
             ),
         )
 
-    fun response(
-        rootProjectId: String = ROOT_PROJECT_ID,
-        result: List<BuildConfigurationComponentReportDto> = emptyList(),
-    ): BuildConfigurationReportResponseDto = BuildConfigurationReportResponseDto(rootProjectId = rootProjectId, result = result)
-
     fun componentReport(
         componentId: String,
         status: ComponentReportStatus = ComponentReportStatus.OK,
@@ -170,7 +163,7 @@ object Fixtures {
         name: String,
         actual: String,
         expected: String,
-        status: Boolean = actual == expected && actual != BuildConfigurationConstants.NOT_DEFINED,
+        status: Boolean = actual == expected,
     ): BuildConfigurationCheckResultDto =
         BuildConfigurationCheckResultDto(
             checkType = type,

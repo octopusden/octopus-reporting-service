@@ -29,7 +29,7 @@ class BuildConfigurationReportServiceImpl(
         if (request.checks.steps.isEmpty() && request.checks.parameters.isEmpty()) {
             logger.info("generateReport: both checks.parameters and checks.steps are empty")
             return BuildConfigurationReportResponseDto(
-                rootProjectId = request.rootProjectId,
+                request = request,
                 result = emptyList(),
             )
         }
@@ -37,7 +37,7 @@ class BuildConfigurationReportServiceImpl(
         if (components.isEmpty()) {
             logger.info("generateReport: no components after filtering")
             return BuildConfigurationReportResponseDto(
-                rootProjectId = request.rootProjectId,
+                request = request,
                 result = emptyList(),
             )
         }
@@ -61,7 +61,7 @@ class BuildConfigurationReportServiceImpl(
             result.size,
         )
         return BuildConfigurationReportResponseDto(
-            rootProjectId = request.rootProjectId,
+            request = request,
             result = result,
         )
     }
@@ -143,7 +143,7 @@ class BuildConfigurationReportServiceImpl(
                 checkName = parameterName,
                 actualValue = actualValue,
                 expectedValue = expectedValue,
-                status = actualValue == expectedValue && actualValue != NOT_DEFINED,
+                status = actualValue == expectedValue,
             )
         }
 
@@ -168,7 +168,7 @@ class BuildConfigurationReportServiceImpl(
                 checkName = stepName,
                 actualValue = actualValue,
                 expectedValue = expectedValue,
-                status = actualValue == expectedValue && actualValue != NOT_DEFINED,
+                status = actualValue == expectedValue,
             )
         }
 

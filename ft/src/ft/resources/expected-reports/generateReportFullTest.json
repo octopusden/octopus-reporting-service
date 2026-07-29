@@ -1,5 +1,16 @@
 {
-  "rootProjectId": "RootProject",
+  "request": {
+    "rootProjectId": "RootProject",
+    "componentsFilter": {
+      "includeSystems": ["TEST_SYSTEM"],
+      "excludeComponents": []
+    },
+    "checks": {
+      "buildStage": "BUILD",
+      "parameters": ["XRAY"],
+      "steps": ["Compile"]
+    }
+  },
   "result": [
     {
       "componentId": "componentA",

@@ -1,14 +1,22 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ReportingServiceApplication(dev)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <envs>
-      <env name="COMPONENTS_REGISTRY_SERVICE_URL" value="" />
-      <env name="TEAMCITY_PASSWORD" value="" />
-      <env name="TEAMCITY_URL" value="" />
-      <env name="TEAMCITY_USER" value="" />
-    </envs>
     <module name="octopus-reporting-service.reporting-service.main" />
     <option name="PROGRAM_PARAMETERS" value="--spring.config.additional-location=classpath:/application-dev.yaml" />
+    <selectedOptions>
+      <option name="environmentVariables" />
+    </selectedOptions>
     <option name="SPRING_BOOT_MAIN_CLASS" value="org.octopusden.octopus.reportingservice.ReportingServiceApplicationKt" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="true" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="$USER_HOME$/dev.env" />
+      </ENTRIES>
+    </extension>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

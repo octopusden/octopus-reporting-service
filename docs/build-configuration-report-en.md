@@ -48,7 +48,18 @@ If both `parameters` and `steps` are empty, an empty result is returned.
 
 ```json
 {
-  "rootProjectId": "MyRootProject",
+  "request": {
+    "rootProjectId": "MyRootProject",
+    "componentsFilter": {
+      "includeSystems": ["SYSTEM_A"],
+      "excludeComponents": []
+    },
+    "checks": {
+      "buildStage": "BUILD",
+      "parameters": ["XRAY"],
+      "steps": ["Compile"]
+    }
+  },
   "result": [
     {
       "componentId": "my-service",
@@ -82,7 +93,7 @@ If both `parameters` and `steps` are empty, an empty result is returned.
 
 | Field                                | Description                                            |
 |--------------------------------------|--------------------------------------------------------|
-| `rootProjectId`                      | Root project passed in the request                     |
+| `request`                            | Copy of the request used to generate the report        |
 | `result`                             | List of reports per component, sorted by `componentId` |
 | `result[].componentId`               | Component identifier                                   |
 | `result[].status`                    | `OK`, `NO_BUILD_CONFIGURATION`, `NO_PROJECT`           |

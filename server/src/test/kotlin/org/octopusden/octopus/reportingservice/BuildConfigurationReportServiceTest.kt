@@ -9,7 +9,10 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.octopusden.octopus.components.registry.core.dto.ComponentV2
+import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationComponentReportDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationConstants
+import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportRequestDto
+import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.BuildConfigurationReportResponseDto
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.CheckType
 import org.octopusden.octopus.reportingservice.client.common.dto.buildconfig.ComponentReportStatus
 import org.octopusden.octopus.reportingservice.config.BuildConfigurationReportConfig
@@ -22,19 +25,17 @@ import org.octopusden.octopus.reportingservice.fixtures.Fixtures.COMPONENT_A
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.COMPONENT_A_BUILD_ID
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.COMPONENT_A_PROJECT_ID
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.COMPONENT_A_PROJECT_URL
-import org.octopusden.octopus.reportingservice.fixtures.Fixtures.ROOT_PROJECT_ID
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.build
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.checkResult
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.component
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.componentReport
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.param
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.project
-import org.octopusden.octopus.reportingservice.fixtures.Fixtures.request
-import org.octopusden.octopus.reportingservice.fixtures.Fixtures.response
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.step
 import org.octopusden.octopus.reportingservice.service.ComponentsRegistryService
 import org.octopusden.octopus.reportingservice.service.TeamCityService
 import org.octopusden.octopus.reportingservice.service.impl.BuildConfigurationReportServiceImpl
+import org.octopusden.octopus.reportingservice.fixtures.Fixtures.request as reportRequest
 
 @DisplayName("BuildConfigurationReportService")
 class BuildConfigurationReportServiceTest {
@@ -72,6 +73,15 @@ class BuildConfigurationReportServiceTest {
         }
     }
 
+    private fun assertReportResult(
+        expectedRequest: BuildConfigurationReportRequestDto,
+        expectedResult: List<BuildConfigurationComponentReportDto>,
+        actual: BuildConfigurationReportResponseDto,
+    ) {
+        assertEquals(expectedRequest, actual.request)
+        assertEquals(expectedResult, actual.result)
+    }
+
     @Nested
     @DisplayName("Parameter checks")
     inner class ParameterChecks {
@@ -97,18 +107,18 @@ class BuildConfigurationReportServiceTest {
                 ),
             )
 
-            val actual = service.generateReport(request(parameters = listOf("XRAY")))
+            val request = reportRequest(parameters = listOf("XRAY"))
+            val actual = service.generateReport(request)
 
-            assertEquals(
-                response(
-                    result = listOf(
-                        componentReport(
-                            componentId = COMPONENT_A,
-                            status = ComponentReportStatus.OK,
-                            buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
-                            buildTypeId = COMPONENT_A_BUILD_ID,
-                            checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", "true", "true")),
-                        ),
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(
+                        componentId = COMPONENT_A,
+                        status = ComponentReportStatus.OK,
+                        buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
+                        buildTypeId = COMPONENT_A_BUILD_ID,
+                        checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", "true", "true")),
                     ),
                 ),
                 actual,
@@ -137,18 +147,18 @@ class BuildConfigurationReportServiceTest {
                 ),
             )
 
-            val actual = service.generateReport(request(parameters = listOf("XRAY")))
+            val request = reportRequest(parameters = listOf("XRAY"))
+            val actual = service.generateReport(request)
 
-            assertEquals(
-                response(
-                    result = listOf(
-                        componentReport(
-                            componentId = COMPONENT_A,
-                            status = ComponentReportStatus.OK,
-                            buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
-                            buildTypeId = COMPONENT_A_BUILD_ID,
-                            checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", "false", "true")),
-                        ),
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(
+                        componentId = COMPONENT_A,
+                        status = ComponentReportStatus.OK,
+                        buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
+                        buildTypeId = COMPONENT_A_BUILD_ID,
+                        checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", "false", "true")),
                     ),
                 ),
                 actual,
@@ -171,24 +181,23 @@ class BuildConfigurationReportServiceTest {
                 ),
             )
 
-            val actual = service.generateReport(request(parameters = listOf("XRAY")))
+            val request = reportRequest(parameters = listOf("XRAY"))
+            val actual = service.generateReport(request)
 
-            assertEquals(
-                response(
-                    result = listOf(
-                        componentReport(
-                            componentId = COMPONENT_A,
-                            status = ComponentReportStatus.OK,
-                            buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
-                            buildTypeId = COMPONENT_A_BUILD_ID,
-                            checks = listOf(
-                                checkResult(
-                                    CheckType.PARAMETER,
-                                    "XRAY",
-                                    BuildConfigurationConstants.NOT_DEFINED,
-                                    BuildConfigurationConstants.NOT_DEFINED,
-                                    status = false,
-                                ),
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(
+                        componentId = COMPONENT_A,
+                        status = ComponentReportStatus.OK,
+                        buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
+                        buildTypeId = COMPONENT_A_BUILD_ID,
+                        checks = listOf(
+                            checkResult(
+                                CheckType.PARAMETER,
+                                "XRAY",
+                                BuildConfigurationConstants.NOT_DEFINED,
+                                BuildConfigurationConstants.NOT_DEFINED,
                             ),
                         ),
                     ),
@@ -223,18 +232,18 @@ class BuildConfigurationReportServiceTest {
                 ),
             )
 
-            val actual = service.generateReport(request(steps = listOf("Compile")))
+            val request = reportRequest(steps = listOf("Compile"))
+            val actual = service.generateReport(request)
 
-            assertEquals(
-                response(
-                    result = listOf(
-                        componentReport(
-                            componentId = COMPONENT_A,
-                            status = ComponentReportStatus.OK,
-                            buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
-                            buildTypeId = COMPONENT_A_BUILD_ID,
-                            checks = listOf(checkResult(CheckType.STEP, "Compile", "ENABLED", "ENABLED")),
-                        ),
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(
+                        componentId = COMPONENT_A,
+                        status = ComponentReportStatus.OK,
+                        buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
+                        buildTypeId = COMPONENT_A_BUILD_ID,
+                        checks = listOf(checkResult(CheckType.STEP, "Compile", "ENABLED", "ENABLED")),
                     ),
                 ),
                 actual,
@@ -263,18 +272,18 @@ class BuildConfigurationReportServiceTest {
                 ),
             )
 
-            val actual = service.generateReport(request(steps = listOf("Compile")))
+            val request = reportRequest(steps = listOf("Compile"))
+            val actual = service.generateReport(request)
 
-            assertEquals(
-                response(
-                    result = listOf(
-                        componentReport(
-                            componentId = COMPONENT_A,
-                            status = ComponentReportStatus.OK,
-                            buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
-                            buildTypeId = COMPONENT_A_BUILD_ID,
-                            checks = listOf(checkResult(CheckType.STEP, "Compile", "DISABLED", "ENABLED")),
-                        ),
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(
+                        componentId = COMPONENT_A,
+                        status = ComponentReportStatus.OK,
+                        buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
+                        buildTypeId = COMPONENT_A_BUILD_ID,
+                        checks = listOf(checkResult(CheckType.STEP, "Compile", "DISABLED", "ENABLED")),
                     ),
                 ),
                 actual,
@@ -294,14 +303,15 @@ class BuildConfigurationReportServiceTest {
                 projects = emptyList(),
             )
 
-            val actual = service.generateReport(request(parameters = listOf("XRAY")))
-            assertEquals(
-                response(
-                    result = listOf(
-                        componentReport(
-                            componentId = "orphanComponent",
-                            status = ComponentReportStatus.NO_PROJECT,
-                        ),
+            val request = reportRequest(parameters = listOf("XRAY"))
+            val actual = service.generateReport(request)
+
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(
+                        componentId = "orphanComponent",
+                        status = ComponentReportStatus.NO_PROJECT,
                     ),
                 ),
                 actual,
@@ -326,15 +336,15 @@ class BuildConfigurationReportServiceTest {
                 ),
             )
 
-            val actual = service.generateReport(request(parameters = listOf("XRAY")))
+            val request = reportRequest(parameters = listOf("XRAY"))
+            val actual = service.generateReport(request)
 
-            assertEquals(
-                response(
-                    result = listOf(
-                        componentReport(
-                            componentId = COMPONENT_A,
-                            status = ComponentReportStatus.NO_BUILD_CONFIGURATION,
-                        ),
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(
+                        componentId = COMPONENT_A,
+                        status = ComponentReportStatus.NO_BUILD_CONFIGURATION,
                     ),
                 ),
                 actual,
@@ -354,15 +364,13 @@ class BuildConfigurationReportServiceTest {
                 projects = emptyList(),
             )
 
-            val actual = service.generateReport(
-                request(parameters = listOf("XRAY"), excludeComponents = setOf("skipped")),
-            )
+            val request = reportRequest(parameters = listOf("XRAY"), excludeComponents = setOf("skipped"))
+            val actual = service.generateReport(request)
 
-            assertEquals(
-                response(
-                    result = listOf(
-                        componentReport(componentId = COMPONENT_A, status = ComponentReportStatus.NO_PROJECT),
-                    ),
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(componentId = COMPONENT_A, status = ComponentReportStatus.NO_PROJECT),
                 ),
                 actual,
             )
@@ -381,15 +389,15 @@ class BuildConfigurationReportServiceTest {
                 projects = emptyList(),
             )
 
-            val actual = service.generateReport(request(parameters = listOf("XRAY")))
+            val request = reportRequest(parameters = listOf("XRAY"))
+            val actual = service.generateReport(request)
 
-            assertEquals(
-                response(
-                    result = listOf(
-                        componentReport(componentId = "alpha", status = ComponentReportStatus.NO_PROJECT),
-                        componentReport(componentId = "Betta", status = ComponentReportStatus.NO_PROJECT),
-                        componentReport(componentId = "gamma", status = ComponentReportStatus.NO_PROJECT),
-                    ),
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(componentId = "alpha", status = ComponentReportStatus.NO_PROJECT),
+                    componentReport(componentId = "Betta", status = ComponentReportStatus.NO_PROJECT),
+                    componentReport(componentId = "gamma", status = ComponentReportStatus.NO_PROJECT),
                 ),
                 actual,
             )
@@ -402,16 +410,18 @@ class BuildConfigurationReportServiceTest {
         @Test
         @DisplayName("Empty checks")
         fun emptyChecks() {
-            val actual = service.generateReport(request())
-            assertEquals(response(rootProjectId = ROOT_PROJECT_ID, result = emptyList()), actual)
+            val request = reportRequest()
+            val actual = service.generateReport(request)
+            assertReportResult(request, emptyList(), actual)
         }
 
         @Test
         @DisplayName("No components after filter")
         fun noComponentsAfterFilter() {
             stubMocks(components = emptyList(), template = build(BUILD_TEMPLATE_ID))
-            val actual = service.generateReport(request(parameters = listOf("XRAY")))
-            assertEquals(response(rootProjectId = ROOT_PROJECT_ID, result = emptyList()), actual)
+            val request = reportRequest(parameters = listOf("XRAY"))
+            val actual = service.generateReport(request)
+            assertReportResult(request, emptyList(), actual)
         }
     }
 }
