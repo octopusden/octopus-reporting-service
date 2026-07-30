@@ -2,6 +2,8 @@ package org.octopusden.octopus.reportingservice.client.common.dto.buildconfig
 
 data class BuildConfigurationComponentReportDto(
     val componentId: String,
+    val componentOwner: String,
+    val componentUrl: String,
     val status: ComponentReportStatus,
     val buildConfigurationUrl: String? = null,
     val buildTypeId: String? = null,

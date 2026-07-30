@@ -21,6 +21,7 @@ import org.octopusden.octopus.reportingservice.domain.BuildConfiguration
 import org.octopusden.octopus.reportingservice.domain.BuildConfigurationParameter
 import org.octopusden.octopus.reportingservice.domain.BuildConfigurationProject
 import org.octopusden.octopus.reportingservice.domain.BuildConfigurationStep
+import org.octopusden.octopus.reportingservice.service.impl.ComponentsRegistryServiceImpl.Companion.COMPONENT_PATH
 
 object Fixtures {
     // Components Registry
@@ -145,14 +146,18 @@ object Fixtures {
 
     fun componentReport(
         componentId: String,
-        status: ComponentReportStatus = ComponentReportStatus.OK,
+        componentOwner: String = "owner",
+        status: ComponentReportStatus = ComponentReportStatus.SUCCESS,
+        componentUrl: String = "$COMPONENT_REGISTRY_URL/$COMPONENT_PATH/$componentId",
         buildConfigurationUrl: String? = null,
         buildTypeId: String? = null,
         checks: List<BuildConfigurationCheckResultDto> = emptyList(),
     ): BuildConfigurationComponentReportDto =
         BuildConfigurationComponentReportDto(
             componentId = componentId,
+            componentOwner = componentOwner,
             status = status,
+            componentUrl = componentUrl,
             buildConfigurationUrl = buildConfigurationUrl,
             buildTypeId = buildTypeId,
             checks = checks,
@@ -182,4 +187,5 @@ object Fixtures {
     const val COMPONENT_A_PROJECT_ID = "RootProject_ComponentA"
     const val COMPONENT_A_PROJECT_URL = "http://tc/RootProject_ComponentA"
     const val COMPONENT_A_BUILD_ID = "RootProject_ComponentA_Build"
+    const val COMPONENT_REGISTRY_URL = "http://components-registry"
 }

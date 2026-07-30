@@ -50,6 +50,7 @@ class BuildConfigurationReportServiceImpl(
             .map { component ->
                 buildComponentReport(
                     componentId = component.id,
+                    componentOwner = component.componentOwner,
                     projects = projectsByComponentId[component.id].orEmpty(),
                     stageTemplates = stageTemplates,
                     request = request,
@@ -83,13 +84,17 @@ class BuildConfigurationReportServiceImpl(
 
     private fun buildComponentReport(
         componentId: String,
+        componentOwner: String,
         projects: List<BuildConfigurationProject>,
         stageTemplates: Map<String, BuildConfiguration>,
         request: BuildConfigurationReportRequestDto,
     ): BuildConfigurationComponentReportDto {
+        val componentUrl = componentsRegistryService.getComponentUrl(componentId)
         if (projects.isEmpty()) {
             return BuildConfigurationComponentReportDto(
                 componentId = componentId,
+                componentOwner = componentOwner,
+                componentUrl = componentUrl,
                 status = ComponentReportStatus.NO_PROJECT,
             )
         }
@@ -111,6 +116,8 @@ class BuildConfigurationReportServiceImpl(
             )
             return BuildConfigurationComponentReportDto(
                 componentId = componentId,
+                componentOwner = componentOwner,
+                componentUrl = componentUrl,
                 status = ComponentReportStatus.NO_BUILD_CONFIGURATION,
             )
         }
@@ -123,7 +130,9 @@ class BuildConfigurationReportServiceImpl(
         }
         return BuildConfigurationComponentReportDto(
             componentId = componentId,
-            status = ComponentReportStatus.OK,
+            componentOwner = componentOwner,
+            componentUrl = componentUrl,
+            status = ComponentReportStatus.SUCCESS,
             buildConfigurationUrl = project.webUrl,
             buildTypeId = buildConfiguration.buildTypeId,
             checks = checks,

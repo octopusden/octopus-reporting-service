@@ -27,6 +27,7 @@ import org.octopusden.octopus.reportingservice.fixtures.Fixtures.COMPONENT_A_PRO
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.COMPONENT_A_PROJECT_URL
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.build
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.checkResult
+import org.octopusden.octopus.reportingservice.fixtures.Fixtures.COMPONENT_REGISTRY_URL
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.component
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.componentReport
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.param
@@ -35,6 +36,7 @@ import org.octopusden.octopus.reportingservice.fixtures.Fixtures.step
 import org.octopusden.octopus.reportingservice.service.ComponentsRegistryService
 import org.octopusden.octopus.reportingservice.service.TeamCityService
 import org.octopusden.octopus.reportingservice.service.impl.BuildConfigurationReportServiceImpl
+import org.octopusden.octopus.reportingservice.service.impl.ComponentsRegistryServiceImpl.Companion.COMPONENT_PATH
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.request as reportRequest
 
 @DisplayName("BuildConfigurationReportService")
@@ -47,6 +49,9 @@ class BuildConfigurationReportServiceTest {
     fun setUp() {
         teamCityService = mock()
         componentsRegistryService = mock()
+        whenever(componentsRegistryService.getComponentUrl(any())).thenAnswer {
+            "$COMPONENT_REGISTRY_URL/$COMPONENT_PATH/${it.arguments[0]}"
+        }
         service = BuildConfigurationReportServiceImpl(
             config = BuildConfigurationReportConfig(
                 baseProjectId = BASE_PROJECT_ID,
@@ -115,7 +120,7 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(
                         componentId = COMPONENT_A,
-                        status = ComponentReportStatus.OK,
+                        status = ComponentReportStatus.SUCCESS,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
                         checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", "true", "true")),
@@ -155,7 +160,7 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(
                         componentId = COMPONENT_A,
-                        status = ComponentReportStatus.OK,
+                        status = ComponentReportStatus.SUCCESS,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
                         checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", "false", "true")),
@@ -189,7 +194,7 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(
                         componentId = COMPONENT_A,
-                        status = ComponentReportStatus.OK,
+                        status = ComponentReportStatus.SUCCESS,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
                         checks = listOf(
@@ -240,7 +245,7 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(
                         componentId = COMPONENT_A,
-                        status = ComponentReportStatus.OK,
+                        status = ComponentReportStatus.SUCCESS,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
                         checks = listOf(checkResult(CheckType.STEP, "Compile", "ENABLED", "ENABLED")),
@@ -280,7 +285,7 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(
                         componentId = COMPONENT_A,
-                        status = ComponentReportStatus.OK,
+                        status = ComponentReportStatus.SUCCESS,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
                         checks = listOf(checkResult(CheckType.STEP, "Compile", "DISABLED", "ENABLED")),

@@ -12,14 +12,17 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class ClientsConfig {
     @Bean
-    fun componentsRegistryClient(
+    fun componentsRegistryUrlProvider(
         @Value($$"${components-registry-service.url}") url: String,
+    ): ClassicComponentsRegistryServiceClientUrlProvider = object : ClassicComponentsRegistryServiceClientUrlProvider {
+        override fun getApiUrl() = url
+    }
+
+    @Bean
+    fun componentsRegistryClient(
+        urlProvider: ClassicComponentsRegistryServiceClientUrlProvider,
     ): ClassicComponentsRegistryServiceClient =
-        ClassicComponentsRegistryServiceClient(
-            object : ClassicComponentsRegistryServiceClientUrlProvider {
-                override fun getApiUrl() = url
-            },
-        )
+        ClassicComponentsRegistryServiceClient(urlProvider)
 
     @Bean
     fun teamCityClient(teamCityConfig: TeamCityConfig): TeamcityClassicClient =

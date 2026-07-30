@@ -275,11 +275,6 @@
             white-space: nowrap;
         }
 
-        .status-ok {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
         .status-warning {
             background: #fff4e5;
             color: #ef6c00;
@@ -321,15 +316,15 @@
 </head>
 
 <body>
-    #set($okComponents = [])
+    #set($successComponents = [])
     #set($failedComponents = [])
     #set($successfulComponents = [])
     #set($noProjectComponents = [])
     #set($noBuildConfigComponents = [])
 
     #foreach($component in $result)
-        #if($component.status.name() == "OK")
-            #set($dummy = $okComponents.add($component))
+        #if($component.status.name() == "SUCCESS")
+            #set($dummy = $successComponents.add($component))
 
             #set($hasFailedCheck = false)
             #foreach($check in $component.checks)
@@ -363,6 +358,14 @@
         <span class="check-value">Disabled</span>
         #else
         <span class="check-value">$stringValue</span>
+        #end
+    #end
+
+    #macro(componentLink $component)
+        #if($component.componentUrl)
+            <a class="component-name" href="$component.componentUrl" target="_blank" rel="noopener noreferrer">$component.componentId</a>
+        #else
+            <span class="component-name">$component.componentId</span>
         #end
     #end
 
@@ -482,9 +485,10 @@
     <div class="table-wrap">
         <table id="failedChecksTable">
             <colgroup>
-                <col style="width: 24%;">
-                <col style="width: 16%;">
                 <col style="width: 20%;">
+                <col style="width: 10%;">
+                <col style="width: 14%;">
+                <col style="width: 16%;">
                 <col style="width: 20%;">
                 <col style="width: 20%;">
             </colgroup>
@@ -492,6 +496,7 @@
             <thead>
             <tr>
                 <th>Component</th>
+                <th>Owner</th>
                 <th>Check Type</th>
                 <th>Check</th>
                 <th>Actual Value</th>
@@ -506,19 +511,17 @@
                         <tr>
                             <td>
                                 <div class="component-cell">
-                                    #if($component.buildConfigurationUrl)
-                                        <a class="component-name" href="$component.buildConfigurationUrl" target="_blank" rel="noopener noreferrer">
-                                            $component.componentId
-                                        </a>
-                                    #else
-                                        <span class="component-name">$component.componentId</span>
-                                    #end
+                                    #componentLink($component)
 
-                                    #if($component.buildTypeId)
+                                    #if($component.buildConfigurationUrl)
+                                        <a class="muted mono" href="$component.buildConfigurationUrl" target="_blank" rel="noopener noreferrer">$component.buildTypeId</a>
+                                    #elseif($component.buildTypeId)
                                         <span class="muted mono">$component.buildTypeId</span>
                                     #end
                                 </div>
                             </td>
+
+                            <td>$component.componentOwner</td>
 
                             <td>$check.checkType</td>
 
@@ -546,13 +549,15 @@
     <div class="table-wrap">
         <table id="noBuildConfigTable">
             <colgroup>
-                <col style="width: 75%;">
+                <col style="width: 50%;">
                 <col style="width: 25%;">
+                <col style="width: 25%">
             </colgroup>
 
             <thead>
             <tr>
                 <th>Component</th>
+                <th>Owner</th>
                 <th>Status</th>
             </tr>
             </thead>
@@ -560,7 +565,8 @@
             <tbody>
                 #foreach($component in $noBuildConfigComponents)
                 <tr>
-                    <td>$component.componentId</td>
+                    <td>#componentLink($component)</td>
+                    <td>$component.componentOwner</td>
                     <td>
                         <span class="status-badge status-warning">NO_BUILD_CONFIGURATION</span>
                     </td>
@@ -579,11 +585,13 @@
             <colgroup>
                 <col style="width: 75%;">
                 <col style="width: 25%;">
+                <col style="width: 25%">
             </colgroup>
 
             <thead>
             <tr>
                 <th>Component</th>
+                <th>Owner</th>
                 <th>Status</th>
             </tr>
             </thead>
@@ -591,7 +599,8 @@
             <tbody>
                 #foreach($component in $noProjectComponents)
                 <tr>
-                    <td>$component.componentId</td>
+                    <td>#componentLink($component)</td>
+                    <td>$component.componentOwner</td>
                     <td>
                         <span class="status-badge status-warning">NO_PROJECT</span>
                     </td>
@@ -608,22 +617,22 @@
     <div class="table-wrap">
         <table id="successfulComponentsTable">
             <colgroup>
-                <col style="width: 24%;">
+                <col style="width: 20%;">
+                <col style="width: 10%;">
                 <col style="width: 14%;">
-                <col style="width: 18%;">
-                <col style="width: 18%;">
-                <col style="width: 18%;">
-                <col style="width: 8%;">
+                <col style="width: 16%;">
+                <col style="width: 20%;">
+                <col style="width: 20%;">
             </colgroup>
 
             <thead>
             <tr>
                 <th>Component</th>
+                <th>Owner</th>
                 <th>Check Type</th>
                 <th>Check</th>
                 <th>Actual Value</th>
                 <th>Expected Value</th>
-                <th>Status</th>
             </tr>
             </thead>
 
@@ -633,30 +642,20 @@
                     <tr>
                         <td>
                             <div class="component-cell">
+                                #componentLink($component)
                                 #if($component.buildConfigurationUrl)
-                                    <a class="component-name"
-                                       href="$component.buildConfigurationUrl"
-                                       target="_blank"
-                                       rel="noopener noreferrer">
-                                        $component.componentId
-                                    </a>
-                                #else
-                                    <span class="component-name">$component.componentId</span>
-                                #end
-
-                                #if($component.buildTypeId)
+                                    <a class="muted mono" href="$component.buildConfigurationUrl" target="_blank" rel="noopener noreferrer">$component.buildTypeId</a>
+                                #elseif($component.buildTypeId)
                                     <span class="muted mono">$component.buildTypeId</span>
                                 #end
                             </div>
                         </td>
 
+                        <td>$component.componentOwner</td>
                         <td>$check.checkType</td>
                         <td>$check.checkName</td>
                         <td>#formatValue($check.actualValue)</td>
                         <td>#formatValue($check.expectedValue)</td>
-                        <td>
-                            <span class="status-badge status-ok">OK</span>
-                        </td>
                     </tr>
                     #end
                 #end

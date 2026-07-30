@@ -12,7 +12,7 @@
 #set($noBuildConfigComponents = [])
 
 #foreach($component in $result)
-    #if($component.status.name() == "OK")
+    #if($component.status.name() == "SUCCESS")
         #set($dummy = $okComponents.add($component))
         #set($hasFailedCheck = false)
 
@@ -47,6 +47,14 @@
     <strong>Disabled</strong>
     #else
     <strong>$stringValue</strong>
+    #end
+#end
+
+#macro(wikiComponentLink $component)
+    #if($component.componentUrl)
+    <a href="$component.componentUrl">$component.componentId</a>
+    #else
+    <strong>$component.componentId</strong>
     #end
 #end
 
@@ -198,9 +206,18 @@
 #if($failedComponents.size() > 0)
 <h2>Failed Checks</h2>
 <table>
+    <colgroup>
+        <col style="width: 20%;"/>
+        <col style="width: 10%;"/>
+        <col style="width: 14%;"/>
+        <col style="width: 16%;"/>
+        <col style="width: 20%;"/>
+        <col style="width: 20%;"/>
+    </colgroup>
     <tbody>
     <tr>
         <th>Component</th>
+        <th>Owner</th>
         <th>Check Type</th>
         <th>Check</th>
         <th>Actual Value</th>
@@ -211,16 +228,15 @@
                 #if(!$check.status)
                 <tr>
                     <td>
+                        #wikiComponentLink($component)
+                        <br/>
                         #if($component.buildConfigurationUrl)
-                            <a href="$component.buildConfigurationUrl">$component.componentId</a>
-                        #else
-                            <strong>$component.componentId</strong>
-                        #end
-
-                        #if($component.buildTypeId)
-                            <br/><code>$component.buildTypeId</code>
+                            <a href="$component.buildConfigurationUrl"><code>$component.buildTypeId</code></a>
+                        #elseif($component.buildTypeId)
+                            <code>$component.buildTypeId</code>
                         #end
                     </td>
+                    <td>$component.componentOwner</td>
                     <td><code>$check.checkType</code></td>
                     <td><code>$check.checkName</code></td>
                     <td>#formatValue($check.actualValue)</td>
@@ -239,11 +255,13 @@
     <tbody>
     <tr>
         <th>Component</th>
+        <th>Owner</th>
         <th>Status</th>
     </tr>
         #foreach($component in $noBuildConfigComponents)
         <tr>
-            <td><strong>$component.componentId</strong></td>
+            <td>#wikiComponentLink($component)</td>
+            <td>$component.componentOwner</td>
             <td>
                 <ac:structured-macro ac:name="status" ac:schema-version="1">
                     <ac:parameter ac:name="colour">Yellow</ac:parameter>
@@ -262,11 +280,13 @@
     <tbody>
     <tr>
         <th>Component</th>
+        <th>Owner</th>
         <th>Status</th>
     </tr>
         #foreach($component in $noProjectComponents)
         <tr>
-            <td><strong>$component.componentId</strong></td>
+            <td>#wikiComponentLink($component)</td>
+            <td>$component.componentOwner</td>
             <td>
                 <ac:structured-macro ac:name="status" ac:schema-version="1">
                     <ac:parameter ac:name="colour">Yellow</ac:parameter>
@@ -282,9 +302,18 @@
 #if($successfulComponents.size() > 0)
 <h2>Successful Components</h2>
 <table>
+    <colgroup>
+        <col style="width: 20%;"/>
+        <col style="width: 10%;"/>
+        <col style="width: 14%;"/>
+        <col style="width: 16%;"/>
+        <col style="width: 20%;"/>
+        <col style="width: 20%;"/>
+    </colgroup>
     <tbody>
     <tr>
         <th>Component</th>
+        <th>Owner</th>
         <th>Check Type</th>
         <th>Check</th>
         <th>Actual Value</th>
@@ -295,18 +324,17 @@
             #foreach($check in $component.checks)
             <tr>
                 <td>
+                    #wikiComponentLink($component)
+                    <br/>
                     #if($component.buildConfigurationUrl)
-                        <a href="$component.buildConfigurationUrl">$component.componentId</a>
+                        <a href="$component.buildConfigurationUrl"><code>$component.buildTypeId</code></a>
+                    #elseif($component.buildTypeId)
+                        <code>$component.buildTypeId</code>
                     #else
-                        <strong>$component.componentId</strong>
-                    #end
-
-                    #if($component.buildTypeId)
-                        <br/><code>$component.buildTypeId</code>
-                    #else
-                        <br/><em>Build type not specified</em>
+                        <em>Build type not specified</em>
                     #end
                 </td>
+                <td>$component.componentOwner</td>
                 <td><code>$check.checkType</code></td>
                 <td><code>$check.checkName</code></td>
                 <td>#formatValue($check.actualValue)</td>
