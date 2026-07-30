@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-release.yml@v2.4.1
+    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-release.yml@v2.6.2
     with:
       flow-type: hybrid
       java-version: '21'
@@ -14,4 +14,12 @@ jobs:
       build-version: ${{ github.event.client_payload.project_version }}
       docker-image: reporting-service
       skip-extra-tasks: ft
+      # Exempts reporting-automation from the Maven Central publication guard, which otherwise
+      # fails the release on `reporting-automation-<ver>-all.jar` (~21.6 MB) for both the `-all`
+      # classifier and the size limit. That artifact must keep reaching a Maven repository:
+      # automation/metarunners/OctopusReportingAutomation.xml downloads it via
+      # maven-dependency-plugin as ${group}:${name}:${version}:jar:all and then runs
+      # `java -jar <name>-<version>-all.jar`. The value is the artifactId the guard compares
+      # against, not a module path or a file name.
+      fat-jar-publication-allowlist: reporting-automation
     secrets: inherit

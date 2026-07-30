@@ -29,9 +29,9 @@ octopusQuality {
     }
     // The functional-test task requires a live OKD/Docker environment; keep it out of the gate.
     excludeTasks("ft")
-    // Drop these modules from coverage verification. octopus-quality 2.4.0 now ENFORCES the
-    // per-module Kover line-coverage floor (it was a no-op in 2.3.5), so every module wired into
-    // coverage must clear it or the gate fails at 0%.
+    // Drop these modules from coverage verification. octopus-quality ENFORCES the per-module Kover
+    // line-coverage floor (since 2.4.0), so every module wired into coverage must clear it or the
+    // gate fails at 0%.
     //   - ft: runs only against a live OKD/Docker environment (its Kover instrumentation would
     //     otherwise drag in :reporting-service:dockerBuildImage via :ft:ocProcess) and carries no
     //     unit coverage.
@@ -57,6 +57,83 @@ allprojects {
     if (version == "unspecified") {
         version = defaultVersion
     }
+}
+
+// Project paths allowed to publish to Maven Central. Central is an exchange for artifacts other
+// projects consume as a Maven dependency; a deployable's artifact belongs in its docker image.
+// Paths, not names: the root project's path is ":", so a name-based check cannot see a publication
+// added there, and two modules with the same name in different subtrees would collapse to one entry.
+//   :client, :common        consumed as Maven dependencies, and declared in the published POMs of
+//                           the other kept modules (:reporting-automation -> :client -> :common,
+//                           so removing either breaks resolution for consumers that never name it).
+//   :reporting-automation   automation/metarunners/OctopusReportingAutomation.xml resolves it from
+//                           a Maven repository as ${group}:${name}:${version}:jar:all and runs the
+//                           result with `java -jar`, so a Maven repository is its only channel.
+// :reporting-service is deliberately absent: its deliverable is the docker image built from
+// bootJar, and nothing resolves it as a Maven dependency.
+val centralPublishedProjects = setOf(
+    ":client",
+    ":common",
+    ":reporting-automation",
+)
+
+// Paths of the projects that really publish, recorded REACTIVELY rather than snapshotted.
+// `plugins.withId` fires whenever maven-publish is applied, and `publications.all` fires for
+// publications that already exist AND for any added later — including from a `projectsEvaluated`
+// callback registered after this script's own. A one-shot snapshot would miss those, because
+// Gradle dispatches such callbacks in registration order, and the guard would stay green while
+// an extra coordinate reached Central.
+// Only plain strings are collected, so the task action never reads `Project` state at execution
+// time — that is what keeps the task compatible with the configuration cache.
+//
+// allprojects, NOT subprojects: the root is a publishable project like any other, and a
+// publication added there must not be invisible to this check.
+val centralPublishingProjectPaths = mutableSetOf<String>()
+allprojects {
+    val candidatePath = path
+    plugins.withId("maven-publish") {
+        extensions
+            .getByType(PublishingExtension::class.java)
+            .publications
+            .all { centralPublishingProjectPaths.add(candidatePath) }
+    }
+}
+
+// A TASK, not a throw from `gradle.projectsEvaluated`: a policy problem must fail its own gate.
+// Throwing at configuration time would break `build`, `test`, `dependencies` and IDE sync the
+// moment the publication set drifts, instead of just the publish path.
+val verifyCentralPublicationPolicy = tasks.register("verifyCentralPublicationPolicy") {
+    group = "verification"
+    description = "Fails when the set of projects publishing to Maven Central drifts from the allowlist."
+    val allowlisted = centralPublishedProjects
+    val observed = centralPublishingProjectPaths
+    doLast {
+        // Compared as Set to Set: a List is never equal to a Set, which would make the guard fire
+        // on every publish. The expectation is the literal allowlist above, never a set derived
+        // from the same data that creates the publications — that would be tautological.
+        val actual = observed.toSet()
+        if (actual != allowlisted) {
+            throw GradleException(
+                "Maven Central publication set drifted.\n" +
+                    "  allowlisted: ${allowlisted.sorted()}\n" +
+                    "  publishing:  ${actual.sorted()}",
+            )
+        }
+    }
+}
+
+// Wired onto the LEAF upload tasks (AbstractPublishToMaven covers PublishToMavenRepository and
+// PublishToMavenLocal), not only onto the aggregates: `dependsOn` does not order two siblings of
+// the same aggregate, so under parallel execution an upload could otherwise start before the
+// guard failed. The aggregates are matched by name as well — `publish` is per-project and
+// `publishToSonatype` belongs to the nexus plugin, so match rather than force them into existence.
+allprojects {
+    tasks.withType(AbstractPublishToMaven::class.java).configureEach {
+        dependsOn(verifyCentralPublicationPolicy)
+    }
+    tasks
+        .matching { it.name in setOf("publishToSonatype", "publish", "publishToMavenLocal") }
+        .configureEach { dependsOn(verifyCentralPublicationPolicy) }
 }
 
 nexusPublishing {

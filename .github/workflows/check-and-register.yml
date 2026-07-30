@@ -8,8 +8,11 @@ on:
 
 jobs:
   build:
-    uses: octopusden/octopus-base/.github/workflows/common-check-and-register-release.yml@v2.4.1
+    uses: octopusden/octopus-base/.github/workflows/common-check-and-register-release.yml@v2.6.2
     if:  "${{ github.event.workflow_run.conclusion == 'success' }}"
     with:
-      artifact-pattern: "octopus/reporting-service/reporting-service/_VER_/reporting-service-_VER_.jar"
+      # Gates registration on the released version being genuinely resolvable on Maven Central.
+      # Points at `client`, a published library: the reporting-service jar is no longer published
+      # there, so polling it would wait out the full retry budget and fail every release.
+      artifact-pattern: "octopus/reporting-service/client/_VER_/client-_VER_.jar"
     secrets: inherit
