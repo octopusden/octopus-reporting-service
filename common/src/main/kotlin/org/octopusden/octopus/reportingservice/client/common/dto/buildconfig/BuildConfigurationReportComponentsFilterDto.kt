@@ -5,6 +5,8 @@ import org.octopusden.octopus.reportingservice.client.common.validation.NoBlankE
 data class BuildConfigurationReportComponentsFilterDto(
     @field:NoBlankElements(message = "includeSystems must not contain blank values")
     val includeSystems: Set<String> = emptySet(),
+    @field:NoBlankElements(message = "includeComponents must not contain blank values")
+    val includeComponents: Set<String> = emptySet(),
     @field:NoBlankElements(message = "excludeComponents must not contain blank values")
     val excludeComponents: Set<String> = emptySet(),
 )

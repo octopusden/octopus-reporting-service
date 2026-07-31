@@ -433,6 +433,19 @@
                 </div>
 
                 <div>
+                    <span class="detail-label">Included Components</span>
+                    <span class="detail-value">
+                        #if($request.componentsFilter.includeComponents.size() > 0)
+                            #foreach($c in $request.componentsFilter.includeComponents)
+                                $c#if($foreach.hasNext), #end
+                            #end
+                        #else
+                            <span class="hero-muted">—</span>
+                        #end
+                    </span>
+                </div>
+
+                <div>
                     <span class="detail-label">Excluded Components</span>
                     <span class="detail-value">
                         #if($request.componentsFilter.excludeComponents.size() > 0)

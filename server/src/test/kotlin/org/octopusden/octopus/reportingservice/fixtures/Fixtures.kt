@@ -126,6 +126,7 @@ object Fixtures {
     fun request(
         rootProjectId: String = ROOT_PROJECT_ID,
         systems: Set<String> = setOf(SYSTEM),
+        includeComponents: Set<String> = emptySet(),
         excludeComponents: Set<String> = emptySet(),
         stage: BuildStage = BuildStage.BUILD,
         parameters: List<String> = emptyList(),
@@ -135,6 +136,7 @@ object Fixtures {
             rootProjectId = rootProjectId,
             componentsFilter = BuildConfigurationReportComponentsFilterDto(
                 includeSystems = systems,
+                includeComponents = includeComponents,
                 excludeComponents = excludeComponents,
             ),
             checks = BuildConfigurationReportChecksDto(

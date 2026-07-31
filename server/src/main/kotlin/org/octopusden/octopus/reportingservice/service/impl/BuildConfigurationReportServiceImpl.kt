@@ -69,7 +69,12 @@ class BuildConfigurationReportServiceImpl(
 
     private fun getComponentsAfterFilter(request: BuildConfigurationReportRequestDto): List<ComponentV2> {
         val all = componentsRegistryService.getComponentsBySystems(request.componentsFilter.includeSystems)
-        return all.filter { !request.componentsFilter.excludeComponents.contains(it.id) }
+        val afterInclude = if (request.componentsFilter.includeComponents.isNotEmpty()) {
+            all.filter { request.componentsFilter.includeComponents.contains(it.id) }
+        } else {
+            all
+        }
+        return afterInclude.filter { !request.componentsFilter.excludeComponents.contains(it.id) }
     }
 
     private fun getBuildStageTemplates(request: BuildConfigurationReportRequestDto): Map<String, BuildConfiguration> {

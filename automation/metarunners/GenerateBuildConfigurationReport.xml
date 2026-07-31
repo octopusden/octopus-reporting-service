@@ -9,6 +9,7 @@
             <param name="REPORTING_SERVICE_URL" value="" spec="text description='Reporting Service URL' validationMode='not_empty' display='normal'"/>
             <param name="ROOT_PROJECT_ID" value="" spec="text description='Root project ID' validationMode='not_empty' display='normal'"/>
             <param name="INCLUDE_SYSTEMS" value="" spec="text description='Comma-separated list of systems to include' validationMode='any' display='normal'"/>
+            <param name="INCLUDE_COMPONENTS" value="" spec="text description='Comma-separated list of components to include' validationMode='any' display='normal'"/>
             <param name="EXCLUDE_COMPONENTS" value="" spec="text description='Comma-separated list of components to exclude' validationMode='any' display='normal'"/>
             <param name="BUILD_STAGE" value="BUILD" spec="text description='Build stage: BUILD, RELEASE_CANDIDATE, RELEASE' validationMode='any' display='normal'"/>
             <param name="PARAMETERS" value="" spec="text description='Comma-separated list of parameters to check' validationMode='any' display='normal'"/>
@@ -38,6 +39,7 @@
                            --reporting-service-url=%REPORTING_SERVICE_URL%
                            --root-project-id=%ROOT_PROJECT_ID%
                            --include-systems=%INCLUDE_SYSTEMS%
+                           --include-components=%INCLUDE_COMPONENTS%
                            --exclude-components=%EXCLUDE_COMPONENTS%
                            --build-stage=%BUILD_STAGE%
                            --parameters=%PARAMETERS%

@@ -361,6 +361,27 @@ class BuildConfigurationReportServiceTest {
     @DisplayName("Filtering and sorting")
     inner class Filtering {
         @Test
+        @DisplayName("includeComponents filtering")
+        fun includeComponents() {
+            stubMocks(
+                components = listOf(component(COMPONENT_A), component("another")),
+                template = build(BUILD_TEMPLATE_ID),
+                projects = emptyList(),
+            )
+
+            val request = reportRequest(parameters = listOf("XRAY"), includeComponents = setOf("another"))
+            val actual = service.generateReport(request)
+
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(componentId = "another", status = ComponentReportStatus.NO_PROJECT),
+                ),
+                actual,
+            )
+        }
+
+        @Test
         @DisplayName("excludeComponents filtering")
         fun excludeComponents() {
             stubMocks(

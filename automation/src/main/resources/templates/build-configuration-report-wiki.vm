@@ -165,6 +165,18 @@
         </td>
     </tr>
     <tr>
+        <td><strong>Include Components</strong></td>
+        <td>
+            #if($request.componentsFilter.includeComponents.size() > 0)
+                #foreach($componentId in $request.componentsFilter.includeComponents)
+                    <code>$componentId</code>#if($foreach.hasNext), #end
+                #end
+            #else
+                <em>—</em>
+            #end
+        </td>
+    </tr>
+    <tr>
         <td><strong>Exclude Components</strong></td>
         <td>
             #if($request.componentsFilter.excludeComponents.size() > 0)
