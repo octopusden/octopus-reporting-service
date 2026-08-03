@@ -8,7 +8,8 @@ plugins {
     // Applied but declaring NO publication: this module is not published to Maven Central.
     // Keeping the plugin leaves the `publish` lifecycle task in place as a no-op, so a CI
     // invocation of it does not fail. Declaring no MavenPublication is what keeps the module
-    // off Central; the allowlist in the root build enforces that (verifyCentralPublicationPolicy).
+    // off Central; the declared `centralPublications` set in the root build's
+    // `octopusQuality { publication { } }` block (which this module is absent from) enforces that.
     `maven-publish`
 }
 
