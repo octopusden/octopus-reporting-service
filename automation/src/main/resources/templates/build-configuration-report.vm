@@ -362,11 +362,7 @@
     #end
 
     #macro(componentLink $component)
-        #if($component.componentUrl)
-            <a class="component-name" href="$component.componentUrl" target="_blank" rel="noopener noreferrer">$component.componentId</a>
-        #else
-            <span class="component-name">$component.componentId</span>
-        #end
+        <a class="component-name" href="$componentsRegistryUrl/rest/api/2/components/$component.componentId" target="_blank" rel="noopener noreferrer">$component.componentId</a>
     #end
 
 

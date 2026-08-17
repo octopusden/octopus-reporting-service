@@ -81,7 +81,7 @@ class BuildConfigurationReportFunctionalTest {
             val expected = loadExpected("expected-reports/generateReportFullTest.json")
             assertEquals(expected.request, actual.request)
             assertEquals(expected.result.size, actual.result.size)
-            expected.result.forEachIndexed { index, expectedComponent ->
+                expected.result.forEachIndexed { index, expectedComponent ->
                 val actualComponent = actual.result[index]
                 assertEquals(expectedComponent.componentId, actualComponent.componentId)
                 assertEquals(expectedComponent.componentOwner, actualComponent.componentOwner)

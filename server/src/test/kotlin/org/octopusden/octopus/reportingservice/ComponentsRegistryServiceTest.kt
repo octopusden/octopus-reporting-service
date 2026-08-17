@@ -11,11 +11,9 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.octopusden.octopus.components.registry.client.impl.ClassicComponentsRegistryServiceClient
-import org.octopusden.octopus.components.registry.client.impl.ClassicComponentsRegistryServiceClientUrlProvider
 import org.octopusden.octopus.components.registry.core.dto.ComponentV2
 import org.octopusden.octopus.components.registry.core.dto.ComponentsDTO
 import org.octopusden.octopus.reportingservice.client.common.exception.ExternalServiceException
-import org.octopusden.octopus.reportingservice.fixtures.Fixtures.COMPONENT_REGISTRY_URL
 import org.octopusden.octopus.reportingservice.fixtures.Fixtures.component
 import org.octopusden.octopus.reportingservice.service.impl.ComponentsRegistryServiceImpl
 
@@ -27,9 +25,7 @@ class ComponentsRegistryServiceTest {
     @BeforeEach
     fun setUp() {
         client = mock()
-        val urlProvider = mock<ClassicComponentsRegistryServiceClientUrlProvider>()
-        whenever(urlProvider.getApiUrl()).thenReturn(COMPONENT_REGISTRY_URL)
-        service = ComponentsRegistryServiceImpl(client = client, urlProvider = urlProvider)
+        service = ComponentsRegistryServiceImpl(client = client)
     }
 
     private fun stubComponents(vararg components: ComponentV2) {

@@ -3,6 +3,7 @@
     "rootProjectId": "RootProject",
     "componentsFilter": {
       "includeSystems": ["TEST_SYSTEM"],
+      "includeComponents": [],
       "excludeComponents": []
     },
     "checks": {
@@ -16,7 +17,6 @@
       "componentId": "componentA",
       "componentOwner": "owner",
       "status": "SUCCESS",
-      "componentUrl": "http://${TEST_COMPONENTS_REGISTRY_HOST}/rest/api/2/components/componentA",
       "buildConfigurationUrl": "http://tc/RootProject_ComponentA",
       "buildTypeId": "RootProject_ComponentA_Build",
       "checks": [
@@ -40,7 +40,6 @@
       "componentId": "componentB",
       "componentOwner": "owner",
       "status": "SUCCESS",
-      "componentUrl": "http://${TEST_COMPONENTS_REGISTRY_HOST}/rest/api/2/components/componentB",
       "buildConfigurationUrl": "http://tc/RootProject_ComponentB",
       "buildTypeId": "RootProject_ComponentB_Build",
       "checks": [
@@ -64,7 +63,6 @@
       "componentId": "componentC",
       "componentOwner": "owner",
       "status": "NO_BUILD_CONFIGURATION",
-      "componentUrl": "http://${TEST_COMPONENTS_REGISTRY_HOST}/rest/api/2/components/componentC",
       "buildTypeId": null,
       "checks": []
     },
@@ -72,7 +70,6 @@
       "componentId": "componentD",
       "componentOwner": "owner",
       "status": "NO_PROJECT",
-      "componentUrl": "http://${TEST_COMPONENTS_REGISTRY_HOST}/rest/api/2/components/componentD",
       "buildConfigurationUrl": null,
       "buildTypeId": null,
       "checks": []

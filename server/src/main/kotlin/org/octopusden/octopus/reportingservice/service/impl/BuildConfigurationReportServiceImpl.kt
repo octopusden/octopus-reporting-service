@@ -94,12 +94,10 @@ class BuildConfigurationReportServiceImpl(
         stageTemplates: Map<String, BuildConfiguration>,
         request: BuildConfigurationReportRequestDto,
     ): BuildConfigurationComponentReportDto {
-        val componentUrl = componentsRegistryService.getComponentUrl(componentId)
         if (projects.isEmpty()) {
             return BuildConfigurationComponentReportDto(
                 componentId = componentId,
                 componentOwner = componentOwner,
-                componentUrl = componentUrl,
                 status = ComponentReportStatus.NO_PROJECT,
             )
         }
@@ -122,7 +120,6 @@ class BuildConfigurationReportServiceImpl(
             return BuildConfigurationComponentReportDto(
                 componentId = componentId,
                 componentOwner = componentOwner,
-                componentUrl = componentUrl,
                 status = ComponentReportStatus.NO_BUILD_CONFIGURATION,
             )
         }
@@ -136,7 +133,6 @@ class BuildConfigurationReportServiceImpl(
         return BuildConfigurationComponentReportDto(
             componentId = componentId,
             componentOwner = componentOwner,
-            componentUrl = componentUrl,
             status = ComponentReportStatus.SUCCESS,
             buildConfigurationUrl = project.webUrl,
             buildTypeId = buildConfiguration.buildTypeId,

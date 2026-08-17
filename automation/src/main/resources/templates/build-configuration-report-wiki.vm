@@ -51,11 +51,7 @@
 #end
 
 #macro(wikiComponentLink $component)
-    #if($component.componentUrl)
-    <a href="$component.componentUrl">$component.componentId</a>
-    #else
-    <strong>$component.componentId</strong>
-    #end
+<a href="$componentsRegistryUrl/rest/api/2/components/$component.componentId">$component.componentId</a>
 #end
 
 <h2>Overview</h2>

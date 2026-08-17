@@ -7,6 +7,7 @@
     <settings>
         <parameters>
             <param name="REPORTING_SERVICE_URL" value="" spec="text description='Reporting Service URL' validationMode='not_empty' display='normal'"/>
+            <param name="COMPONENTS_REGISTRY_URL" value="" spec="text description='Components Registry base URL' validationMode='not_empty' display='normal'"/>
             <param name="ROOT_PROJECT_ID" value="" spec="text description='Root project ID' validationMode='not_empty' display='normal'"/>
             <param name="INCLUDE_SYSTEMS" value="" spec="text description='Comma-separated list of systems to include' validationMode='any' display='normal'"/>
             <param name="INCLUDE_COMPONENTS" value="" spec="text description='Comma-separated list of components to include' validationMode='any' display='normal'"/>
@@ -37,6 +38,7 @@
                            --report-escape=%CUSTOM_REPORT_ESCAPE_HTML%
                            generate-build-configuration-report
                            --reporting-service-url=%REPORTING_SERVICE_URL%
+                           --components-registry-url=%COMPONENTS_REGISTRY_URL%
                            --root-project-id=%ROOT_PROJECT_ID%
                            --include-systems=%INCLUDE_SYSTEMS%
                            --include-components=%INCLUDE_COMPONENTS%
