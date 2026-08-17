@@ -6,7 +6,7 @@ defined for the selected build stage (`BUILD`, `RELEASE_CANDIDATE`, `RELEASE`).
 
 Possible component statuses in the report:
 
-- `OK` - configuration found and matches the template
+- `SUCCESS` - configuration found and matches the template
 - `NO_BUILD_CONFIGURATION` - TeamCity project found, but no configuration inherits the standard template
 - `NO_PROJECT` - TeamCity project not found
 
@@ -23,6 +23,7 @@ POST /rest/api/1/reports/build-configuration
   "rootProjectId": "MyRootProject",
   "componentsFilter": {
     "includeSystems": ["SYSTEM_A"],
+    "includeComponents": ["my-service"],
     "excludeComponents": ["legacy-service"]
   },
   "checks": {
@@ -33,14 +34,15 @@ POST /rest/api/1/reports/build-configuration
 }
 ```
 
-| Field                                      | Required              | Description                                                    |
-|--------------------------------------------|-----------------------|----------------------------------------------------------------|
-| `rootProjectId`                            | yes                   | Root TeamCity project where component subprojects are searched |
-| `componentsFilter.includeSystems`          | no                    | Filter by systems. If empty - all components                   |
-| `componentsFilter.excludeComponents`       | no                    | Component identifiers to exclude                               |
-| `checks.buildStage`                        | no (default: `BUILD`) | Build stage: `BUILD`, `RELEASE_CANDIDATE`, `RELEASE`           |
-| `checks.parameters`                        | no                    | TeamCity parameter names to check                              |
-| `checks.steps`                             | no                    | TeamCity step names to check                                   |
+| Field                                      | Required              | Description                                                                 |
+|--------------------------------------------|-----------------------|-----------------------------------------------------------------------------|
+| `rootProjectId`                            | yes                   | Root TeamCity project where component subprojects are searched              |
+| `componentsFilter.includeSystems`          | no                    | Filter by systems. If empty - all components                                |
+| `componentsFilter.includeComponents`       | no                    | Component identifiers to include (if set, only these will be in the report) |
+| `componentsFilter.excludeComponents`       | no                    | Component identifiers to exclude                                            |
+| `checks.buildStage`                        | no (default: `BUILD`) | Build stage: `BUILD`, `RELEASE_CANDIDATE`, `RELEASE`                        |
+| `checks.parameters`                        | no                    | TeamCity parameter names to check                                           |
+| `checks.steps`                             | no                    | TeamCity step names to check                                                |
 
 If both `parameters` and `steps` are empty, an empty result is returned.
 
@@ -52,6 +54,7 @@ If both `parameters` and `steps` are empty, an empty result is returned.
     "rootProjectId": "MyRootProject",
     "componentsFilter": {
       "includeSystems": ["SYSTEM_A"],
+      "includeComponents": [],
       "excludeComponents": []
     },
     "checks": {
@@ -63,7 +66,8 @@ If both `parameters` and `steps` are empty, an empty result is returned.
   "result": [
     {
       "componentId": "my-service",
-      "status": "OK",
+      "componentOwner": "team-a",
+      "status": "SUCCESS",
       "buildConfigurationUrl": "http://teamcity/project.html?projectId=MyRootProject_MyService",
       "buildTypeId": "MyRootProject_MyService_Build",
       "checks": [
@@ -85,6 +89,7 @@ If both `parameters` and `steps` are empty, an empty result is returned.
     },
     {
       "componentId": "another-service",
+      "componentOwner": "team-b",
       "status": "NO_BUILD_CONFIGURATION"
     }
   ]
@@ -96,7 +101,8 @@ If both `parameters` and `steps` are empty, an empty result is returned.
 | `request`                            | Copy of the request used to generate the report        |
 | `result`                             | List of reports per component, sorted by `componentId` |
 | `result[].componentId`               | Component identifier                                   |
-| `result[].status`                    | `OK`, `NO_BUILD_CONFIGURATION`, `NO_PROJECT`           |
+| `result[].componentOwner`            | Component owner                                        |
+| `result[].status`                    | `SUCCESS`, `NO_BUILD_CONFIGURATION`, `NO_PROJECT`      |
 | `result[].buildConfigurationUrl`     | TeamCity project URL (can be `null`)                   |
 | `result[].buildTypeId`               | Build configuration identifier                         |
 | `result[].checks`                    | Parameter and step check results                       |
@@ -117,6 +123,7 @@ java -jar automation.jar \
   --json-file=report.json \
   generate-build-configuration-report \
   --reporting-service-url=http://reporting-service:8080 \
+  --components-registry-url=http://components-registry:8080 \
   --root-project-id=MyRootProject \
   --include-systems=SYSTEM_A \
   --build-stage=BUILD \
@@ -124,7 +131,23 @@ java -jar automation.jar \
   --steps=Compile,Test
 ```
 
-For a full list of options: `generate-build-configuration-report --help`.
+| Option                         | Required | Description                                                           |
+|--------------------------------|----------|-----------------------------------------------------------------------|
+| `--reporting-service-url`      | yes      | Reporting service URL                                                 |
+| `--components-registry-url`    | yes      | Components Registry URL (used to build component links in the report) |
+| `--root-project-id`            | yes      | Root TeamCity project                                                 |
+| `--include-systems`            | no       | Systems to include (comma-separated)                                  |
+| `--include-components`         | no       | Component identifiers to include (comma-separated)                    |
+| `--exclude-components`         | no       | Component identifiers to exclude (comma-separated)                    |
+| `--build-stage`                | no       | Build stage: `BUILD`, `RELEASE_CANDIDATE`, `RELEASE`                  |
+| `--parameters`                 | no       | Parameters to check (comma-separated)                                 |
+| `--steps`                      | no       | Steps to check (comma-separated)                                      |
+| `--publish-to-wiki`            | no       | Publish to Confluence (`true`/`false`)                                |
+| `--wiki-report-template`       | no       | Path to Velocity template for wiki                                    |
+| `--wiki-page-id`               | no       | Confluence page ID                                                    |
+| `--wiki-url`                   | no       | Confluence URL                                                        |
+| `--wiki-user`                  | no       | Confluence username                                                   |
+| `--wiki-password`              | no       | Confluence password                                                   |
 
 ### Meta-Runner
 
