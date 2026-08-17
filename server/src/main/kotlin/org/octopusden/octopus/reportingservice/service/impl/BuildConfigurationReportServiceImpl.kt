@@ -33,7 +33,11 @@ class BuildConfigurationReportServiceImpl(
                 result = emptyList(),
             )
         }
-        val components = getComponentsAfterFilter(request)
+        val components = getComponentsAfterFilter(
+            includeSystems = request.componentsFilter.includeSystems,
+            includeComponents = request.componentsFilter.includeComponents,
+            excludeComponents = request.componentsFilter.excludeComponents,
+        )
         if (components.isEmpty()) {
             logger.info("generateReport: no components after filtering")
             return BuildConfigurationReportResponseDto(
@@ -67,14 +71,15 @@ class BuildConfigurationReportServiceImpl(
         )
     }
 
-    private fun getComponentsAfterFilter(request: BuildConfigurationReportRequestDto): List<ComponentV2> {
-        val all = componentsRegistryService.getComponentsBySystems(request.componentsFilter.includeSystems)
-        val afterInclude = if (request.componentsFilter.includeComponents.isNotEmpty()) {
-            all.filter { request.componentsFilter.includeComponents.contains(it.id) }
-        } else {
-            all
+    private fun getComponentsAfterFilter(
+        includeSystems: Set<String>,
+        includeComponents: Set<String>,
+        excludeComponents: Set<String>,
+    ): List<ComponentV2> {
+        val all = componentsRegistryService.getComponentsBySystems(includeSystems)
+        return all.filter {
+            (includeComponents.isEmpty() || it.id in includeComponents) && it.id !in excludeComponents
         }
-        return afterInclude.filter { !request.componentsFilter.excludeComponents.contains(it.id) }
     }
 
     private fun getBuildStageTemplates(request: BuildConfigurationReportRequestDto): Map<String, BuildConfiguration> {

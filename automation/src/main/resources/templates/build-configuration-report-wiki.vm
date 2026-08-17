@@ -5,7 +5,6 @@
 
 <h1>Build Configuration Report — <code>$request.rootProjectId</code></h1>
 
-#set($okComponents = [])
 #set($failedComponents = [])
 #set($successfulComponents = [])
 #set($noProjectComponents = [])
@@ -13,7 +12,6 @@
 
 #foreach($component in $result)
     #if($component.status.name() == "SUCCESS")
-        #set($dummy = $okComponents.add($component))
         #set($hasFailedCheck = false)
 
         #foreach($check in $component.checks)

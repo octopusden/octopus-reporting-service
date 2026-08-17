@@ -316,7 +316,6 @@
 </head>
 
 <body>
-    #set($successComponents = [])
     #set($failedComponents = [])
     #set($successfulComponents = [])
     #set($noProjectComponents = [])
@@ -324,8 +323,6 @@
 
     #foreach($component in $result)
         #if($component.status.name() == "SUCCESS")
-            #set($dummy = $successComponents.add($component))
-
             #set($hasFailedCheck = false)
             #foreach($check in $component.checks)
                 #if(!$check.status)
@@ -560,7 +557,7 @@
             <colgroup>
                 <col style="width: 50%;">
                 <col style="width: 25%;">
-                <col style="width: 25%">
+                <col style="width: 25%;">
             </colgroup>
 
             <thead>
@@ -592,9 +589,9 @@
     <div class="table-wrap">
         <table id="noProjectTable">
             <colgroup>
-                <col style="width: 75%;">
+                <col style="width: 50%;">
                 <col style="width: 25%;">
-                <col style="width: 25%">
+                <col style="width: 25%;">
             </colgroup>
 
             <thead>
