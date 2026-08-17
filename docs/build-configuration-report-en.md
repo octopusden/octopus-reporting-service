@@ -46,6 +46,19 @@ POST /rest/api/1/reports/build-configuration
 
 If both `parameters` and `steps` are empty, an empty result is returned.
 
+### Component Filtering
+
+The `includeComponents` and `excludeComponents` filters are applied sequentially:
+
+1. First, from all components belonging to the systems specified in `includeSystems`, only those whose identifiers are listed in `includeComponents` are selected (if the filter is set).
+2. Then, components listed in `excludeComponents` are removed from the resulting set.
+
+Therefore, if a component is specified in both filters together, it will be excluded.
+
+**Example:** with `includeComponents: ["alpha", "beta"]` and `excludeComponents: ["beta"]`, only `alpha` will appear in the report.
+
+If `includeComponents` is empty, all system components are included (except those excluded via `excludeComponents`).
+
 ### Response
 
 ```json

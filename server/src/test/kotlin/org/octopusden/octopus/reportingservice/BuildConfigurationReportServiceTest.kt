@@ -377,6 +377,31 @@ class BuildConfigurationReportServiceTest {
         }
 
         @Test
+        @DisplayName("includeComponents + excludeComponents combined")
+        fun includeAndExcludeComponentsCombined() {
+            stubMocks(
+                components = listOf(component("alpha"), component("beta"), component("gamma")),
+                template = build(BUILD_TEMPLATE_ID),
+                projects = emptyList(),
+            )
+
+            val request = reportRequest(
+                parameters = listOf("XRAY"),
+                includeComponents = setOf("alpha", "beta"),
+                excludeComponents = setOf("beta"),
+            )
+            val actual = service.generateReport(request)
+
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(componentId = "alpha", status = ComponentReportStatus.NO_PROJECT),
+                ),
+                actual,
+            )
+        }
+
+        @Test
         @DisplayName("excludeComponents filtering")
         fun excludeComponents() {
             stubMocks(

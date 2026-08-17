@@ -46,6 +46,19 @@ POST /rest/api/1/reports/build-configuration
 
 Если и `parameters`, и `steps` пусты - возвращается пустой результат.
 
+### Фильтрация компонентов
+
+Фильтры `includeComponents` и `excludeComponents` применяются последовательно:
+
+1. Сначала из всех компонентов, принадлежащих указанным в `includeSystems` системам, выбираются только те, чьи id перечислены в `includeComponents` (если фильтр задан).
+2. Затем из полученного набора исключаются компоненты, перечисленные в `excludeComponents`.
+
+Таким образом, если компонент указан одновременно в обоих фильтрах, то он будет исключен.
+
+**Пример:** при `includeComponents: ["alpha", "beta"]` и `excludeComponents: ["beta"]` в отчёт попадёт только `alpha`.
+
+Если `includeComponents` пуст, включаются все компоненты систем (кроме исключённых через `excludeComponents`).
+
 ### Response
 
 ```json
