@@ -33,7 +33,11 @@ class BuildConfigurationReportServiceImpl(
                 result = emptyList(),
             )
         }
-        val components = getComponentsAfterFilter(request)
+        val components = getComponentsAfterFilter(
+            includeSystems = request.componentsFilter.includeSystems,
+            includeComponents = request.componentsFilter.includeComponents,
+            excludeComponents = request.componentsFilter.excludeComponents,
+        )
         if (components.isEmpty()) {
             logger.info("generateReport: no components after filtering")
             return BuildConfigurationReportResponseDto(
@@ -50,6 +54,7 @@ class BuildConfigurationReportServiceImpl(
             .map { component ->
                 buildComponentReport(
                     componentId = component.id,
+                    componentOwner = component.componentOwner,
                     projects = projectsByComponentId[component.id].orEmpty(),
                     stageTemplates = stageTemplates,
                     request = request,
@@ -66,9 +71,15 @@ class BuildConfigurationReportServiceImpl(
         )
     }
 
-    private fun getComponentsAfterFilter(request: BuildConfigurationReportRequestDto): List<ComponentV2> {
-        val all = componentsRegistryService.getComponentsBySystems(request.componentsFilter.includeSystems)
-        return all.filter { !request.componentsFilter.excludeComponents.contains(it.id) }
+    private fun getComponentsAfterFilter(
+        includeSystems: Set<String>,
+        includeComponents: Set<String>,
+        excludeComponents: Set<String>,
+    ): List<ComponentV2> {
+        val all = componentsRegistryService.getComponentsBySystems(includeSystems)
+        return all.filter {
+            (includeComponents.isEmpty() || it.id in includeComponents) && it.id !in excludeComponents
+        }
     }
 
     private fun getBuildStageTemplates(request: BuildConfigurationReportRequestDto): Map<String, BuildConfiguration> {
@@ -83,6 +94,7 @@ class BuildConfigurationReportServiceImpl(
 
     private fun buildComponentReport(
         componentId: String,
+        componentOwner: String,
         projects: List<BuildConfigurationProject>,
         stageTemplates: Map<String, BuildConfiguration>,
         request: BuildConfigurationReportRequestDto,
@@ -90,6 +102,7 @@ class BuildConfigurationReportServiceImpl(
         if (projects.isEmpty()) {
             return BuildConfigurationComponentReportDto(
                 componentId = componentId,
+                componentOwner = componentOwner,
                 status = ComponentReportStatus.NO_PROJECT,
             )
         }
@@ -111,6 +124,7 @@ class BuildConfigurationReportServiceImpl(
             )
             return BuildConfigurationComponentReportDto(
                 componentId = componentId,
+                componentOwner = componentOwner,
                 status = ComponentReportStatus.NO_BUILD_CONFIGURATION,
             )
         }
@@ -123,7 +137,8 @@ class BuildConfigurationReportServiceImpl(
         }
         return BuildConfigurationComponentReportDto(
             componentId = componentId,
-            status = ComponentReportStatus.OK,
+            componentOwner = componentOwner,
+            status = ComponentReportStatus.SUCCESS,
             buildConfigurationUrl = project.webUrl,
             buildTypeId = buildConfiguration.buildTypeId,
             checks = checks,

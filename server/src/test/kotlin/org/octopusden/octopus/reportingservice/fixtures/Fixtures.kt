@@ -125,6 +125,7 @@ object Fixtures {
     fun request(
         rootProjectId: String = ROOT_PROJECT_ID,
         systems: Set<String> = setOf(SYSTEM),
+        includeComponents: Set<String> = emptySet(),
         excludeComponents: Set<String> = emptySet(),
         stage: BuildStage = BuildStage.BUILD,
         parameters: List<String> = emptyList(),
@@ -134,6 +135,7 @@ object Fixtures {
             rootProjectId = rootProjectId,
             componentsFilter = BuildConfigurationReportComponentsFilterDto(
                 includeSystems = systems,
+                includeComponents = includeComponents,
                 excludeComponents = excludeComponents,
             ),
             checks = BuildConfigurationReportChecksDto(
@@ -145,13 +147,15 @@ object Fixtures {
 
     fun componentReport(
         componentId: String,
-        status: ComponentReportStatus = ComponentReportStatus.OK,
+        componentOwner: String = "owner",
+        status: ComponentReportStatus = ComponentReportStatus.SUCCESS,
         buildConfigurationUrl: String? = null,
         buildTypeId: String? = null,
         checks: List<BuildConfigurationCheckResultDto> = emptyList(),
     ): BuildConfigurationComponentReportDto =
         BuildConfigurationComponentReportDto(
             componentId = componentId,
+            componentOwner = componentOwner,
             status = status,
             buildConfigurationUrl = buildConfigurationUrl,
             buildTypeId = buildTypeId,

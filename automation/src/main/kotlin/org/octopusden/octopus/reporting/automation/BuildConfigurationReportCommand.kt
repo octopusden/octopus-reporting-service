@@ -38,6 +38,13 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
             it.isNotEmpty()
         }
 
+    private val componentsRegistryUrl by option(COMPONENTS_REGISTRY_URL_OPTION, help = "Components Registry base URL")
+        .convert { it.trim() }
+        .required()
+        .check("$COMPONENTS_REGISTRY_URL_OPTION is empty") {
+            it.isNotEmpty()
+        }
+
     private val rootProjectId by option(ROOT_PROJECT_ID_OPTION, help = "Root project ID")
         .convert { it.trim() }
         .required()
@@ -46,6 +53,10 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
         }
 
     private val includeSystems by option(INCLUDE_SYSTEMS_OPTION, help = "Comma-separated list of systems to include")
+        .convert { it.trim() }
+        .default("")
+
+    private val includeComponents by option(INCLUDE_COMPONENTS_OPTION, help = "Comma-separated list of components to include")
         .convert { it.trim() }
         .default("")
 
@@ -100,6 +111,7 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
             rootProjectId = rootProjectId,
             componentsFilter = BuildConfigurationReportComponentsFilterDto(
                 includeSystems = includeSystems.split(SPLIT_SYMBOLS.toRegex()).filter { it.isNotEmpty() }.toSet(),
+                includeComponents = includeComponents.split(SPLIT_SYMBOLS.toRegex()).filter { it.isNotEmpty() }.toSet(),
                 excludeComponents = excludeComponents.split(SPLIT_SYMBOLS.toRegex()).filter { it.isNotEmpty() }.toSet(),
             ),
             checks = BuildConfigurationReportChecksDto(
@@ -112,6 +124,7 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
         val reportContext = mutableMapOf(
             "result" to response.result,
             "request" to response.request,
+            "componentsRegistryUrl" to componentsRegistryUrl,
         )
         report.write(reportContext, response)
         if (publishToWiki) {
@@ -168,7 +181,9 @@ class BuildConfigurationReportCommand : CliktCommand(name = COMMAND) {
         const val COMMAND = "generate-build-configuration-report"
         const val REPORTING_SERVICE_URL_OPTION = "--reporting-service-url"
         const val ROOT_PROJECT_ID_OPTION = "--root-project-id"
+        const val COMPONENTS_REGISTRY_URL_OPTION = "--components-registry-url"
         const val INCLUDE_SYSTEMS_OPTION = "--include-systems"
+        const val INCLUDE_COMPONENTS_OPTION = "--include-components"
         const val EXCLUDE_COMPONENTS_OPTION = "--exclude-components"
         const val BUILD_STAGE_OPTION = "--build-stage"
         const val PARAMETERS_OPTION = "--parameters"

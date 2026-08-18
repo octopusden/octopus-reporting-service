@@ -1,7 +1,7 @@
 package org.octopusden.octopus.reportingservice.client.common.dto.buildconfig
 
 enum class ComponentReportStatus {
-    OK,
+    SUCCESS,
     NO_PROJECT,
     NO_BUILD_CONFIGURATION,
 }

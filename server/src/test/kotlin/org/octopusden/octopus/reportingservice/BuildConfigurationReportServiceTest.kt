@@ -115,7 +115,7 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(
                         componentId = COMPONENT_A,
-                        status = ComponentReportStatus.OK,
+                        status = ComponentReportStatus.SUCCESS,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
                         checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", "true", "true")),
@@ -155,7 +155,7 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(
                         componentId = COMPONENT_A,
-                        status = ComponentReportStatus.OK,
+                        status = ComponentReportStatus.SUCCESS,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
                         checks = listOf(checkResult(CheckType.PARAMETER, "XRAY", "false", "true")),
@@ -189,7 +189,7 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(
                         componentId = COMPONENT_A,
-                        status = ComponentReportStatus.OK,
+                        status = ComponentReportStatus.SUCCESS,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
                         checks = listOf(
@@ -240,7 +240,7 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(
                         componentId = COMPONENT_A,
-                        status = ComponentReportStatus.OK,
+                        status = ComponentReportStatus.SUCCESS,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
                         checks = listOf(checkResult(CheckType.STEP, "Compile", "ENABLED", "ENABLED")),
@@ -280,7 +280,7 @@ class BuildConfigurationReportServiceTest {
                 listOf(
                     componentReport(
                         componentId = COMPONENT_A,
-                        status = ComponentReportStatus.OK,
+                        status = ComponentReportStatus.SUCCESS,
                         buildConfigurationUrl = COMPONENT_A_PROJECT_URL,
                         buildTypeId = COMPONENT_A_BUILD_ID,
                         checks = listOf(checkResult(CheckType.STEP, "Compile", "DISABLED", "ENABLED")),
@@ -355,6 +355,52 @@ class BuildConfigurationReportServiceTest {
     @Nested
     @DisplayName("Filtering and sorting")
     inner class Filtering {
+        @Test
+        @DisplayName("includeComponents filtering")
+        fun includeComponents() {
+            stubMocks(
+                components = listOf(component(COMPONENT_A), component("another")),
+                template = build(BUILD_TEMPLATE_ID),
+                projects = emptyList(),
+            )
+
+            val request = reportRequest(parameters = listOf("XRAY"), includeComponents = setOf("another"))
+            val actual = service.generateReport(request)
+
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(componentId = "another", status = ComponentReportStatus.NO_PROJECT),
+                ),
+                actual,
+            )
+        }
+
+        @Test
+        @DisplayName("includeComponents + excludeComponents combined")
+        fun includeAndExcludeComponentsCombined() {
+            stubMocks(
+                components = listOf(component("alpha"), component("beta"), component("gamma")),
+                template = build(BUILD_TEMPLATE_ID),
+                projects = emptyList(),
+            )
+
+            val request = reportRequest(
+                parameters = listOf("XRAY"),
+                includeComponents = setOf("alpha", "beta"),
+                excludeComponents = setOf("beta"),
+            )
+            val actual = service.generateReport(request)
+
+            assertReportResult(
+                request,
+                listOf(
+                    componentReport(componentId = "alpha", status = ComponentReportStatus.NO_PROJECT),
+                ),
+                actual,
+            )
+        }
+
         @Test
         @DisplayName("excludeComponents filtering")
         fun excludeComponents() {

@@ -3,6 +3,7 @@
     "rootProjectId": "RootProject",
     "componentsFilter": {
       "includeSystems": ["TEST_SYSTEM"],
+      "includeComponents": [],
       "excludeComponents": []
     },
     "checks": {
@@ -14,7 +15,8 @@
   "result": [
     {
       "componentId": "componentA",
-      "status": "OK",
+      "componentOwner": "owner",
+      "status": "SUCCESS",
       "buildConfigurationUrl": "http://tc/RootProject_ComponentA",
       "buildTypeId": "RootProject_ComponentA_Build",
       "checks": [
@@ -36,7 +38,8 @@
     },
     {
       "componentId": "componentB",
-      "status": "OK",
+      "componentOwner": "owner",
+      "status": "SUCCESS",
       "buildConfigurationUrl": "http://tc/RootProject_ComponentB",
       "buildTypeId": "RootProject_ComponentB_Build",
       "checks": [
@@ -58,12 +61,14 @@
     },
     {
       "componentId": "componentC",
+      "componentOwner": "owner",
       "status": "NO_BUILD_CONFIGURATION",
       "buildTypeId": null,
       "checks": []
     },
     {
       "componentId": "componentD",
+      "componentOwner": "owner",
       "status": "NO_PROJECT",
       "buildConfigurationUrl": null,
       "buildTypeId": null,
