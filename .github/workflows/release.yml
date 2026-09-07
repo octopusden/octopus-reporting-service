@@ -6,20 +6,21 @@ on:
 
 jobs:
   build:
-    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-release.yml@v2.7.1
+    # TODO placeholder — replace with the octopus-base tag that carries
+    # github-packages-publications once it is released.
+    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-release.yml@vX.Y.Z
+    permissions:
+      contents: write
+      packages: write
     with:
       flow-type: hybrid
       java-version: '21'
       commit-hash: ${{ github.event.client_payload.commit }}
       build-version: ${{ github.event.client_payload.project_version }}
+      # Central refuses a version it already holds, so a half-published release can only be
+      # finished by resuming — never by re-dispatching.
+      resume-deployment-id: ${{ github.event.client_payload.resume_deployment_id }}
       docker-image: reporting-service
       skip-extra-tasks: ft
-      # Exempts reporting-automation from the Maven Central publication guard, which otherwise
-      # fails the release on `reporting-automation-<ver>-all.jar` (~21.6 MB) for both the `-all`
-      # classifier and the size limit. That artifact must keep reaching a Maven repository:
-      # automation/metarunners/OctopusReportingAutomation.xml downloads it via
-      # maven-dependency-plugin as ${group}:${name}:${version}:jar:all and then runs
-      # `java -jar <name>-<version>-all.jar`. The value is the artifactId the guard compares
-      # against, not a module path or a file name.
-      fat-jar-publication-allowlist: reporting-automation
+      github-packages-publications: ":reporting-automation:maven"
     secrets: inherit
