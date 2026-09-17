@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-release.yml@v3.0.0
+    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-release.yml@v3.0.2
     permissions:
       contents: write
       packages: write
@@ -21,4 +21,5 @@ jobs:
       docker-image: reporting-service
       skip-extra-tasks: ft
       github-packages-publications: ":reporting-automation:maven"
+      github-packages-repository: octopusden/octopus-maven-packages
     secrets: inherit
