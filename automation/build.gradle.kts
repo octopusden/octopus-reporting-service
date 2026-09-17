@@ -60,6 +60,17 @@ publishing {
             }
         }
     }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/octopusden/octopus-reporting-service")
+            credentials {
+                username = System.getenv("GITHUB_PACKAGES_USERNAME")
+                password = System.getenv("GITHUB_PACKAGES_TOKEN")
+            }
+        }
+    }
 }
 
 signing {
