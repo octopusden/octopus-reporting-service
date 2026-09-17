@@ -31,5 +31,6 @@ jobs:
       docker-image: reporting-service
       skip-extra-tasks: ft
       github-packages-publications: ":reporting-automation:maven"
+      github-packages-repository: octopusden/octopus-maven-packages
       dry-run: true
     secrets: inherit
