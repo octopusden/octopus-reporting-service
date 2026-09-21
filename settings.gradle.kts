@@ -12,6 +12,7 @@ pluginManagement {
         id("org.jlleitschuh.gradle.ktlint") version providers.gradleProperty("ktlint-gradle.version").get()
         id("org.jetbrains.kotlinx.kover") version providers.gradleProperty("kover.version").get()
         id("org.octopusden.octopus-quality") version providers.gradleProperty("octopus-quality.version").get()
+        id("org.sonarqube") version providers.gradleProperty("sonarqube.version").get()
     }
     repositories {
         gradlePluginPortal()

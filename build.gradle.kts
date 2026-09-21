@@ -17,6 +17,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") apply false
     id("org.jetbrains.kotlinx.kover") apply false
     id("org.octopusden.octopus-quality")
+    id("org.sonarqube")
 }
 
 octopusQuality {
