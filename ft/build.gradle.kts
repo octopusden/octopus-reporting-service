@@ -12,7 +12,6 @@ sourceSets {
 val ftImplementation: Configuration by configurations.getting {
     extendsFrom(configurations.implementation.get())
 }
-ftImplementation.isCanBeResolved = true
 
 configurations["ftRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
 
